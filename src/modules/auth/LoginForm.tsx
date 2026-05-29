@@ -1,11 +1,76 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { BiDumbbell, BiLock, BiUser } from "react-icons/bi";
 import { CgMail } from "react-icons/cg";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
+type LoginFormData = {
+  email: string;
+  password: string;
+};
+
+type RegisterFormData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 export default function LoginForm() {
   const [isRegister, setIsRegister] = useState(false);
+  const [serverError, setServerError] = useState("");
+  const router = useRouter();
+
+  const loginForm = useForm<LoginFormData>();
+  const registerForm = useForm<RegisterFormData>();
+
+  const onLogin = async (data: LoginFormData) => {
+    setServerError("");
+    const result = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setServerError("ایمیل یا رمز عبور اشتباه است");
+    } else {
+      router.push("/dashboard");
+    }
+  };
+
+  const onRegister = async (data: RegisterFormData) => {
+    setServerError("");
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        setServerError(err.message || "خطایی رخ داده است");
+        return;
+      }
+
+      await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+      router.push("/dashboard");
+    } catch {
+      setServerError("خطا در ارتباط با سرور");
+    }
+  };
+
+  const inputClass = (hasError?: boolean) =>
+    `w-full bg-white/5 border ${hasError ? "border-red-500" : "border-white/10"} rounded-lg pr-12 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500`;
 
   return (
     <div
@@ -13,7 +78,7 @@ export default function LoginForm() {
       dir="rtl"
     >
       <div className="w-full max-w-md">
-        {/* Logo */}
+        {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             <BiDumbbell className="w-12 h-12 text-orange-500" />
@@ -22,12 +87,13 @@ export default function LoginForm() {
           <p className="text-white/60">به جامعه فیتنس ما بپیوندید</p>
         </div>
 
-        {/* Form Container */}
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8">
-          {/* Tabs */}
           <div className="flex gap-2 mb-8 bg-white/5 p-1 rounded-lg">
             <button
-              onClick={() => setIsRegister(false)}
+              onClick={() => {
+                setIsRegister(false);
+                setServerError("");
+              }}
               className={`flex-1 py-3 rounded-lg transition-colors ${
                 !isRegister
                   ? "bg-orange-500 text-white"
@@ -37,7 +103,10 @@ export default function LoginForm() {
               ورود
             </button>
             <button
-              onClick={() => setIsRegister(true)}
+              onClick={() => {
+                setIsRegister(true);
+                setServerError("");
+              }}
               className={`flex-1 py-3 rounded-lg transition-colors ${
                 isRegister
                   ? "bg-orange-500 text-white"
@@ -48,67 +117,71 @@ export default function LoginForm() {
             </button>
           </div>
 
-          {/* Form */}
-          <form className="space-y-5">
-            {isRegister && (
+          {serverError && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+              {serverError}
+            </div>
+          )}
+
+          {!isRegister && (
+            <form
+              onSubmit={loginForm.handleSubmit(onLogin)}
+              className="space-y-5"
+            >
               <div>
                 <label className="block text-white/80 mb-2 text-sm">
-                  نام و نام خانوادگی
+                  ایمیل
                 </label>
                 <div className="relative">
-                  <BiUser className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                  <CgMail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
-                    type="text"
-                    placeholder="نام کامل خود را وارد کنید"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg pr-12 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500"
+                    type="email"
+                    placeholder="example@email.com"
+                    className={inputClass(!!loginForm.formState.errors.email)}
+                    {...loginForm.register("email", {
+                      required: "ایمیل الزامی است",
+                      pattern: {
+                        value: /^\S+@\S+$/i,
+                        message: "ایمیل معتبر نیست",
+                      },
+                    })}
                   />
                 </div>
+                {loginForm.formState.errors.email && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {loginForm.formState.errors.email.message}
+                  </p>
+                )}
               </div>
-            )}
 
-            <div>
-              <label className="block text-white/80 mb-2 text-sm">ایمیل</label>
-              <div className="relative">
-                <CgMail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                <input
-                  type="email"
-                  placeholder="example@email.com"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg pr-12 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-white/80 mb-2 text-sm">
-                رمز عبور
-              </label>
-              <div className="relative">
-                <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                <input
-                  type="password"
-                  placeholder="رمز عبور خود را وارد کنید"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg pr-12 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500"
-                />
-              </div>
-            </div>
-
-            {isRegister && (
               <div>
                 <label className="block text-white/80 mb-2 text-sm">
-                  تکرار رمز عبور
+                  رمز عبور
                 </label>
                 <div className="relative">
                   <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
                     type="password"
-                    placeholder="رمز عبور را دوباره وارد کنید"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg pr-12 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500"
+                    placeholder="رمز عبور خود را وارد کنید"
+                    className={inputClass(
+                      !!loginForm.formState.errors.password,
+                    )}
+                    {...loginForm.register("password", {
+                      required: "رمز عبور الزامی است",
+                      minLength: {
+                        value: 6,
+                        message: "رمز عبور حداقل ۶ کاراکتر باشد",
+                      },
+                    })}
                   />
                 </div>
+                {loginForm.formState.errors.password && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {loginForm.formState.errors.password.message}
+                  </p>
+                )}
               </div>
-            )}
 
-            {!isRegister && (
               <div className="flex items-center justify-between text-sm">
                 <label className="flex items-center gap-2 text-white/70 cursor-pointer">
                   <input
@@ -121,17 +194,173 @@ export default function LoginForm() {
                   فراموشی رمز عبور؟
                 </a>
               </div>
-            )}
 
-            <button
-              type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg transition-colors font-medium"
+              <button
+                type="submit"
+                disabled={loginForm.formState.isSubmitting}
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-3 rounded-lg transition-colors font-medium"
+              >
+                {loginForm.formState.isSubmitting
+                  ? "در حال ورود..."
+                  : "ورود به حساب"}
+              </button>
+            </form>
+          )}
+
+          {isRegister && (
+            <form
+              onSubmit={registerForm.handleSubmit(onRegister)}
+              className="space-y-5"
             >
-              {isRegister ? "ایجاد حساب کاربری" : "ورود به حساب"}
-            </button>
-          </form>
+              <div>
+                <label className="block text-white/80 mb-2 text-sm">نام</label>
+                <div className="relative">
+                  <BiUser className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                  <input
+                    type="text"
+                    placeholder="نام خود را وارد کنید"
+                    className={inputClass(
+                      !!registerForm.formState.errors.firstName,
+                    )}
+                    {...registerForm.register("firstName", {
+                      required: "نام الزامی است",
+                      minLength: {
+                        value: 2,
+                        message: "نام حداقل ۲ کاراکتر باشد",
+                      },
+                    })}
+                  />
+                </div>
+                {registerForm.formState.errors.firstName && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {registerForm.formState.errors.firstName.message}
+                  </p>
+                )}
+              </div>
 
-          {/* Social Login */}
+              <div>
+                <label className="block text-white/80 mb-2 text-sm">
+                  نام خانوادگی
+                </label>
+                <div className="relative">
+                  <BiUser className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                  <input
+                    type="text"
+                    placeholder="نام خانوادگی خود را وارد کنید"
+                    className={inputClass(
+                      !!registerForm.formState.errors.lastName,
+                    )}
+                    {...registerForm.register("lastName", {
+                      required: "نام خانوادگی الزامی است",
+                      minLength: {
+                        value: 2,
+                        message: "نام خانوادگی حداقل ۲ کاراکتر باشد",
+                      },
+                    })}
+                  />
+                </div>
+                {registerForm.formState.errors.lastName && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {registerForm.formState.errors.lastName.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-white/80 mb-2 text-sm">
+                  ایمیل
+                </label>
+                <div className="relative">
+                  <CgMail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                  <input
+                    type="email"
+                    placeholder="example@email.com"
+                    className={inputClass(
+                      !!registerForm.formState.errors.email,
+                    )}
+                    {...registerForm.register("email", {
+                      required: "ایمیل الزامی است",
+                      pattern: {
+                        value: /^\S+@\S+$/i,
+                        message: "ایمیل معتبر نیست",
+                      },
+                    })}
+                  />
+                </div>
+                {registerForm.formState.errors.email && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {registerForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-white/80 mb-2 text-sm">
+                  رمز عبور
+                </label>
+                <div className="relative">
+                  <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                  <input
+                    type="password"
+                    placeholder="رمز عبور خود را وارد کنید"
+                    className={inputClass(
+                      !!registerForm.formState.errors.password,
+                    )}
+                    {...registerForm.register("password", {
+                      required: "رمز عبور الزامی است",
+                      minLength: {
+                        value: 6,
+                        message: "رمز عبور حداقل ۶ کاراکتر باشد",
+                      },
+                    })}
+                  />
+                </div>
+                {registerForm.formState.errors.password && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {registerForm.formState.errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-white/80 mb-2 text-sm">
+                  تکرار رمز عبور
+                </label>
+                <div className="relative">
+                  <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                  <input
+                    type="password"
+                    placeholder="رمز عبور را دوباره وارد کنید"
+                    className={inputClass(
+                      !!registerForm.formState.errors.confirmPassword,
+                    )}
+                    {...registerForm.register("confirmPassword", {
+                      required: "تکرار رمز عبور الزامی است",
+                      validate: (val) =>
+                        val === registerForm.getValues("password") ||
+                        "رمز عبور و تکرار آن یکسان نیستند",
+                    })}
+                  />
+                </div>
+                {registerForm.formState.errors.confirmPassword && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {registerForm.formState.errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={registerForm.formState.isSubmitting}
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-3 rounded-lg transition-colors font-medium"
+              >
+                {registerForm.formState.isSubmitting
+                  ? "در حال ثبت نام..."
+                  : "ایجاد حساب کاربری"}
+              </button>
+            </form>
+          )}
+
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -143,9 +372,11 @@ export default function LoginForm() {
                 </span>
               </div>
             </div>
-
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 rounded-lg transition-colors">
+              <button
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 rounded-lg transition-colors"
+              >
                 <svg
                   className="w-5 h-5"
                   viewBox="0 0 24 24"
@@ -172,7 +403,6 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* Footer Link */}
         <div className="text-center mt-6 text-white/60 text-sm">
           <Link href="/" className="hover:text-orange-500 transition-colors">
             بازگشت به صفحه اصلی
