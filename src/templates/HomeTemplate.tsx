@@ -1,5 +1,3 @@
-import Footer from "../components/layout/Footer";
-import Header from "../components/layout/Header";
 import FAQ from "../modules/home/FAQ";
 import HeroSection from "../modules/home/HeroSection";
 import LatestArticles from "../modules/home/LatestArticles";
@@ -11,7 +9,6 @@ import WorkoutPlans from "../modules/home/WorkoutPlans";
 export default function HomeTemplate() {
   return (
     <>
-      <Header />
       <HeroSection />
       <WhyChooseUs />
       <WorkoutPlans />
@@ -19,7 +16,6 @@ export default function HomeTemplate() {
       <LatestArticles />
       <LiveStats />
       <FAQ />
-      <Footer />
     </>
   );
 }

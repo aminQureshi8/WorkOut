@@ -31,7 +31,6 @@ export default defineConfig([
         },
       ],
       "@typescript-eslint/consistent-type-imports": "warn",
-      "no-undef": "error",
       "@next/next/no-img-element": "error",
       "@next/next/no-async-client-component": "error",
     },

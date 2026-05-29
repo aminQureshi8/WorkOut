@@ -1,4 +1,4 @@
-import HomeTemplate from "./templates/HomeTemplate";
+import HomeTemplate from "../../templates/HomeTemplate";
 
 export default function Home() {
   return <HomeTemplate />;
