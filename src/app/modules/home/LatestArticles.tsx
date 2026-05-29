@@ -3,14 +3,11 @@ import { BsArrowLeft } from "react-icons/bs";
 
 export default function LatestArticles() {
   return (
-    <section className="py-20 bg-black/20">
+    <section className="py-20 bg-black/20 font-danaMed">
       <div className="container mx-auto">
         <div className="flex justify-between items-end mb-12">
           <div>
-            <h2
-              className="text-3xl md:text-4xl font-bold text-white mb-4"
-              style={{ fontFamily: "Marbeh, sans-serif" }}
-            >
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               جدیدترین مقالات
             </h2>
             <p className="text-white/70">آخرین نکات و راهنماهای تمرینی</p>
@@ -35,10 +32,7 @@ export default function LatestArticles() {
                 </span>
                 <span className="text-xs text-white/50">۵ دقیقه مطالعه</span>
               </div>
-              <h3
-                className="text-xl font-bold text-white mb-3 line-clamp-2"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
                 ۱۰ نکته طلایی برای افزایش حجم عضلانی
               </h3>
               <p className="text-white/70 text-sm line-clamp-2 mb-4">
@@ -67,10 +61,7 @@ export default function LatestArticles() {
                 </span>
                 <span className="text-xs text-white/50">۸ دقیقه مطالعه</span>
               </div>
-              <h3
-                className="text-xl font-bold text-white mb-3 line-clamp-2"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
                 راهنمای کامل تغذیه ورزشی
               </h3>
               <p className="text-white/70 text-sm line-clamp-2 mb-4">
@@ -99,10 +90,7 @@ export default function LatestArticles() {
                 </span>
                 <span className="text-xs text-white/50">۶ دقیقه مطالعه</span>
               </div>
-              <h3
-                className="text-xl font-bold text-white mb-3 line-clamp-2"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
                 بهترین تمرینات برای کاهش وزن
               </h3>
               <p className="text-white/70 text-sm line-clamp-2 mb-4">
