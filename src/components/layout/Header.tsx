@@ -7,15 +7,10 @@ export default function Header() {
       <div className="container mx-auto">
         <div className="mx-auhref font-danaMed">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <BiDumbbell className="w-8 h-8 text-orange-500" />
-              <span
-                className="font-bold text-xl text-white"
-               
-              >
-                فیت‌کوچ
-              </span>
-            </div>
+              <span className="font-bold text-xl text-white">استارفیت</span>
+            </Link>
             <div className="hidden md:flex gap-8">
               <Link
                 href="/"
