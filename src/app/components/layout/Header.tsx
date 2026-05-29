@@ -3,9 +3,9 @@ import { BiDumbbell } from "react-icons/bi";
 
 export default function Header() {
   return (
-    <nav className="bg-black/30 backdrop-blur-lg border-b border-white/10">
+    <nav className="bg-black/30! backdrop-blur-lg border-b border-white/10">
       <div className="container mx-auto">
-        <div className="mx-auhref font-danaMed  px-4 sm:px-6 lg:px-8">
+        <div className="mx-auhref font-danaMed">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
               <BiDumbbell className="w-8 h-8 text-orange-500" />

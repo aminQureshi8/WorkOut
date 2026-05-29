@@ -12,3 +12,20 @@
   -webkit-font-feature-settings: "ss02";
   font-feature-settings: "ss02";
 }
+
+@utility container {
+  padding-inline: 8px;
+  margin-inline: auto;
+
+  @variant md {
+    padding-inline: px;
+  }
+
+  @variant lg {
+    padding-inline: 20px;
+  }
+
+  @variant xl {
+    padding-inline: 100px;
+  }
+}
