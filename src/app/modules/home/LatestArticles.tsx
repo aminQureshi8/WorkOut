@@ -25,7 +25,7 @@ export default function LatestArticles() {
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           <article className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-all hover:scale-105 cursor-pointer">
-            <div className="aspect-video bg-gradient-to-br from-orange-500/20 to-purple-500/20 flex items-center justify-center text-6xl">
+            <div className="aspect-video bg-linear-to-br from-orange-500/20 to-purple-500/20 flex items-center justify-center text-6xl">
               🏋️
             </div>
             <div className="p-6">
@@ -57,7 +57,7 @@ export default function LatestArticles() {
           </article>
 
           <article className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-all hover:scale-105 cursor-pointer">
-            <div className="aspect-video bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center text-6xl">
+            <div className="aspect-video bg-linear-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center text-6xl">
               🥗
             </div>
             <div className="p-6">
@@ -89,7 +89,7 @@ export default function LatestArticles() {
           </article>
 
           <article className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-all hover:scale-105 cursor-pointer">
-            <div className="aspect-video bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center text-6xl">
+            <div className="aspect-video bg-linear-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center text-6xl">
               🏃
             </div>
             <div className="p-6">
