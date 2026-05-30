@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { BiDumbbell, BiLock, BiUser } from "react-icons/bi";
 import { CgMail } from "react-icons/cg";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -22,6 +23,9 @@ type RegisterFormData = {
 export default function LoginForm() {
   const [isRegister, setIsRegister] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false);
   const router = useRouter();
 
   const loginForm = useForm<LoginFormData>();
@@ -162,7 +166,7 @@ export default function LoginForm() {
                 <div className="relative">
                   <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
-                    type="password"
+                    type={showLoginPassword ? "text" : "password"}
                     placeholder="رمز عبور خود را وارد کنید"
                     className={inputClass(
                       !!loginForm.formState.errors.password,
@@ -175,6 +179,17 @@ export default function LoginForm() {
                       },
                     })}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+                  >
+                    {showLoginPassword ? (
+                      <AiOutlineEyeInvisible className="w-5 h-5" />
+                    ) : (
+                      <AiOutlineEye className="w-5 h-5" />
+                    )}
+                  </button>
                 </div>
                 {loginForm.formState.errors.password && (
                   <p className="text-red-400 text-xs mt-1">
@@ -276,7 +291,7 @@ export default function LoginForm() {
                 <div className="relative">
                   <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
-                    type="password"
+                    type={showRegisterPassword ? "text" : "password"}
                     placeholder="رمز عبور خود را وارد کنید"
                     className={inputClass(
                       !!registerForm.formState.errors.password,
@@ -289,6 +304,17 @@ export default function LoginForm() {
                       },
                     })}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+                  >
+                    {showRegisterPassword ? (
+                      <AiOutlineEyeInvisible className="w-5 h-5" />
+                    ) : (
+                      <AiOutlineEye className="w-5 h-5" />
+                    )}
+                  </button>
                 </div>
                 {registerForm.formState.errors.password && (
                   <p className="text-red-400 text-xs mt-1">
@@ -304,7 +330,7 @@ export default function LoginForm() {
                 <div className="relative">
                   <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
-                    type="password"
+                    type={showRegisterConfirmPassword ? "text" : "password"}
                     placeholder="رمز عبور را دوباره وارد کنید"
                     className={inputClass(
                       !!registerForm.formState.errors.confirmPassword,
@@ -316,6 +342,17 @@ export default function LoginForm() {
                         "رمز عبور و تکرار آن یکسان نیستند",
                     })}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterConfirmPassword(!showRegisterConfirmPassword)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+                  >
+                    {showRegisterConfirmPassword ? (
+                      <AiOutlineEyeInvisible className="w-5 h-5" />
+                    ) : (
+                      <AiOutlineEye className="w-5 h-5" />
+                    )}
+                  </button>
                 </div>
                 {registerForm.formState.errors.confirmPassword && (
                   <p className="text-red-400 text-xs mt-1">
