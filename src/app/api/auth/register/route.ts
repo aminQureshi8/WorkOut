@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.error("Register error:", error);
+   
     return NextResponse.json(
       { message: "خطای سرور، لطفاً دوباره تلاش کنید" },
       { status: 500 },

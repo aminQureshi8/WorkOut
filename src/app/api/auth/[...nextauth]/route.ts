@@ -65,7 +65,6 @@ export const authOptions = {
       if (user) {
         await dbConnect();
         const dbUser = await User.findOne({ email: user.email || token.email });
-        console.log("dbUser in jwt:", dbUser);
         if (dbUser) {
           token.id = dbUser._id.toString();
           token.username = dbUser.username;
@@ -78,7 +77,6 @@ export const authOptions = {
     },
 
     async session({ session, token }: any) {
-      console.log("token in session:", token);
       if (token) {
         session.user.id = token.id;
         session.user.username = token.username;

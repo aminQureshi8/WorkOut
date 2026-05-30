@@ -384,7 +384,7 @@ export default function LoginForm() {
                 </span>
               </div>
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="mt-6">
               <button
                 onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
                 className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 rounded-lg transition-colors"
@@ -401,16 +401,7 @@ export default function LoginForm() {
                 </svg>
                 ورود با گوگل
               </button>
-              <button className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 rounded-lg transition-colors">
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
-                </svg>
-                فیسبوک
-              </button>
+             
             </div>
           </div>
         </div>

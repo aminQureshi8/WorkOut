@@ -48,7 +48,6 @@ export default async function Header() {
                 username={session.user.username}
                 avatar={session.user.avatar}
                 email={session.user.email}
-
               />
             ) : (
               <Link

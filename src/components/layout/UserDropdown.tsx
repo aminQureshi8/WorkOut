@@ -19,10 +19,16 @@ export default function UserDropdown({
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const ref = useRef<HTMLDivElement>(null);
+  const portalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (
+        ref.current &&
+        !ref.current.contains(e.target as Node) &&
+        portalRef.current &&
+        !portalRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -43,8 +49,9 @@ export default function UserDropdown({
 
   const dropdown = (
     <div
+      ref={portalRef}
       style={{ top: pos.top, left: pos.left }}
-      className="absolute w-56 bg-gray-900 border border-white/10 rounded-xl shadow-xl z-9999 overflow-hidden"
+      className="absolute w-56 bg-gray-900 border border-white/10 rounded-xl shadow-xl z-[9999] overflow-hidden"
       dir="rtl"
     >
       <div className="px-4 py-3 border-b border-white/10 flex items-center gap-3">
@@ -88,7 +95,12 @@ export default function UserDropdown({
 
       <div className="border-t border-white/10 py-1">
         <button
-          onClick={() => signOut({ callbackUrl: "/" })}
+          onClick={() =>
+            signOut({
+              redirect: true,
+              callbackUrl: "/login",
+            })
+          }
           className="flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-colors text-sm w-full"
         >
           <BiLogOut className="w-4 h-4" />
