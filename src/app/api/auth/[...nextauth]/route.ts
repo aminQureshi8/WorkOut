@@ -1,12 +1,17 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-
+import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcrypt";
 import User from "../../../../../model/User";
 import dbConnect from "../../../../../lib/dbConnect";
 
 export const authOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -39,21 +44,47 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async signIn({ user, account }: any) {
+      if (account?.provider === "google") {
+        await dbConnect();
+        const existing = await User.findOne({ email: user.email });
+        if (!existing) {
+          await User.create({
+            username: user.name,
+            email: user.email,
+            avatar: user.image,
+            password: "",
+          });
+        }
+        return true;
+      }
+      return true;
+    },
+
+    async jwt({ token, user, account, trigger }: any) {
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.username = user.username;
-        token.role = user.role;
+        await dbConnect();
+        const dbUser = await User.findOne({ email: user.email || token.email });
+        console.log("dbUser in jwt:", dbUser);
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+          token.username = dbUser.username;
+          token.role = dbUser.role;
+          token.avatar = dbUser.avatar;
+          token.email = dbUser.email;
+        }
       }
       return token;
     },
+
     async session({ session, token }: any) {
+      console.log("token in session:", token);
       if (token) {
         session.user.id = token.id;
-        session.user.email = token.email;
         session.user.username = token.username;
         session.user.role = token.role;
+        session.user.avatar = token.avatar;
+        session.user.email = token.email;
       }
       return session;
     },
