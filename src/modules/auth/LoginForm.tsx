@@ -13,8 +13,7 @@ type LoginFormData = {
 };
 
 type RegisterFormData = {
-  firstName: string;
-  lastName: string;
+  username: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -45,6 +44,7 @@ export default function LoginForm() {
 
   const onRegister = async (data: RegisterFormData) => {
     setServerError("");
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -52,9 +52,10 @@ export default function LoginForm() {
         body: JSON.stringify(data),
       });
 
+      const resData = await res.json();
+
       if (!res.ok) {
-        const err = await res.json();
-        setServerError(err.message || "خطایی رخ داده است");
+        setServerError(resData.message || "خطایی رخ داده است");
         return;
       }
 
@@ -213,34 +214,8 @@ export default function LoginForm() {
               className="space-y-5"
             >
               <div>
-                <label className="block text-white/80 mb-2 text-sm">نام</label>
-                <div className="relative">
-                  <BiUser className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                  <input
-                    type="text"
-                    placeholder="نام خود را وارد کنید"
-                    className={inputClass(
-                      !!registerForm.formState.errors.firstName,
-                    )}
-                    {...registerForm.register("firstName", {
-                      required: "نام الزامی است",
-                      minLength: {
-                        value: 2,
-                        message: "نام حداقل ۲ کاراکتر باشد",
-                      },
-                    })}
-                  />
-                </div>
-                {registerForm.formState.errors.firstName && (
-                  <p className="text-red-400 text-xs mt-1">
-                    {registerForm.formState.errors.firstName.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
                 <label className="block text-white/80 mb-2 text-sm">
-                  نام خانوادگی
+                  نام کاربری
                 </label>
                 <div className="relative">
                   <BiUser className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
@@ -248,9 +223,9 @@ export default function LoginForm() {
                     type="text"
                     placeholder="نام خانوادگی خود را وارد کنید"
                     className={inputClass(
-                      !!registerForm.formState.errors.lastName,
+                      !!registerForm.formState.errors.username,
                     )}
-                    {...registerForm.register("lastName", {
+                    {...registerForm.register("username", {
                       required: "نام خانوادگی الزامی است",
                       minLength: {
                         value: 2,
@@ -259,9 +234,9 @@ export default function LoginForm() {
                     })}
                   />
                 </div>
-                {registerForm.formState.errors.lastName && (
+                {registerForm.formState.errors.username && (
                   <p className="text-red-400 text-xs mt-1">
-                    {registerForm.formState.errors.lastName.message}
+                    {registerForm.formState.errors.username.message}
                   </p>
                 )}
               </div>

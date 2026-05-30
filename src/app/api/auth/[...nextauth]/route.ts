@@ -12,6 +12,7 @@ export const authOptions = {
       credentials: {
         email: { type: "email" },
         password: { type: "password" },
+        username: { type: "text" },
       },
       async authorize(credentials) {
         await dbConnect();
@@ -31,8 +32,7 @@ export const authOptions = {
         return {
           id: user._id.toString(),
           email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          username: user.username,
           role: user.role,
         };
       },
@@ -43,8 +43,7 @@ export const authOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
+        token.username = user.username;
         token.role = user.role;
       }
       return token;
@@ -53,8 +52,7 @@ export const authOptions = {
       if (token) {
         session.user.id = token.id;
         session.user.email = token.email;
-        session.user.firstName = token.firstName;
-        session.user.lastName = token.lastName;
+        session.user.username = token.username;
         session.user.role = token.role;
       }
       return session;

@@ -30,7 +30,7 @@ export default function HeroSection() {
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-square rounded-3xl bg-gradient-to-br from-orange-500/20 to-purple-500/20 backdrop-blur-xl border border-white/10 flex items-center justify-center">
+              <div className="aspect-square -z-10 rounded-3xl bg-gradient-to-br from-orange-500/20 to-purple-500/20 backdrop-blur-xl border border-white/10 flex items-center justify-center">
                 <BiDumbbell className="w-32 h-32 text-orange-500/50" />
               </div>
             </div>

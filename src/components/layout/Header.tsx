@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { BiDumbbell } from "react-icons/bi";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import UserDropdown from "./UserDropdown";
 
-export default function Header() {
+export default async function Header() {
+  const session = await getServerSession(authOptions);
+
   return (
     <nav className="bg-black/30! backdrop-blur-lg border-b border-white/10">
       <div className="container mx-auto">
@@ -37,12 +42,22 @@ export default function Header() {
                 پشتیبانی
               </Link>
             </div>
-            <Link
-              href="/login"
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors"
-            >
-              ورود / ثبت نام
-            </Link>
+
+            {session ? (
+              <UserDropdown
+                username={session.user.username}
+                avatar={session.user.avatar}
+                email={session.user.email}
+
+              />
+            ) : (
+              <Link
+                href="/login"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors"
+              >
+                ورود / ثبت نام
+              </Link>
+            )}
           </div>
         </div>
       </div>

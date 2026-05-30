@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import bcrypt from "bcrypt";
-import dbConnect from "../../../../lib/dbConnect";
-import User from "../../../../model/User";
+import dbConnect from "../../../../../lib/dbConnect";
+import User from "../../../../../model/User";
 
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const { firstName, lastName, email, password, confirmPassword } =
-      await req.json();
+    const { username, email, password, confirmPassword } = await req.json();
 
-    // ─── Validation ───────────────────────────────────────────
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    if (!username || !email || !password || !confirmPassword) {
       return NextResponse.json(
         { message: "همه فیلدها الزامی هستند" },
         { status: 400 },
@@ -41,7 +39,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ─── Duplicate Check ──────────────────────────────────────
     const existingUser = await User.findOne({
       email: email.toLowerCase(),
     });
@@ -53,13 +50,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ─── Hash Password ────────────────────────────────────────
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // ─── Create User ──────────────────────────────────────────
-    const newUser = await User.create({
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
+    await User.create({
+      username: username.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
     });
@@ -67,18 +61,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         message: "ثبت نام با موفقیت انجام شد",
-        user: {
-          id: newUser._id.toString(),
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
-          email: newUser.email,
-          role: newUser.role,
-        },
       },
       { status: 201 },
     );
   } catch (error: any) {
-    // Mongoose duplicate key error
     if (error.code === 11000) {
       return NextResponse.json(
         { message: "این ایمیل قبلاً ثبت شده است" },
