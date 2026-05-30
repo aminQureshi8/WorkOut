@@ -25,7 +25,8 @@ export default function LoginForm() {
   const [serverError, setServerError] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false);
+  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] =
+    useState(false);
   const router = useRouter();
 
   const loginForm = useForm<LoginFormData>();
@@ -83,7 +84,6 @@ export default function LoginForm() {
       dir="rtl"
     >
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             <BiDumbbell className="w-12 h-12 text-orange-500" />
@@ -306,7 +306,9 @@ export default function LoginForm() {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                    onClick={() =>
+                      setShowRegisterPassword(!showRegisterPassword)
+                    }
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
                   >
                     {showRegisterPassword ? (
@@ -344,7 +346,11 @@ export default function LoginForm() {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowRegisterConfirmPassword(!showRegisterConfirmPassword)}
+                    onClick={() =>
+                      setShowRegisterConfirmPassword(
+                        !showRegisterConfirmPassword,
+                      )
+                    }
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
                   >
                     {showRegisterConfirmPassword ? (
@@ -401,7 +407,6 @@ export default function LoginForm() {
                 </svg>
                 ورود با گوگل
               </button>
-             
             </div>
           </div>
         </div>
