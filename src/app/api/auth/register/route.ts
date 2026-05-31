@@ -52,10 +52,13 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    const totalUsers = await User.countDocuments({});
+
     await User.create({
       username: username.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
+      role: totalUsers === 0 ? "admin" : "user",
     });
 
     return NextResponse.json(
@@ -72,7 +75,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-   
     return NextResponse.json(
       { message: "خطای سرور، لطفاً دوباره تلاش کنید" },
       { status: 500 },

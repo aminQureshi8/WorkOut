@@ -7,6 +7,9 @@ import UserDropdown from "./UserDropdown";
 export default async function Header() {
   const session = await getServerSession(authOptions);
 
+  console.log(session);
+  
+
   return (
     <nav className="bg-black/30! backdrop-blur-lg border-b border-white/10">
       <div className="container mx-auto">
@@ -48,6 +51,7 @@ export default async function Header() {
                 username={session.user.username}
                 avatar={session.user.avatar}
                 email={session.user.email}
+                role={session.user.role}
               />
             ) : (
               <Link

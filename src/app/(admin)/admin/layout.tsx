@@ -1,7 +1,7 @@
 import { SidebarProvider } from "@/components/layout/admin/SidebarContext";
 import AdminSidebar from "@/components/layout/admin/AdminSidebar";
-import AdminHeader from "@/components/layout/admin/AdminHeader";
 import MainWrapper from "@/components/layout/admin/MainWrapper";
+import AdminHeaderContainer from "@/components/layout/admin/AdminHeaderContainer";
 
 export default function AdminLayout({
   children,
@@ -13,7 +13,7 @@ export default function AdminLayout({
       <div className="flex h-screen bg-gray-950 overflow-hidden" dir="rtl">
         <AdminSidebar />
         <MainWrapper>
-          <AdminHeader />
+          <AdminHeaderContainer />
           {children}
         </MainWrapper>
       </div>

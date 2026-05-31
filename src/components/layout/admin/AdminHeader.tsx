@@ -2,7 +2,7 @@
 import { Bell, Menu, Settings } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 
-export default function AdminHeader() {
+export default function AdminHeader({ username, role }) {
   const { onToggle } = useSidebar();
 
   return (
@@ -38,8 +38,10 @@ export default function AdminHeader() {
             </button>
             <div className="hidden md:flex items-center gap-3 pr-4 border-r border-white/10">
               <div className="text-left">
-                <div className="text-white text-sm">مربی علی محمدی</div>
-                <div className="text-white/50 text-xs">مدیر سیستم</div>
+                <div className="text-white text-sm">{username}</div>
+                <div className="text-white/50 text-xs">
+                  {role === "admin" ? "مدیر سیستم" : "مربی"}
+                </div>
               </div>
               <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
                 ع

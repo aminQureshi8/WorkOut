@@ -11,10 +11,12 @@ export default function UserDropdown({
   username,
   avatar,
   email,
+  role,
 }: {
   username: string;
   avatar: string;
   email: string;
+  role: string;
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
@@ -75,14 +77,26 @@ export default function UserDropdown({
       </div>
 
       <div className="py-1">
-        <Link
-          href="/dashboard"
-          onClick={() => setOpen(false)}
-          className="flex items-center gap-3 px-4 py-2.5 text-white/80 hover:bg-white/5 hover:text-orange-500 transition-colors text-sm"
-        >
-          <MdDashboard className="w-4 h-4" />
-          داشبورد
-        </Link>
+        {role === "admin" ? (
+          <Link
+            href="/admin"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-4 py-2.5 text-white/80 hover:bg-white/5 hover:text-orange-500 transition-colors text-sm"
+          >
+            <MdDashboard className="w-4 h-4" />
+            پنل ادمین
+          </Link>
+        ) : (
+          <Link
+            href="/dashboard"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-4 py-2.5 text-white/80 hover:bg-white/5 hover:text-orange-500 transition-colors text-sm"
+          >
+            <MdDashboard className="w-4 h-4" />
+            داشبورد
+          </Link>
+        )}
+
         <Link
           href="/dashboard/profile"
           onClick={() => setOpen(false)}

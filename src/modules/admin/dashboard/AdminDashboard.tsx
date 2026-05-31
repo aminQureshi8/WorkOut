@@ -1,3 +1,5 @@
+import dbConnect from "@/lib/dbConnect";
+import User from "@/model/User";
 import {
   Users,
   FileText,
@@ -73,7 +75,13 @@ const recentTickets = [
   },
 ];
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  await dbConnect();
+
+  const users = await User.find({}, "username createdAt")
+    .sort({ createdAt: -1 })
+    .limit(5);
+
   return (
     <div className="px-3 sm:px-6 lg:px-8 py-6 sm:py-8 overflow-x-hidden">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
@@ -161,7 +169,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-   
       <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 min-w-0 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
           <div className="p-4 sm:p-6 border-b border-white/10">
@@ -192,21 +199,21 @@ export default function AdminDashboard() {
           </div>
           <div className="p-3 sm:p-6">
             <div className="space-y-2 sm:space-y-4">
-              {recentUsers.map((user) => (
+              {users.map((user) => (
                 <div
                   key={user.id}
                   className="flex items-center justify-between p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
                 >
                   <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                     <div className="w-9 h-9 sm:w-12 sm:h-12 bg-orange-500/20 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
-                      {user.name.charAt(0)}
+                      {user.username.charAt(0)}
                     </div>
                     <div className="min-w-0">
                       <div className="text-white font-medium text-sm sm:text-base truncate">
-                        {user.name}
+                        {user.username}
                       </div>
                       <div className="text-white/60 text-xs sm:text-sm truncate">
-                        {user.package}
+                        {/* {user.package} */}
                       </div>
                     </div>
                   </div>
@@ -216,13 +223,13 @@ export default function AdminDashboard() {
                         تاریخ عضویت
                       </div>
                       <div className="text-white text-xs sm:text-sm">
-                        {user.joinDate}
+                        {new Date(user.createdAt).toLocaleDateString("fa-IR")}
                       </div>
                     </div>
                     <span
                       className={`px-2 sm:px-3 py-1 rounded-full text-xs ${user.status === "فعال" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}
                     >
-                      {user.status}
+                      {/* {user.status} */}
                     </span>
                     <button className="text-white/50 hover:text-white hidden sm:block">
                       <MoreVertical className="w-5 h-5" />

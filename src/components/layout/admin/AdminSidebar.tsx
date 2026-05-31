@@ -126,7 +126,6 @@ export default function AdminSidebar() {
 
   return (
     <>
-     
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-40 md:hidden"
@@ -140,10 +139,9 @@ export default function AdminSidebar() {
           w-64
           ${isOpen ? "translate-x-0" : "translate-x-full"}
           md:translate-x-0
-          ${isOpen ? "md:w-64" : "md:w-20"}
+          ${isOpen ? "md:w-64" : "md:w-18"}
         `}
       >
-        
         <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
           {isOpen ? (
             <>
@@ -159,14 +157,12 @@ export default function AdminSidebar() {
               </button>
             </>
           ) : (
-          
             <button onClick={onToggle} className="w-full flex justify-center">
               <Menu className="w-6 h-6 text-white/70" />
             </button>
           )}
         </div>
 
-       
         <div className="h-[calc(100vh-8rem)] overflow-y-auto py-4 px-3">
           {menuItems.map((section, sectionIndex) => (
             <div key={sectionIndex} className="mb-6">
@@ -221,7 +217,6 @@ export default function AdminSidebar() {
           ))}
         </div>
 
-        
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/10 bg-black/20">
           <Link
             href="/admin/help"
