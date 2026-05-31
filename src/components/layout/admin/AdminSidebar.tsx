@@ -3,16 +3,8 @@ import { useState } from "react";
 import {
   Dumbbell,
   Users,
-  FileText,
-  MessageSquare,
-  TrendingUp,
   Calendar,
-  DollarSign,
   Settings,
-  Bell,
-  Search,
-  MoreVertical,
-  Clock,
   LayoutDashboard,
   Package,
   UserCog,
@@ -27,9 +19,9 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
-
+import Link from "next/link";
 export default function AdminSidebar() {
-  const { isOpen, onToggle } = useSidebar(); // ← از context بگیر
+  const { isOpen, onToggle } = useSidebar();
   const [activePage, setActivePage] = useState("dashboard");
 
   const menuItems = [
@@ -41,42 +33,93 @@ export default function AdminSidebar() {
           label: "داشبورد",
           icon: LayoutDashboard,
           badge: null,
+          href: "/admin",
         },
-        { id: "users", label: "کاربران", icon: Users, badge: "۲,۵۴۳" },
-        { id: "packages", label: "پکیج‌ها", icon: Package, badge: null },
+        {
+          id: "users",
+          label: "کاربران",
+          icon: Users,
+          badge: "۲,۵۴۳",
+          href: "/admin/users",
+        },
+        {
+          id: "packages",
+          label: "پکیج‌ها",
+          icon: Package,
+          badge: null,
+          href: "/admin/packages",
+        },
         {
           id: "subscriptions",
           label: "اشتراک‌ها",
           icon: Calendar,
           badge: "۱۲۳",
+          href: "/admin/subscriptions",
         },
       ],
     },
     {
       title: "محتوا",
       items: [
-        { id: "articles", label: "مقالات", icon: BookOpen, badge: "۱۵۶" },
+        {
+          id: "articles",
+          label: "مقالات",
+          icon: BookOpen,
+          badge: "۱۵۶",
+          href: "/admin/articles",
+        },
         {
           id: "workouts",
           label: "برنامه‌های تمرینی",
           icon: Dumbbell,
           badge: null,
+          href: "/admin/workouts",
         },
-        { id: "tickets", label: "تیکت‌ها", icon: Ticket, badge: "۴۸" },
+        {
+          id: "tickets",
+          label: "تیکت‌ها",
+          icon: Ticket,
+          badge: "۴۸",
+          href: "/admin/tickets",
+        },
       ],
     },
     {
       title: "مالی",
       items: [
-        { id: "payments", label: "پرداخت‌ها", icon: CreditCard, badge: null },
-        { id: "reports", label: "گزارش‌ها", icon: BarChart3, badge: null },
+        {
+          id: "payments",
+          label: "پرداخت‌ها",
+          icon: CreditCard,
+          badge: null,
+          href: "/admin/payments",
+        },
+        {
+          id: "reports",
+          label: "گزارش‌ها",
+          icon: BarChart3,
+          badge: null,
+          href: "/admin/reports",
+        },
       ],
     },
     {
       title: "تنظیمات",
       items: [
-        { id: "settings", label: "تنظیمات سایت", icon: Settings, badge: null },
-        { id: "admins", label: "مدیران", icon: UserCog, badge: "۳" },
+        {
+          id: "settings",
+          label: "تنظیمات سایت",
+          icon: Settings,
+          badge: null,
+          href: "/admin/settings",
+        },
+        {
+          id: "admins",
+          label: "مدیران",
+          icon: UserCog,
+          badge: "۳",
+          href: "/admin/admins",
+        },
       ],
     },
   ];
@@ -146,19 +189,19 @@ export default function AdminSidebar() {
   return (
     <aside
       className={`fixed top-0 right-0 h-full bg-black/40 backdrop-blur-xl border-l border-white/10 transition-all duration-300 z-50 ${
-        isOpen ? "w-64" : "w-20" // ← sidebarOpen → isOpen
+        isOpen ? "w-64" : "w-20"
       }`}
     >
       {/* Sidebar Header */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
-        {isOpen ? ( // ← sidebarOpen → isOpen
+        {isOpen ? (
           <>
             <div className="flex items-center gap-2">
               <Dumbbell className="w-8 h-8 text-orange-500" />
               <span className="font-bold text-lg text-white">فیت‌کوچ</span>
             </div>
             <button
-              onClick={onToggle} // ← setSidebarOpen(false) → onToggle
+              onClick={onToggle}
               className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
             >
               <ChevronLeft className="w-5 h-5 text-white/70" />
@@ -166,8 +209,6 @@ export default function AdminSidebar() {
           </>
         ) : (
           <button onClick={onToggle} className="w-full flex justify-center">
-            {" "}
-            {/* ← setSidebarOpen(true) → onToggle */}
             <Menu className="w-6 h-6 text-white/70" />
           </button>
         )}
@@ -177,15 +218,16 @@ export default function AdminSidebar() {
       <div className="h-[calc(100vh-8rem)] overflow-y-auto py-4 px-3">
         {menuItems.map((section, sectionIndex) => (
           <div key={sectionIndex} className="mb-6">
-            {isOpen && ( // ← sidebarOpen → isOpen
+            {isOpen && (
               <h3 className="text-white/50 text-xs font-medium mb-3 px-3">
                 {section.title}
               </h3>
             )}
             <div className="space-y-1">
               {section.items.map((item) => (
-                <button
+                <Link
                   key={item.id}
+                  href={item.href}
                   onClick={() => setActivePage(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
                     activePage === item.id
@@ -194,7 +236,7 @@ export default function AdminSidebar() {
                   }`}
                 >
                   <item.icon className="w-5 h-5 flex-shrink-0" />
-                  {isOpen && ( // ← sidebarOpen → isOpen
+                  {isOpen && (
                     <>
                       <span className="flex-1 text-right text-sm">
                         {item.label}
@@ -212,7 +254,7 @@ export default function AdminSidebar() {
                       )}
                     </>
                   )}
-                </button>
+                </Link>
               ))}
             </div>
           </div>
@@ -221,20 +263,22 @@ export default function AdminSidebar() {
 
       {/* Sidebar Footer */}
       <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/10 bg-black/20">
-        <button className="w-full flex items-center gap-3 px-3 py-3 text-white/70 hover:bg-white/5 hover:text-white rounded-lg transition-all">
+        <Link
+          href="/admin/help"
+          className="w-full flex items-center gap-3 px-3 py-3 text-white/70 hover:bg-white/5 hover:text-white rounded-lg transition-all"
+        >
           <HelpCircle className="w-5 h-5 flex-shrink-0" />
           {isOpen && (
             <span className="flex-1 text-right text-sm">راهنما و پشتیبانی</span>
-          )}{" "}
-          {/* ← sidebarOpen → isOpen */}
-        </button>
-        <button className="w-full flex items-center gap-3 px-3 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-all mt-1">
+          )}
+        </Link>
+        <Link
+          href="/logout"
+          className="w-full flex items-center gap-3 px-3 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-all mt-1"
+        >
           <LogOut className="w-5 h-5 flex-shrink-0" />
-          {isOpen && (
-            <span className="flex-1 text-right text-sm">خروج</span>
-          )}{" "}
-          {/* ← sidebarOpen → isOpen */}
-        </button>
+          {isOpen && <span className="flex-1 text-right text-sm">خروج</span>}
+        </Link>
       </div>
     </aside>
   );

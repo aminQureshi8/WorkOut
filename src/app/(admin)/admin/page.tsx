@@ -1,6 +1,5 @@
+import AdminDashboard from "@/modules/admin/dashboard/AdminDashboard";
 
 export default function page() {
-  return (
-    <div>page</div>
-  )
+  return <AdminDashboard />;
 }
