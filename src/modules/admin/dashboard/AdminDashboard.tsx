@@ -75,7 +75,7 @@ const recentTickets = [
 
 export default function AdminDashboard() {
   return (
-    <div className="px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="px-3 sm:px-6 lg:px-8 py-6 sm:py-8 overflow-x-hidden">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-lg border border-white/10 rounded-xl p-4 sm:p-6">
           <div className="flex justify-between items-start mb-3 sm:mb-4">
@@ -161,8 +161,9 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+   
       <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
-        <div className="lg:col-span-2 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
+        <div className="lg:col-span-2 min-w-0 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
           <div className="p-4 sm:p-6 border-b border-white/10">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
               <h2
@@ -219,11 +220,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <span
-                      className={`px-2 sm:px-3 py-1 rounded-full text-xs ${
-                        user.status === "فعال"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
-                      }`}
+                      className={`px-2 sm:px-3 py-1 rounded-full text-xs ${user.status === "فعال" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}
                     >
                       {user.status}
                     </span>
@@ -237,7 +234,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
+        <div className="min-w-0 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
           <div className="p-4 sm:p-6 border-b border-white/10">
             <div className="flex justify-between items-center">
               <h2
@@ -264,13 +261,7 @@ export default function AdminDashboard() {
                   <div className="flex justify-between items-start mb-2">
                     <div className="text-white/60 text-xs">#{ticket.id}</div>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        ticket.status === "جدید"
-                          ? "bg-blue-500/20 text-blue-400"
-                          : ticket.status === "در حال بررسی"
-                            ? "bg-orange-500/20 text-orange-400"
-                            : "bg-green-500/20 text-green-400"
-                      }`}
+                      className={`px-2 py-1 rounded-full text-xs ${ticket.status === "جدید" ? "bg-blue-500/20 text-blue-400" : ticket.status === "در حال بررسی" ? "bg-orange-500/20 text-orange-400" : "bg-green-500/20 text-green-400"}`}
                     >
                       {ticket.status}
                     </span>

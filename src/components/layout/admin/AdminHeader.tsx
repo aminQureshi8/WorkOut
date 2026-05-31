@@ -1,14 +1,17 @@
+"use client";
 import { Bell, Menu, Settings } from "lucide-react";
-import React from "react";
+import { useSidebar } from "./SidebarContext";
 
 export default function AdminHeader() {
+  const { onToggle } = useSidebar();
+
   return (
     <nav className="bg-black/30 backdrop-blur-lg border-b border-white/10 sticky top-0 z-40">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-4">
             <button
-            //   onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={onToggle}
               className="lg:hidden w-10 h-10 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
             >
               <Menu className="w-6 h-6 text-white" />

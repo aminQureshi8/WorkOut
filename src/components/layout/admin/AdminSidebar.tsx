@@ -14,12 +14,12 @@ import {
   CreditCard,
   ChevronLeft,
   Menu,
-  X,
   LogOut,
   HelpCircle,
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import Link from "next/link";
+
 export default function AdminSidebar() {
   const { isOpen, onToggle } = useSidebar();
   const [activePage, setActivePage] = useState("dashboard");
@@ -124,162 +124,125 @@ export default function AdminSidebar() {
     },
   ];
 
-  const recentUsers = [
-    {
-      id: 1,
-      name: "محمد رضایی",
-      package: "بسته حرفه‌ای",
-      status: "فعال",
-      joinDate: "۱۵ اردیبهشت",
-    },
-    {
-      id: 2,
-      name: "سارا احمدی",
-      package: "بسته VIP",
-      status: "فعال",
-      joinDate: "۱۲ اردیبهشت",
-    },
-    {
-      id: 3,
-      name: "علی کریمی",
-      package: "بسته پایه",
-      status: "منقضی",
-      joinDate: "۸ فروردین",
-    },
-    {
-      id: 4,
-      name: "فاطمه نوری",
-      package: "بسته حرفه‌ای",
-      status: "فعال",
-      joinDate: "۵ اردیبهشت",
-    },
-    {
-      id: 5,
-      name: "حسین محمدی",
-      package: "بسته VIP",
-      status: "فعال",
-      joinDate: "۳ اردیبهشت",
-    },
-  ];
-
-  const recentTickets = [
-    {
-      id: 101,
-      user: "محمد رضایی",
-      subject: "سوال درباره برنامه تمرینی",
-      status: "در حال بررسی",
-      time: "۲ ساعت پیش",
-    },
-    {
-      id: 102,
-      user: "سارا احمدی",
-      subject: "مشکل در دانلود ویدیو",
-      status: "پاسخ داده شده",
-      time: "۵ ساعت پیش",
-    },
-    {
-      id: 103,
-      user: "علی کریمی",
-      subject: "درخواست تمدید اشتراک",
-      status: "جدید",
-      time: "۱ روز پیش",
-    },
-  ];
-
   return (
-    <aside
-      className={`fixed top-0 right-0 h-full bg-black/40 backdrop-blur-xl border-l border-white/10 transition-all duration-300 z-50 ${
-        isOpen ? "w-64" : "w-20"
-      }`}
-    >
-      {/* Sidebar Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
-        {isOpen ? (
-          <>
-            <div className="flex items-center gap-2">
-              <Dumbbell className="w-8 h-8 text-orange-500" />
-              <span className="font-bold text-lg text-white">فیت‌کوچ</span>
-            </div>
-            <button
-              onClick={onToggle}
-              className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5 text-white/70" />
+    <>
+     
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          onClick={onToggle}
+        />
+      )}
+
+      <aside
+        className={`
+          fixed top-0 right-0 h-full bg-black/40 backdrop-blur-xl border-l border-white/10 transition-all duration-300 z-50
+          w-64
+          ${isOpen ? "translate-x-0" : "translate-x-full"}
+          md:translate-x-0
+          ${isOpen ? "md:w-64" : "md:w-20"}
+        `}
+      >
+        
+        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
+          {isOpen ? (
+            <>
+              <div className="flex items-center gap-2">
+                <Dumbbell className="w-8 h-8 text-orange-500" />
+                <span className="font-bold text-lg text-white">فیت‌کوچ</span>
+              </div>
+              <button
+                onClick={onToggle}
+                className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5 text-white/70" />
+              </button>
+            </>
+          ) : (
+          
+            <button onClick={onToggle} className="w-full flex justify-center">
+              <Menu className="w-6 h-6 text-white/70" />
             </button>
-          </>
-        ) : (
-          <button onClick={onToggle} className="w-full flex justify-center">
-            <Menu className="w-6 h-6 text-white/70" />
-          </button>
-        )}
-      </div>
-
-      {/* Sidebar Menu */}
-      <div className="h-[calc(100vh-8rem)] overflow-y-auto py-4 px-3">
-        {menuItems.map((section, sectionIndex) => (
-          <div key={sectionIndex} className="mb-6">
-            {isOpen && (
-              <h3 className="text-white/50 text-xs font-medium mb-3 px-3">
-                {section.title}
-              </h3>
-            )}
-            <div className="space-y-1">
-              {section.items.map((item) => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  onClick={() => setActivePage(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
-                    activePage === item.id
-                      ? "bg-orange-500 text-white"
-                      : "text-white/70 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5 flex-shrink-0" />
-                  {isOpen && (
-                    <>
-                      <span className="flex-1 text-right text-sm">
-                        {item.label}
-                      </span>
-                      {item.badge && (
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${
-                            activePage === item.id
-                              ? "bg-white/20 text-white"
-                              : "bg-white/10 text-white/60"
-                          }`}
-                        >
-                          {item.badge}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Sidebar Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/10 bg-black/20">
-        <Link
-          href="/admin/help"
-          className="w-full flex items-center gap-3 px-3 py-3 text-white/70 hover:bg-white/5 hover:text-white rounded-lg transition-all"
-        >
-          <HelpCircle className="w-5 h-5 flex-shrink-0" />
-          {isOpen && (
-            <span className="flex-1 text-right text-sm">راهنما و پشتیبانی</span>
           )}
-        </Link>
-        <Link
-          href="/logout"
-          className="w-full flex items-center gap-3 px-3 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-all mt-1"
-        >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
-          {isOpen && <span className="flex-1 text-right text-sm">خروج</span>}
-        </Link>
-      </div>
-    </aside>
+        </div>
+
+       
+        <div className="h-[calc(100vh-8rem)] overflow-y-auto py-4 px-3">
+          {menuItems.map((section, sectionIndex) => (
+            <div key={sectionIndex} className="mb-6">
+              {isOpen && (
+                <h3 className="text-white/50 text-xs font-medium mb-3 px-3">
+                  {section.title}
+                </h3>
+              )}
+              <div className="space-y-1">
+                {section.items.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    onClick={() => {
+                      setActivePage(item.id);
+                      if (
+                        typeof window !== "undefined" &&
+                        window.innerWidth < 768
+                      ) {
+                        onToggle();
+                      }
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
+                      activePage === item.id
+                        ? "bg-orange-500 text-white"
+                        : "text-white/70 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5 flex-shrink-0" />
+                    {isOpen && (
+                      <>
+                        <span className="flex-1 text-right text-sm">
+                          {item.label}
+                        </span>
+                        {item.badge && (
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full ${
+                              activePage === item.id
+                                ? "bg-white/20 text-white"
+                                : "bg-white/10 text-white/60"
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        
+        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/10 bg-black/20">
+          <Link
+            href="/admin/help"
+            className="w-full flex items-center gap-3 px-3 py-3 text-white/70 hover:bg-white/5 hover:text-white rounded-lg transition-all"
+          >
+            <HelpCircle className="w-5 h-5 flex-shrink-0" />
+            {isOpen && (
+              <span className="flex-1 text-right text-sm">
+                راهنما و پشتیبانی
+              </span>
+            )}
+          </Link>
+          <Link
+            href="/logout"
+            className="w-full flex items-center gap-3 px-3 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-all mt-1"
+          >
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            {isOpen && <span className="flex-1 text-right text-sm">خروج</span>}
+          </Link>
+        </div>
+      </aside>
+    </>
   );
 }

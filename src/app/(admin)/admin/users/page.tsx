@@ -1,7 +1,5 @@
-import React from 'react'
+import AdminUsers from "@/modules/admin/users/AdminUsers";
 
 export default function page() {
-  return (
-    <div>page</div>
-  )
+  return <AdminUsers />;
 }
