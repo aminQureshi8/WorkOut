@@ -175,7 +175,7 @@ export default function AdminArticles() {
             <p className="text-white/60">مشاهده و ویرایش تمام مقالات سایت</p>
           </div>
           <Link
-            href="/admin/createArticle"
+            href="/admin/articles/createArticles"
             className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:shadow-lg hover:shadow-orange-500/30 transition-all"
           >
             <Plus className="w-5 h-5" />
@@ -351,8 +351,7 @@ export default function AdminArticles() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <Image
-                          
-                        //   src={article.image}
+                          //   src={article.image}
                           alt={article.title}
                           className="w-16 h-16 rounded-lg object-cover"
                         />

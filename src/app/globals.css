@@ -29,3 +29,20 @@
     padding-inline: 100px;
   }
 }
+
+.ckeditor-wrapper .ck-editor__editable {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  min-height: 400px;
+  direction: rtl;
+}
+
+.ckeditor-wrapper .ck-toolbar {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ckeditor-wrapper .ck-button {
+  color: rgba(255, 255, 255, 0.7) !important;
+}

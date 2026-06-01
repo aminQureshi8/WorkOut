@@ -9,7 +9,7 @@ export default function MainWrapper({
   const { isOpen } = useSidebar();
   return (
     <main
-      className={`flex-1 overflow-y-auto transition-all duration-300 ${
+      className={`flex-1 overflow-y-auto transition-all font-danaMed! duration-300 ${
         isOpen ? "md:mr-64" : "md:mr-20"
       }`}
     >
