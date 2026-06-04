@@ -18,7 +18,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface IUser {
   _id: string;
@@ -47,15 +47,52 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<IUser[]>([]);
   const [editRole, setEditRole] = useState<"user" | "admin" | "coach">("user");
 
-  useEffect(() => {
-    getUsers();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const getUsers = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/user");
+      if (!res.ok) throw new Error("خطا در دریافت کاربران");
+      const data = await res.json();
+      setUsers(data.users);
+    } catch (err) {
+      setError("دریافت کاربران با خطا مواجه شد");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const getUsers = async () => {
-    const res = await fetch("/api/admin/user");
-    const data = await res.json();
-    setUsers(data.users);
-  };
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      getUsers();
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const timer = setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/admin/search?query=${searchQuery}`, {
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        setUsers(data.userFind);
+      } catch (err: any) {
+        if (err.name !== "AbortError") setError("خطا در جستجو");
+      } finally {
+        setIsLoading(false);
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [searchQuery, getUsers]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -110,7 +147,6 @@ export default function AdminUsers() {
     if (!editingUser) return;
 
     try {
-      // اگه role به coach تغییر کرد، promote-coach رو صدا بزن
       if (editRole === "coach" && editingUser.role !== "coach") {
         await fetch("/api/admin/promote-coach", {
           method: "POST",
@@ -118,7 +154,6 @@ export default function AdminUsers() {
           body: JSON.stringify({ userId: editingUser._id }),
         });
       } else {
-        // فقط role رو آپدیت کن
         await fetch(`/api/admin/user/${editingUser._id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -126,7 +161,6 @@ export default function AdminUsers() {
         });
       }
 
-      // آپدیت local state
       setUsers((prev) =>
         prev.map((u) =>
           u._id === editingUser._id ? { ...u, role: editRole } : u,
@@ -300,112 +334,142 @@ export default function AdminUsers() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
-                {users.map((user) => (
-                  <tr
-                    key={user._id}
-                    className="hover:bg-white/5 transition-colors"
-                  >
-                    <td className="p-4">
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.includes(user._id)}
-                        onChange={() => toggleUserSelection(user._id)}
-                        className="w-4 h-4 rounded border-white/20"
-                      />
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={10} className="p-12 text-center text-white/50">
+                      در حال بارگذاری...
                     </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center text-xl">
-                          {user.avatar || "👤"}
-                        </div>
-                        <div>
-                          <div className="text-white font-medium">
-                            {user.username}
-                          </div>
-                          <div className="text-white/60 text-xs">
-                            {user.email}
-                          </div>
-                        </div>
-                      </div>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan={10} className="p-12 text-center text-red-400">
+                      {error}
                     </td>
-                    <td className="p-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2 text-white/70 text-sm">
-                          <Mail className="w-3 h-3" />
-                          <span className="text-xs">{user.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-white/70 text-sm">
-                          <Phone className="w-3 h-3" />
-                          <span className="text-xs">{user.phone || "—"}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2 text-white/80 text-sm">
-                        <Package className="w-4 h-4 text-orange-500" />
-                        {user.package || "—"}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs border ${getStatusBadge(user.status)}`}
-                      >
-                        {user.status === "فعال" && (
-                          <CheckCircle className="w-3 h-3" />
+                  </tr>
+                ) : users.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="p-12 text-center">
+                      <div className="flex flex-col items-center gap-3 text-white/50">
+                        <Users className="w-12 h-12 opacity-30" />
+                        <p className="text-lg">کاربری پیدا نشد</p>
+                        {searchQuery && (
+                          <p className="text-sm">
+                            نتیجه‌ای برای «{searchQuery}» یافت نشد
+                          </p>
                         )}
-                        {user.status === "منقضی" && (
-                          <Calendar className="w-3 h-3" />
-                        )}
-                        {user.status === "مسدود" && (
-                          <XCircle className="w-3 h-3" />
-                        )}
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs border ${getRoleBadge(user.role)}`}
-                      >
-                        {getRoleLabel(user.role)}
-                      </span>
-                    </td>
-                    <td className="p-4 text-white/70 text-sm">
-                      {new Date(user.createdAt).toLocaleDateString("fa-IR")}
-                    </td>
-                    <td className="p-4 text-white/70 text-sm">
-                      {user.lastLogin || "—"}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className="text-white font-medium"
-                        style={{ fontFamily: "Marbeh, sans-serif" }}
-                      >
-                        {user.totalPayments || "۰"}
-                      </span>
-                      <span className="text-white/60 text-xs mr-1">تومان</span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleEdit(user)}
-                          className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
-                          title="ویرایش"
-                        >
-                          <Edit className="w-4 h-4 text-white/70" />
-                        </button>
-                        <button
-                          className="w-8 h-8 bg-white/5 hover:bg-red-500/20 rounded-lg flex items-center justify-center transition-colors"
-                          title="مسدود کردن"
-                        >
-                          <Ban className="w-4 h-4 text-red-400" />
-                        </button>
-                        <button className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors">
-                          <MoreVertical className="w-4 h-4 text-white/70" />
-                        </button>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  users.map((user) => (
+                    <tr
+                      key={user._id}
+                      className="hover:bg-white/5 transition-colors"
+                    >
+                      <td className="p-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.includes(user._id)}
+                          onChange={() => toggleUserSelection(user._id)}
+                          className="w-4 h-4 rounded border-white/20"
+                        />
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center text-xl">
+                            {user.avatar || "👤"}
+                          </div>
+                          <div>
+                            <div className="text-white font-medium">
+                              {user.username}
+                            </div>
+                            <div className="text-white/60 text-xs">
+                              {user.email}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2 text-white/70 text-sm">
+                            <Mail className="w-3 h-3" />
+                            <span className="text-xs">{user.email}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-white/70 text-sm">
+                            <Phone className="w-3 h-3" />
+                            <span className="text-xs">{user.phone || "—"}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2 text-white/80 text-sm">
+                          <Package className="w-4 h-4 text-orange-500" />
+                          {user.package || "—"}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs border ${getStatusBadge(user.status)}`}
+                        >
+                          {user.status === "فعال" && (
+                            <CheckCircle className="w-3 h-3" />
+                          )}
+                          {user.status === "منقضی" && (
+                            <Calendar className="w-3 h-3" />
+                          )}
+                          {user.status === "مسدود" && (
+                            <XCircle className="w-3 h-3" />
+                          )}
+                          {user.status}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs border ${getRoleBadge(user.role)}`}
+                        >
+                          {getRoleLabel(user.role)}
+                        </span>
+                      </td>
+                      <td className="p-4 text-white/70 text-sm">
+                        {new Date(user.createdAt).toLocaleDateString("fa-IR")}
+                      </td>
+                      <td className="p-4 text-white/70 text-sm">
+                        {user.lastLogin || "—"}
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className="text-white font-medium"
+                          style={{ fontFamily: "Marbeh, sans-serif" }}
+                        >
+                          {user.totalPayments || "۰"}
+                        </span>
+                        <span className="text-white/60 text-xs mr-1">
+                          تومان
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEdit(user)}
+                            className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
+                            title="ویرایش"
+                          >
+                            <Edit className="w-4 h-4 text-white/70" />
+                          </button>
+                          <button
+                            className="w-8 h-8 bg-white/5 hover:bg-red-500/20 rounded-lg flex items-center justify-center transition-colors"
+                            title="مسدود کردن"
+                          >
+                            <Ban className="w-4 h-4 text-red-400" />
+                          </button>
+                          <button className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors">
+                            <MoreVertical className="w-4 h-4 text-white/70" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
