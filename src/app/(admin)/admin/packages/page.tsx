@@ -1,4 +1,4 @@
-import PackageAdmin from "@/modules/admin/package/PackageAdmin";
+import PackageAdmin from "@/modules/admin/package/PackagesManagement";
 
 export default function page() {
   return <PackageAdmin />;

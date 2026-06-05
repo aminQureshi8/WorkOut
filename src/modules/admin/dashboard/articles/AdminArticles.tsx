@@ -157,11 +157,7 @@ export default function AdminArticles() {
   const draftCount = mockArticles.filter((a) => a.status === "draft").length;
 
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br  p-4 md:p-8"
-      style={{ fontFamily: "Dana, sans-serif" }}
-      dir="rtl"
-    >
+    <div className="min-h-screen bg-gradient-to-br p-4 md:p-8" dir="rtl">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
