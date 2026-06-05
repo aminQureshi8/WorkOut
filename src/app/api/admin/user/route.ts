@@ -15,6 +15,6 @@ export async function GET(req: NextRequest) {
     const totalUsers = await User.countDocuments({});
     const totalPage = Math.ceil(totalUsers / limit);
 
-    return NextResponse.json({ users, totalPage });
+    return NextResponse.json({ users, totalPage , totalUsers });
   } catch (error) {}
 }
