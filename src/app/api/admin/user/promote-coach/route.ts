@@ -16,14 +16,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "قبلاً مربی شده" }, { status: 400 });
 
     user.role = "coach";
-    user.save();
+    await user.save();
 
     const coach = await Coach.create({
       userId: user._id,
-      name: user.name,
+      name: user.username,
       specialties: [],
     });
 
     return NextResponse.json({ success: true, coach }, { status: 201 });
-  } catch (error) {}
+  } catch (error) {
+    return NextResponse.json({ message: error.message });
+  }
 }
