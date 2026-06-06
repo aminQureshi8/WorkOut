@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
     const data = await req.json();
-    // Expected fields: name, slug, tagline, description, price, originalPrice, icon, colorClass, rating, reviewCount, studentCount, isPopular, isActive
+
     const pkg = await Package.create({
       ...data,
     });
