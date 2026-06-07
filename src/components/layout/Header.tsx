@@ -1,11 +1,20 @@
+"use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BiDumbbell } from "react-icons/bi";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import UserDropdown from "./UserDropdown";
 
-export default async function Header() {
-  const session = await getServerSession(authOptions);
+export default function Header({session}) {
+  const pathname = usePathname();
+
+  const getLinkClass = (href: string) => {
+    const isActive = pathname === href;
+    return isActive
+      ? "text-orange-500 transition-colors"
+      : "text-white/80 hover:text-orange-500 transition-colors";
+  };
 
   return (
     <nav className="bg-black/30! backdrop-blur-lg border-b border-white/10">
@@ -17,28 +26,16 @@ export default async function Header() {
               <span className="font-bold text-xl text-white">استارفیت</span>
             </Link>
             <div className="hidden md:flex gap-8">
-              <Link
-                href="/"
-                className="text-white hover:text-orange-500 transition-colors"
-              >
+              <Link href="/" className={getLinkClass("/")}>
                 خانه
               </Link>
-              <Link
-                href="/packages"
-                className="text-white/80 hover:text-orange-500 transition-colors"
-              >
+              <Link href="/packages" className={getLinkClass("/packages")}>
                 پکیج‌ها
               </Link>
-              <Link
-                href="/articles"
-                className="text-white/80 hover:text-orange-500 transition-colors"
-              >
+              <Link href="/articles" className={getLinkClass("/articles")}>
                 مقالات
               </Link>
-              <Link
-                href="/tickets"
-                className="text-white/80 hover:text-orange-500 transition-colors"
-              >
+              <Link href="/tickets" className={getLinkClass("/tickets")}>
                 پشتیبانی
               </Link>
             </div>

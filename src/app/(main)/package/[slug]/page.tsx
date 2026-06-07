@@ -1,7 +1,21 @@
+import Package from "@/model/Package";
+import Packagefeature from "@/model/Packagefeature";
 import PackageDetails from "@/modules/packages/packageDetails/PackageDetails";
 
 export default async function page({ params }) {
   const { slug } = await params;
 
-  return <PackageDetails slug={slug} />;
+  const packageFind = await Package.findOne({ slug }).lean();
+  const features = await Packagefeature.find({
+    packageId: packageFind._id,
+  }).lean();
+
+  console.log(packageFind);
+
+  return (
+    <PackageDetails
+      package={JSON.parse(JSON.stringify(packageFind))}
+      features={JSON.parse(JSON.stringify(features))}
+    />
+  );
 }
