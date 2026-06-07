@@ -6,21 +6,22 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ packageId: string }> },
 ) {
-  await dbConnect();
-  const { name, description, included, sortOrder } = await req.json();
+  try {
+    await dbConnect();
+    const resolvedParams = await params;
+    const packageId = resolvedParams.packageId;
 
-  const resolvedParams = await params;
-  const packageId = resolvedParams.packageId;
+    const body = await req.json();
+    const items = Array.isArray(body) ? body : [body];
 
-  const feature = await Packagefeature.create({
-    packageId,
-    name,
-    description,
-    included,
-    sortOrder,
-  });
+    const features = await Packagefeature.insertMany(
+      items.map((item) => ({ ...item, packageId })),
+    );
 
-  return NextResponse.json({ feature }, { status: 201 });
+    return NextResponse.json({ features }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ message: error.message });
+  }
 }
 
 export async function GET(

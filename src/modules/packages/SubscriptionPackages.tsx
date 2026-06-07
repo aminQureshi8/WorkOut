@@ -2,54 +2,56 @@ import Link from "next/link";
 import { BiCheck, BiDumbbell } from "react-icons/bi";
 import { BsArrowLeft } from "react-icons/bs";
 
-export default function SubscriptionPackages() {
-  const packages = [
-    {
-      id: 1,
-      name: "بسته پایه",
-      price: "۵۰۰,۰۰۰",
-      duration: "یک ماهه",
-      color: "from-blue-500 to-cyan-500",
-      features: [
-        "برنامه تمرینی عمومی",
-        "دسترسی به ویدیوهای آموزشی",
-        "پشتیبانی ایمیلی",
-        "گزارش پیشرفت ماهانه",
-      ],
-    },
-    {
-      id: 2,
-      name: "بسته حرفه‌ای",
-      price: "۱,۲۰۰,۰۰۰",
-      duration: "سه ماهه",
-      color: "from-orange-500 to-red-500",
-      popular: true,
-      features: [
-        "برنامه تمرینی اختصاصی",
-        "برنامه تغذیه شخصی",
-        "مربیگری آنلاین",
-        "پشتیبانی ۲۴/۷",
-        "گزارش پیشرفت هفتگی",
-        "مشاوره تخصصی",
-      ],
-    },
-    {
-      id: 3,
-      name: "بسته VIP",
-      price: "۲,۵۰۰,۰۰۰",
-      duration: "شش ماهه",
-      color: "from-purple-500 to-pink-500",
-      features: [
-        "تمام امکانات بسته حرفه‌ای",
-        "برنامه مکمل‌های ورزشی",
-        "جلسات آنلاین اختصاصی",
-        "پیگیری روزانه",
-        "دسترسی به دوره‌های تخصصی",
-        "بیمه بدنسازی",
-        "تخفیف در محصولات مکمل",
-      ],
-    },
-  ];
+export default function SubscriptionPackages({ packages }) {
+  console.log(packages);
+
+  // const packages = [
+  //   {
+  //     id: 1,
+  //     name: "بسته پایه",
+  //     price: "۵۰۰,۰۰۰",
+  //     duration: "یک ماهه",
+  //     color: "from-blue-500 to-cyan-500",
+  //     features: [
+  //       "برنامه تمرینی عمومی",
+  //       "دسترسی به ویدیوهای آموزشی",
+  //       "پشتیبانی ایمیلی",
+  //       "گزارش پیشرفت ماهانه",
+  //     ],
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "بسته حرفه‌ای",
+  //     price: "۱,۲۰۰,۰۰۰",
+  //     duration: "سه ماهه",
+  //     color: "from-orange-500 to-red-500",
+  //     popular: true,
+  //     features: [
+  //       "برنامه تمرینی اختصاصی",
+  //       "برنامه تغذیه شخصی",
+  //       "مربیگری آنلاین",
+  //       "پشتیبانی ۲۴/۷",
+  //       "گزارش پیشرفت هفتگی",
+  //       "مشاوره تخصصی",
+  //     ],
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "بسته VIP",
+  //     price: "۲,۵۰۰,۰۰۰",
+  //     duration: "شش ماهه",
+  //     color: "from-purple-500 to-pink-500",
+  //     features: [
+  //       "تمام امکانات بسته حرفه‌ای",
+  //       "برنامه مکمل‌های ورزشی",
+  //       "جلسات آنلاین اختصاصی",
+  //       "پیگیری روزانه",
+  //       "دسترسی به دوره‌های تخصصی",
+  //       "بیمه بدنسازی",
+  //       "تخفیف در محصولات مکمل",
+  //     ],
+  //   },
+  // ];
 
   return (
     <div
@@ -118,16 +120,32 @@ export default function SubscriptionPackages() {
                       key={index}
                       className="flex items-start gap-3 text-white/80"
                     >
-                      <div className="w-5 h-5 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <BiCheck className="w-3 h-3 text-orange-500" />
+                      <div
+                        className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                          feature.included
+                            ? "bg-orange-500/20"
+                            : "bg-red-500/20"
+                        }`}
+                      >
+                        <BiCheck
+                          className={`w-3 h-3 ${feature.included ? "text-orange-500" : "text-red-500"}`}
+                        />
                       </div>
-                      <span>{feature}</span>
+                      <span
+                        className={
+                          feature.included
+                            ? "text-white/80"
+                            : "text-white/40 line-through"
+                        }
+                      >
+                        {feature.name}
+                      </span>
                     </li>
                   ))}
                 </ul>
 
                 <Link
-                  href={`/subscription/${pkg.id}`}
+                  href={`/package/${pkg.id}`}
                   className={`w-full py-3 rounded-lg transition-colors flex items-center justify-center gap-2 ${
                     pkg.popular
                       ? "bg-orange-500 hover:bg-orange-600 text-white"
