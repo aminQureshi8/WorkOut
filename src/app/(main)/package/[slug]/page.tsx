@@ -10,8 +10,6 @@ export default async function page({ params }) {
     packageId: packageFind._id,
   }).lean();
 
-  console.log(packageFind);
-
   return (
     <PackageDetails
       package={JSON.parse(JSON.stringify(packageFind))}

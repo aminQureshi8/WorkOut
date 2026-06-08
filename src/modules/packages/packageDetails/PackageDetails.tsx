@@ -278,9 +278,13 @@ export default function PackageDetails({
 
                 {/* CTA Buttons */}
                 <div className="space-y-3">
-                  <button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 rounded-lg transition-all font-medium text-lg">
+                  <Link
+                    href={`/order/${packageData.slug}`}
+                    className="block w-full text-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 rounded-lg transition-all font-medium text-lg"
+                  >
                     شروع رایگان ۷ روزه
-                  </button>
+                  </Link>
+
                   <button className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 rounded-lg transition-colors">
                     مشاوره رایگان
                   </button>
