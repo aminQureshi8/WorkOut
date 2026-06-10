@@ -1,13 +1,27 @@
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Package from "@/model/Package";
-import OrderPage from "@/modules/order/Order";
+import OrderPage from "@/modules/order/OrderPage";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 export default async function page({ params }) {
   const { slug } = await params;
 
-  const slugPackage = await Package.findOne({slug}).lean()
+  const session = await getServerSession(authOptions);
 
-  console.log(slugPackage);
-  
+  console.log(session);
 
-  return <OrderPage package={slugPackage} />;
+  if (!session.user.id) {
+    redirect("/");
+  }
+
+  const slugPackage = await Package.findOne({ slug }).lean();
+
+  return (
+    <OrderPage
+      package={JSON.parse(JSON.stringify(slugPackage))}
+      userId={session.user.id}
+      email={session.user.email}
+    />
+  );
 }

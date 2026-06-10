@@ -2,8 +2,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BiDumbbell } from "react-icons/bi";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import UserDropdown from "./UserDropdown";
 
 export default function Header({session}) {
