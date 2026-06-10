@@ -93,9 +93,7 @@ export default function OrderPage({ package: initialPackage, userId, email }) {
 
       const res = await fetch(`/api/order?userId=${userId}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -106,7 +104,22 @@ export default function OrderPage({ package: initialPackage, userId, email }) {
         return;
       }
 
-      console.log(result);
+      const orderId = result.orderId;
+
+      const verifyRes = await fetch("/api/payment/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, paymentRef: "test-ref-123" }),
+      });
+
+      const verifyResult = await verifyRes.json();
+
+      if (!verifyRes.ok) {
+        alert(verifyResult.message);
+        return;
+      }
+
+      console.log("subscription ساخته شد:", verifyResult.subscription);
     } catch (error) {
       console.error(error);
       alert("خطا در ثبت سفارش");
