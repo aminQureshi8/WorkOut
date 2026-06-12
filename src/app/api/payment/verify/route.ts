@@ -1,4 +1,3 @@
-// app/api/payment/verify/route.ts
 import dbConnect from "@/lib/dbConnect";
 import Order from "@/model/Order";
 import Subscription from "@/model/Subscription";
