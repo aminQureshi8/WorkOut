@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ video }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ message: error.message });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

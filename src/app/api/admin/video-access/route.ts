@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
     const access = await Videoaccess.create({ packageId, videoId });
     return NextResponse.json({ access }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

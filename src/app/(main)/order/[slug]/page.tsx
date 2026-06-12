@@ -4,14 +4,16 @@ import OrderPage from "@/modules/order/OrderPage";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
-export default async function page({ params }) {
+export default async function page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
 
   const session = await getServerSession(authOptions);
 
-  console.log(session);
-
-  if (!session.user.id) {
+  if (!session || !session.user || !session.user.id) {
     redirect("/");
   }
 
@@ -25,3 +27,4 @@ export default async function page({ params }) {
     />
   );
 }
+

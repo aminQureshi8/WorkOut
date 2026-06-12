@@ -6,8 +6,8 @@ import Subscription from "@/model/Subscription";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import "@/model/Video"
 
-// GET /api/workout/full → همه چیز رو یکجا برمیگردونه
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
     if (!session)
       return NextResponse.json({ message: "لاگین نیستی" }, { status: 401 });
 
-    // پیدا کردن subscription فعال یوزر
     const subscription = await Subscription.findOne({
       userId: session.user.id,
       status: { $in: ["active", "trial"] },
@@ -29,7 +28,6 @@ export async function GET(req: NextRequest) {
         { status: 403 },
       );
 
-    // پیدا کردن plan مربوط به پکیج
     const plan = await WorkoutPlan.findOne({
       packageId: subscription.packageId,
       isActive: true,
@@ -41,18 +39,15 @@ export async function GET(req: NextRequest) {
         { status: 404 },
       );
 
-    // پیدا کردن همه روزها
     const days = await WorkoutDay.find({ planId: plan._id }).sort({
       sortOrder: 1,
     });
 
-    // پیدا کردن همه حرکات برای همه روزها
     const dayIds = days.map((d) => d._id);
     const exercises = await WorkoutExercise.find({ dayId: { $in: dayIds } })
       .populate("videoId", "url thumbnailUrl title")
       .sort({ sortOrder: 1 });
 
-    // ترکیب روزها با حرکاتشون
     const daysWithExercises = days.map((day) => ({
       _id: day._id,
       dayName: day.dayName,
@@ -71,7 +66,7 @@ export async function GET(req: NextRequest) {
       },
       days: daysWithExercises,
     });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

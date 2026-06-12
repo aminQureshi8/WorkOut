@@ -19,8 +19,11 @@ export async function POST(
     );
 
     return NextResponse.json({ features }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ message: error.message });
+  } catch (error: any) {
+    return NextResponse.json(
+      { message: error.message || "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 

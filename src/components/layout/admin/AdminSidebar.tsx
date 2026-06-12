@@ -20,11 +20,11 @@ import {
 import { useSidebar } from "./SidebarContext";
 import Link from "next/link";
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ isAdmin = false }) {
   const { isOpen, onToggle } = useSidebar();
   const [activePage, setActivePage] = useState("dashboard");
 
-  const menuItems = [
+  const adminMenuItems = [
     {
       title: "منوی اصلی",
       items: [
@@ -124,6 +124,48 @@ export default function AdminSidebar() {
     },
   ];
 
+  const userMenuItems = [
+    {
+      title: "منوی کاربر",
+      items: [
+        {
+          id: "dashboard",
+          label: "داشبورد",
+          icon: LayoutDashboard,
+          badge: null,
+          href: "/dashboard",
+        },
+        {
+          id: "subscription",
+          label: "اشتراک من",
+          icon: CreditCard,
+          badge: null,
+          href: "/dashboard/subscription",
+        },
+        {
+          id: "profile",
+          label: "پروفایل",
+          icon: UserCog,
+          badge: null,
+          href: "/dashboard/profile",
+        },
+        {
+          id: "tickets",
+          label: "تیکت‌ها",
+          icon: Ticket,
+          badge: null,
+          href: "/dashboard/tickets",
+        },
+      ],
+    },
+  ];
+
+  const menuItems = isAdmin ? adminMenuItems : userMenuItems;
+
+  const sidebarStyle = isAdmin
+    ? "bg-black/40 border-l border-white/10"
+    : "bg-[linear-gradient(180deg,#0f172a_0%,#1e1b4b_100%)] border-l border-purple-500/20";
+
   return (
     <>
       {isOpen && (
@@ -135,8 +177,9 @@ export default function AdminSidebar() {
 
       <aside
         className={`
-          fixed top-0 right-0 h-full bg-black/40 backdrop-blur-xl border-l border-white/10 transition-all duration-300 z-50
+          fixed top-0 right-0 h-full backdrop-blur-xl transition-all duration-300 z-50
           w-64
+          ${sidebarStyle}
           ${isOpen ? "translate-x-0" : "translate-x-full"}
           md:translate-x-0
           ${isOpen ? "md:w-64" : "md:w-18"}
@@ -145,10 +188,10 @@ export default function AdminSidebar() {
         <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
           {isOpen ? (
             <>
-              <div className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
                 <Dumbbell className="w-8 h-8 text-orange-500" />
                 <span className="font-bold text-lg text-white">فیت‌کوچ</span>
-              </div>
+              </Link>
               <button
                 onClick={onToggle}
                 className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
@@ -185,9 +228,22 @@ export default function AdminSidebar() {
                         onToggle();
                       }
                     }}
+                    style={
+                      activePage === item.id &&
+                      item.id === "dashboard" &&
+                      !isAdmin
+                        ? {
+                            background:
+                              "linear-gradient(135deg, rgba(124,58,237,0.3), rgba(236,72,153,0.3))",
+                            border: "1px solid rgba(124,58,237,0.4)",
+                          }
+                        : {}
+                    }
                     className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
                       activePage === item.id
-                        ? "bg-orange-500 text-white"
+                        ? item.id === "dashboard" && !isAdmin
+                          ? "text-white"
+                          : "bg-orange-500 text-white"
                         : "text-white/70 hover:bg-white/5 hover:text-white"
                     }`}
                   >
@@ -219,7 +275,7 @@ export default function AdminSidebar() {
 
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/10 bg-black/20">
           <Link
-            href="/admin/help"
+            href={isAdmin ? "/admin/help" : "/dashboard/help"}
             className="w-full flex items-center gap-3 px-3 py-3 text-white/70 hover:bg-white/5 hover:text-white rounded-lg transition-all"
           >
             <HelpCircle className="w-5 h-5 flex-shrink-0" />

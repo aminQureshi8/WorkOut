@@ -3,7 +3,7 @@ import AdminSidebar from "@/components/layout/admin/AdminSidebar";
 import MainWrapper from "@/components/layout/admin/MainWrapper";
 import AdminHeaderContainer from "@/components/layout/admin/AdminHeaderContainer";
 
-export default function AdminLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ export default function AdminLayout({
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-gray-950 overflow-hidden" dir="rtl">
-        <AdminSidebar isAdmin={true} />
+        <AdminSidebar />
         <MainWrapper>
           <AdminHeaderContainer />
           {children}

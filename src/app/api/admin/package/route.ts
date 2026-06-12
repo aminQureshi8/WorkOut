@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       ...data,
     });
     return NextResponse.json({ success: true, package: pkg }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     const message = error?.message || "Failed to create package";
     return NextResponse.json({ error: message }, { status: 400 });
   }

@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
     const exercises = await WorkoutExercise.insertMany(items);
     return NextResponse.json({ exercises }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
       .sort({ sortOrder: 1 });
 
     return NextResponse.json({ exercises });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

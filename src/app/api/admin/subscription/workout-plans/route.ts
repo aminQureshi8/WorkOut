@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     const plan = await WorkoutPlan.create({ packageId, title, description });
     return NextResponse.json({ plan }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       : { isActive: true };
     const plans = await WorkoutPlan.find(query);
     return NextResponse.json({ plans });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

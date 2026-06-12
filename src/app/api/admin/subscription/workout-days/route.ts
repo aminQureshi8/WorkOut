@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
     const days = await WorkoutDay.insertMany(items);
     return NextResponse.json({ days }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
     const days = await WorkoutDay.find({ planId }).sort({ sortOrder: 1 });
     return NextResponse.json({ days });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
