@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { BiDumbbell } from "react-icons/bi";
 import UserDropdown from "./UserDropdown";
 
-export default function Header({session}) {
+export default function Header({ session }: { session: any }) {
   const pathname = usePathname();
 
   const getLinkClass = (href: string) => {
