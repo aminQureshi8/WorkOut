@@ -75,7 +75,7 @@ const recentTickets = [
   },
 ];
 
-export default async function AdminDashboard() {
+export default async function AdminDashboardAdmin() {
   await dbConnect();
 
   const users = await User.find({}, "username createdAt")

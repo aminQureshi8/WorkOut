@@ -1,7 +1,5 @@
-import React from 'react'
+import AdminDashboardUser from "@/modules/dashboard/AdminDashboardUser/AdminDashboardUser";
 
 export default function page() {
-  return (
-    <div>page</div>
-  )
+  return <AdminDashboardUser />;
 }
