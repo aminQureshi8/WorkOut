@@ -29,10 +29,25 @@ import PackageModel from "@/model/Package";
 import CoachModel from "@/model/Coach";
 import OrderModel from "@/model/Order";
 import UserModel from "@/model/User";
+import WorkoutPlanModel from "@/model/WorkoutPlan";
+import WorkoutDayModel from "@/model/WorkoutDay";
+import WorkoutExerciseModel from "@/model/WorkoutExercise";
+import VideoModel from "@/model/Video";
+import DashboardWorkoutPlan from "@/modules/subscription/DashboardWorkoutPlan";
 
 // Touch models to prevent bundler from tree-shaking the schema registration
 const registerModels = () => {
-  return [SubscriptionModel, PackageModel, CoachModel, OrderModel, UserModel];
+  return [
+    SubscriptionModel,
+    PackageModel,
+    CoachModel,
+    OrderModel,
+    UserModel,
+    WorkoutPlanModel,
+    WorkoutDayModel,
+    WorkoutExerciseModel,
+    VideoModel
+  ];
 };
 
 export const dynamic = "force-dynamic";
@@ -112,6 +127,44 @@ export default async function SubscriptionPage() {
     .populate("packageId")
     .populate("coachId")
     .populate("orderId");
+
+  // Fetch Workout Plan for the user's package
+  let workoutPlan = null;
+  let workoutDays: any[] = [];
+  
+  if (subscription) {
+    workoutPlan = await WorkoutPlanModel.findOne({
+      packageId: subscription.packageId?._id,
+      isActive: true,
+    }).lean();
+
+    if (workoutPlan) {
+      const days = await WorkoutDayModel.find({ planId: workoutPlan._id })
+        .sort({ sortOrder: 1 })
+        .lean();
+
+      const dayIds = days.map(d => d._id);
+      const exercises = await WorkoutExerciseModel.find({ dayId: { $in: dayIds } })
+        .populate("videoId")
+        .sort({ sortOrder: 1 })
+        .lean();
+
+      workoutDays = days.map(day => ({
+        ...day,
+        _id: day._id.toString(),
+        exercises: exercises
+          .filter(e => e.dayId.toString() === day._id.toString())
+          .map(e => ({
+            ...e,
+            _id: e._id.toString(),
+            videoId: e.videoId ? {
+              ...e.videoId,
+              _id: e.videoId._id.toString()
+            } : null
+          }))
+      }));
+    }
+  }
 
   // Fetch all payment orders (history)
   const orders = await OrderModel.find({
@@ -236,6 +289,16 @@ export default async function SubscriptionPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+
+              {/* Workout Plan Section */}
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl">
+                <h3 className="text-lg font-bold font-morabbaReg text-white mb-6 flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-orange-500 animate-pulse" />
+                  <span>برنامه تمرینی فعال شما</span>
+                </h3>
+                <DashboardWorkoutPlan plan={workoutPlan} days={workoutDays} />
               </div>
 
               {/* Access Features info */}
