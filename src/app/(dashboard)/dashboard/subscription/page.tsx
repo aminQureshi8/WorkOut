@@ -214,7 +214,7 @@ export default async function SubscriptionPage() {
             <Link
               href="/packages"
               id="sub-upgrade-btn"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white text-sm font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white text-sm font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5"
             >
               <Zap className="w-4 h-4 animate-bounce" />
               <span>ارتقا یا تمدید اشتراک</span>
@@ -229,11 +229,11 @@ export default async function SubscriptionPage() {
             <div className="lg:col-span-2 space-y-6">
               {/* Package Card */}
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8 shadow-xl">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -z-10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -z-10" />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-tr from-orange-500 to-amber-500 shadow-md">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-tr from-purple-500 to-pink-500 shadow-md">
                       <Award className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -255,10 +255,10 @@ export default async function SubscriptionPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-end text-xs md:text-sm">
                     <div className="flex items-center gap-1.5 text-gray-400">
-                      <Clock className="w-4 h-4 text-orange-500" />
+                      <Clock className="w-4 h-4 text-purple-400" />
                       <span>میزان مصرف اشتراک</span>
                     </div>
-                    <span className="font-bold text-orange-500">
+                    <span className="font-bold text-purple-400">
                       {daysRemaining} روز مانده از {totalDays} روز
                     </span>
                   </div>
@@ -266,7 +266,7 @@ export default async function SubscriptionPage() {
                   {/* Visual Progress Bar */}
                   <div className="h-3 rounded-full bg-white/10 overflow-hidden">
                     <div
-                      className="h-3 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 transition-all duration-500"
+                      className="h-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-500"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
@@ -295,7 +295,7 @@ export default async function SubscriptionPage() {
               {/* Workout Plan Section */}
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl">
                 <h3 className="text-lg font-bold font-morabbaReg text-white mb-6 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-orange-500 animate-pulse" />
+                  <Activity className="w-5 h-5 text-purple-400 animate-pulse" />
                   <span>برنامه تمرینی فعال شما</span>
                 </h3>
                 <DashboardWorkoutPlan plan={workoutPlan} days={workoutDays} />
@@ -304,7 +304,7 @@ export default async function SubscriptionPage() {
               {/* Access Features info */}
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl">
                 <h3 className="text-lg font-bold font-morabbaReg text-white mb-4 flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-orange-500" />
+                  <ShieldCheck className="w-5 h-5 text-purple-400" />
                   <span>دسترسی‌های فعال شما</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -361,7 +361,7 @@ export default async function SubscriptionPage() {
               {/* Assigned Coach Card */}
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl relative overflow-hidden">
                 <h3 className="text-base font-bold text-gray-400 mb-4 flex items-center gap-2">
-                  <User className="w-4 h-4 text-orange-500" />
+                  <User className="w-4 h-4 text-purple-400" />
                   <span>مربی اختصاصی شما</span>
                 </h3>
 
@@ -372,10 +372,10 @@ export default async function SubscriptionPage() {
                         <img
                           src={subscription.coachId.avatarUrl}
                           alt={subscription.coachId.name}
-                          className="w-14 h-14 rounded-full object-cover border-2 border-orange-500/30"
+                          className="w-14 h-14 rounded-full object-cover border-2 border-purple-500/30"
                         />
                       ) : (
-                        <div className="w-14 h-14 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-lg border-2 border-orange-500/30">
+                        <div className="w-14 h-14 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-lg border-2 border-purple-500/30">
                           {subscription.coachId.name.charAt(0)}
                         </div>
                       )}
@@ -383,7 +383,7 @@ export default async function SubscriptionPage() {
                         <h4 className="font-bold text-white text-lg">
                           {subscription.coachId.name}
                         </h4>
-                        <p className="text-xs text-orange-400 mt-0.5">
+                        <p className="text-xs text-purple-400 mt-0.5">
                           {subscription.coachId.specialties
                             ?.slice(0, 2)
                             .join("، ") || "مربی ورزشی"}
@@ -405,7 +405,7 @@ export default async function SubscriptionPage() {
                   </div>
                 ) : (
                   <div className="text-center py-6 space-y-3">
-                    <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto text-orange-500 animate-pulse">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto text-purple-400 animate-pulse">
                       <Activity className="w-5 h-5" />
                     </div>
                     <div>
@@ -425,7 +425,7 @@ export default async function SubscriptionPage() {
               {subscription.orderId && (
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl">
                   <h3 className="text-base font-bold text-gray-400 mb-4 flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-orange-500" />
+                    <CreditCard className="w-4 h-4 text-purple-400" />
                     <span>جزئیات پرداخت دوره</span>
                   </h3>
                   <div className="space-y-3 text-xs md:text-sm">
@@ -446,7 +446,7 @@ export default async function SubscriptionPage() {
                     </div>
                     <div className="flex justify-between py-2">
                       <span className="text-gray-500">کد پیگیری پرداخت</span>
-                      <span className="text-orange-400 font-semibold select-all">
+                      <span className="text-purple-400 font-semibold select-all">
                         {subscription.orderId.paymentRef || "ثبت نشده"}
                       </span>
                     </div>
@@ -458,10 +458,10 @@ export default async function SubscriptionPage() {
         ) : (
           /* Empty/No Active Subscription State */
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8 md:p-16 text-center max-w-2xl mx-auto shadow-2xl relative overflow-hidden">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl -z-10" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl -z-10" />
 
-            <div className="w-20 h-20 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-6">
-              <CreditCard className="w-10 h-10 text-orange-500 animate-pulse" />
+            <div className="w-20 h-20 rounded-full bg-purple-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-6">
+              <CreditCard className="w-10 h-10 text-purple-400 animate-pulse" />
             </div>
 
             <h2 className="font-morabbaReg text-xl md:text-2xl font-bold text-white mb-3">
@@ -477,7 +477,7 @@ export default async function SubscriptionPage() {
               <Link
                 href="/packages"
                 id="sub-buy-btn"
-                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
                 <Sparkles className="w-5 h-5 text-white" />
                 <span>مشاهده و خرید پکیج‌ها</span>
@@ -497,7 +497,7 @@ export default async function SubscriptionPage() {
         {/* Transaction History (Always Displayed) */}
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl">
           <h3 className="text-lg font-bold font-morabbaReg text-white mb-6 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-orange-500" />
+            <FileText className="w-5 h-5 text-purple-400" />
             <span>سوابق تراکنش‌ها و خریدها</span>
           </h3>
 
@@ -532,7 +532,7 @@ export default async function SubscriptionPage() {
                       <td className="py-3.5 text-gray-300">
                         {formatDate(order.createdAt)}
                       </td>
-                      <td className="py-3.5 text-orange-400 font-mono select-all">
+                      <td className="py-3.5 text-purple-400 font-mono select-all">
                         {order.paymentRef || "—"}
                       </td>
                       <td className="py-3.5 pl-2">

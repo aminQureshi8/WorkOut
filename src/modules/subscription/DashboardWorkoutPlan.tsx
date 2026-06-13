@@ -61,10 +61,10 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
   return (
     <div className="space-y-6">
       {/* Plan Header */}
-      <div className="bg-gradient-to-r from-orange-500/10 to-purple-500/10 border border-white/10 rounded-2xl p-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-3xl -z-10" />
+      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-white/10 rounded-2xl p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl -z-10" />
         <div className="flex items-center gap-3 mb-2">
-          <Dumbbell className="w-6 h-6 text-orange-500 animate-pulse" />
+          <Dumbbell className="w-6 h-6 text-purple-400 animate-pulse" />
           <h3 className="text-lg font-bold text-white font-morabbaReg">{plan.title}</h3>
         </div>
         <p className="text-white/60 text-xs md:text-sm leading-relaxed">{plan.description || "بدون توضیحات"}</p>
@@ -90,7 +90,7 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
                   className="w-full text-right p-5 flex items-center justify-between hover:bg-white/3 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-lg flex items-center justify-center font-bold">
+                    <div className="w-10 h-10 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-lg flex items-center justify-center font-bold">
                       <Calendar className="w-5 h-5" />
                     </div>
                     <div>
@@ -138,7 +138,7 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
                             {ex.videoId ? (
                               <button
                                 onClick={() => setActiveVideo(ex.videoId!)}
-                                className="w-full sm:w-auto bg-orange-500/10 hover:bg-orange-500/25 border border-orange-500/20 text-orange-400 px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                className="w-full sm:w-auto bg-purple-500/10 hover:bg-purple-500/25 border border-purple-500/20 text-purple-400 px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                               >
                                 <Play className="w-3.5 h-3.5 fill-current" />
                                 تماشای ویدیو آموزشی
@@ -164,7 +164,7 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
           <div className="bg-gray-950 border border-white/10 rounded-2xl overflow-hidden w-full max-w-3xl relative">
             <div className="p-4 bg-black/40 flex justify-between items-center text-white border-b border-white/10">
               <h3 className="font-bold text-sm flex items-center gap-2">
-                <Film className="w-4 h-4 text-orange-500" />
+                <Film className="w-4 h-4 text-purple-400" />
                 {activeVideo.title}
               </h3>
               <button
