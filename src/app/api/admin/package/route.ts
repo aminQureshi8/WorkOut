@@ -16,3 +16,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    await dbConnect();
+    const packages = await Package.find({}).sort({ createdAt: -1 });
+    return NextResponse.json({ packages });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}
+
