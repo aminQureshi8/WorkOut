@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React from "react";
 import {
   Dumbbell,
   Users,
@@ -19,10 +19,11 @@ import {
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function AdminSidebar({ isAdmin = false }) {
   const { isOpen, onToggle } = useSidebar();
-  const [activePage, setActivePage] = useState("dashboard");
+  const pathname = usePathname();
 
   const adminMenuItems = [
     {
@@ -215,59 +216,63 @@ export default function AdminSidebar({ isAdmin = false }) {
                 </h3>
               )}
               <div className="space-y-1">
-                {section.items.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    onClick={() => {
-                      setActivePage(item.id);
-                      if (
-                        typeof window !== "undefined" &&
-                        window.innerWidth < 768
-                      ) {
-                        onToggle();
+                {section.items.map((item) => {
+                  const isActive =
+                    item.href === "/dashboard" || item.href === "/admin"
+                      ? pathname === item.href
+                      : pathname.startsWith(item.href);
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={() => {
+                        if (
+                          typeof window !== "undefined" &&
+                          window.innerWidth < 768
+                        ) {
+                          onToggle();
+                        }
+                      }}
+                      style={
+                        isActive && item.id === "dashboard" && !isAdmin
+                          ? {
+                              background:
+                                "linear-gradient(135deg, rgba(124,58,237,0.3), rgba(236,72,153,0.3))",
+                              border: "1px solid rgba(124,58,237,0.4)",
+                            }
+                          : {}
                       }
-                    }}
-                    style={
-                      activePage === item.id &&
-                      item.id === "dashboard" &&
-                      !isAdmin
-                        ? {
-                            background:
-                              "linear-gradient(135deg, rgba(124,58,237,0.3), rgba(236,72,153,0.3))",
-                            border: "1px solid rgba(124,58,237,0.4)",
-                          }
-                        : {}
-                    }
-                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
-                      activePage === item.id
-                        ? item.id === "dashboard" && !isAdmin
-                          ? "text-white"
-                          : "bg-orange-500 text-white"
-                        : "text-white/70 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5 flex-shrink-0" />
-                    {isOpen && (
-                      <>
-                        <span className="flex-1 text-right text-sm">
-                          {item.label}
-                        </span>
-                        {item.badge && (
-                          <span
-                            className={`text-xs px-2 py-0.5 rounded-full ${
-                              activePage === item.id
-                                ? "bg-white/20 text-white"
-                                : "bg-white/10 text-white/60"
-                            }`}
-                          >
-                            {item.badge}
+                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
+                        isActive
+                          ? item.id === "dashboard" && !isAdmin
+                            ? "text-white"
+                            : "bg-orange-500 text-white"
+                          : "text-white/70 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5 flex-shrink-0" />
+                      {isOpen && (
+                        <>
+                          <span className="flex-1 text-right text-sm">
+                            {item.label}
                           </span>
-                        )}
-                      </>
-                    )}
-                  </Link>
-                ))}
+                          {item.badge && (
+                            <span
+                              className={`text-xs px-2 py-0.5 rounded-full ${
+                                isActive
+                                  ? "bg-white/20 text-white"
+                                  : "bg-white/10 text-white/60"
+                              }`}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           ))}
