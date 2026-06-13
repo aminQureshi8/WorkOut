@@ -61,9 +61,19 @@ export const authOptions = {
       return true;
     },
 
-    async jwt({ token, user, account, trigger }: any) {
-      if (user) {
-        await dbConnect();
+    async jwt({ token, user, account }: any) {
+      await dbConnect();
+      const userId = user?.id || token?.id;
+      if (userId) {
+        const dbUser = await User.findById(userId);
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+          token.username = dbUser.username;
+          token.role = dbUser.role;
+          token.avatar = dbUser.avatar;
+          token.email = dbUser.email;
+        }
+      } else if (user) {
         const dbUser = await User.findOne({ email: user.email || token.email });
         if (dbUser) {
           token.id = dbUser._id.toString();
