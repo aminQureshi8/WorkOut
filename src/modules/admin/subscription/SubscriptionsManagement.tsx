@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 import {
   Search,
   Plus,
@@ -92,6 +93,41 @@ interface WorkoutExercise {
 }
 
 export default function SubscriptionsManagement() {
+
+  const showAlert = (title: string, text: string, icon: "success" | "error" | "warning" | "info" = "info") => {
+    Swal.fire({
+      title,
+      text,
+      icon,
+      confirmButtonText: "باشه",
+      background: "#111827",
+      color: "#ffffff",
+      confirmButtonColor: "#f97316",
+      customClass: {
+        popup: "border border-white/10 rounded-2xl"
+      }
+    });
+  };
+
+  const showConfirm = async (title: string, text: string, confirmButtonText = "بله، حذف شود") => {
+    const result = await Swal.fire({
+      title,
+      text,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText,
+      cancelButtonText: "انصراف",
+      background: "#111827",
+      color: "#ffffff",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#374151",
+      customClass: {
+        popup: "border border-white/10 rounded-2xl"
+      }
+    });
+    return result.isConfirmed;
+  };
+
   // Main Tab Navigation
   const [activeTab, setActiveTab] = useState<"subscriptions" | "videos">("subscriptions");
 
@@ -245,7 +281,7 @@ export default function SubscriptionsManagement() {
       }
     } catch (e) {
       console.error(e);
-      alert("خطا در بارگذاری اشتراک‌ها");
+      showAlert("خطا", "خطا در بارگذاری اشتراک‌ها", "error");
     } finally {
       setLoading(false);
     }
@@ -282,7 +318,7 @@ export default function SubscriptionsManagement() {
   const handleUploadVideo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!videoFile || !thumbnailFile || !newVideoTitle) {
-      alert("لطفا فایل ویدیو، کاور و عنوان را انتخاب کنید");
+      showAlert("هشدار", "لطفا فایل ویدیو، کاور و عنوان را انتخاب کنید", "warning");
       return;
     }
     setUploadingVideo(true);
@@ -306,7 +342,7 @@ export default function SubscriptionsManagement() {
       });
 
       if (res.ok) {
-        alert("ویدیو با موفقیت آپلود شد");
+        showAlert("موفقیت", "ویدیو با موفقیت آپلود شد", "success");
         setShowUploadVideoModal(false);
         // Reset form
         setVideoFile(null);
@@ -319,28 +355,28 @@ export default function SubscriptionsManagement() {
         fetchVideos();
       } else {
         const err = await res.json();
-        alert(`خطا در آپلود: ${err.message}`);
+        showAlert("خطا", `خطا در آپلود: ${err.message}`, "error");
       }
     } catch (e) {
       console.error(e);
-      alert("خطا در آپلود ویدیو");
+      showAlert("خطا", "خطا در آپلود ویدیو", "error");
     } finally {
       setUploadingVideo(false);
     }
   };
 
   const handleDeleteVideo = async (id: string) => {
-    if (!confirm("آیا از حذف این ویدیو اطمینان دارید؟")) return;
+    if (!(await showConfirm("حذف ویدیو", "آیا از حذف این ویدیو اطمینان دارید؟"))) return;
     try {
       const res = await fetch(`/api/admin/video?id=${id}`, {
         method: "DELETE"
       });
       if (res.ok) {
-        alert("ویدیو حذف شد");
+        showAlert("موفقیت", "ویدیو با موفقیت حذف شد", "success");
         fetchVideos();
       } else {
         const err = await res.json();
-        alert(`خطا: ${err.message}`);
+        showAlert("خطا", `خطا: ${err.message}`, "error");
       }
     } catch (e) {
       console.error(e);
@@ -351,7 +387,7 @@ export default function SubscriptionsManagement() {
   const handleCreateSubscription = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser || !selectedPackageId) {
-      alert("لطفا کاربر و پکیج را انتخاب کنید");
+      showAlert("هشدار", "لطفا کاربر و پکیج را انتخاب کنید", "warning");
       return;
     }
     try {
@@ -366,7 +402,7 @@ export default function SubscriptionsManagement() {
         })
       });
       if (res.ok) {
-        alert("اشتراک با موفقیت ثبت شد");
+        showAlert("موفقیت", "اشتراک با موفقیت ثبت شد", "success");
         setShowCreateModal(false);
         setSelectedUser(null);
         setSelectedPackageId("");
@@ -376,11 +412,11 @@ export default function SubscriptionsManagement() {
         fetchSubscriptions();
       } else {
         const err = await res.json();
-        alert(`خطا: ${err.message}`);
+        showAlert("خطا", `خطا: ${err.message}`, "error");
       }
     } catch (e) {
       console.error(e);
-      alert("خطا در ایجاد اشتراک");
+      showAlert("خطا", "خطا در ایجاد اشتراک", "error");
     }
   };
 
@@ -398,35 +434,35 @@ export default function SubscriptionsManagement() {
         })
       });
       if (res.ok) {
-        alert("اشتراک با موفقیت بروزرسانی شد");
+        showAlert("موفقیت", "اشتراک با موفقیت بروزرسانی شد", "success");
         setShowEditModal(false);
         fetchSubscriptions();
       } else {
         const err = await res.json();
-        alert(`خطا: ${err.message}`);
+        showAlert("خطا", `خطا: ${err.message}`, "error");
       }
     } catch (e) {
       console.error(e);
-      alert("خطا در ویرایش اشتراک");
+      showAlert("خطا", "خطا در ویرایش اشتراک", "error");
     }
   };
 
   const handleDeleteSubscription = async (id: string) => {
-    if (!confirm("آیا از حذف این اشتراک اطمینان دارید؟")) return;
+    if (!(await showConfirm("حذف اشتراک", "آیا از حذف این اشتراک اطمینان دارید؟"))) return;
     try {
       const res = await fetch(`/api/admin/subscription?id=${id}`, {
         method: "DELETE"
       });
       if (res.ok) {
-        alert("اشتراک با موفقیت حذف شد");
+        showAlert("موفقیت", "اشتراک با موفقیت حذف شد", "success");
         fetchSubscriptions();
       } else {
         const err = await res.json();
-        alert(`خطا: ${err.message}`);
+        showAlert("خطا", `خطا: ${err.message}`, "error");
       }
     } catch (e) {
       console.error(e);
-      alert("خطا در حذف اشتراک");
+      showAlert("خطا", "خطا در حذف اشتراک", "error");
     }
   };
 
@@ -473,11 +509,11 @@ export default function SubscriptionsManagement() {
       if (res.ok) {
         const data = await res.json();
         setWorkoutPlan(data.plan);
-        alert("برنامه تمرینی با موفقیت ایجاد شد");
+        showAlert("موفقیت", "برنامه تمرینی با موفقیت ایجاد شد", "success");
       }
     } catch (e) {
       console.error(e);
-      alert("خطا در ایجاد برنامه");
+      showAlert("خطا", "خطا در ایجاد برنامه", "error");
     }
   };
 
@@ -497,7 +533,7 @@ export default function SubscriptionsManagement() {
         const data = await res.json();
         setWorkoutPlan(data.plan);
         setIsEditingPlanInfo(false);
-        alert("برنامه بروزرسانی شد");
+        showAlert("موفقیت", "برنامه تمرینی با موفقیت بروزرسانی شد", "success");
       }
     } catch (e) {
       console.error(e);
@@ -506,7 +542,7 @@ export default function SubscriptionsManagement() {
 
   const handleDeletePlan = async () => {
     if (!workoutPlan) return;
-    if (!confirm("آیا از حذف کامل این برنامه تمرینی به همراه تمام روزها و حرکات آن اطمینان دارید؟")) return;
+    if (!(await showConfirm("حذف برنامه تمرینی", "آیا از حذف کامل این برنامه تمرینی به همراه تمام روزها و حرکات آن اطمینان دارید؟"))) return;
     try {
       const res = await fetch(`/api/admin/subscription/workout-plans?id=${workoutPlan._id}`, {
         method: "DELETE"
@@ -516,7 +552,7 @@ export default function SubscriptionsManagement() {
         setWorkoutDays([]);
         setSelectedDay(null);
         setExercises([]);
-        alert("برنامه تمرینی حذف شد");
+        showAlert("موفقیت", "برنامه تمرینی با موفقیت حذف شد", "success");
       }
     } catch (e) {
       console.error(e);
@@ -581,7 +617,7 @@ export default function SubscriptionsManagement() {
   };
 
   const handleDeleteDay = async (id: string) => {
-    if (!confirm("آیا از حذف این روز و تمامی حرکات ورزشی آن اطمینان دارید؟")) return;
+    if (!(await showConfirm("حذف روز تمرینی", "آیا از حذف این روز و تمامی حرکات ورزشی آن اطمینان دارید؟"))) return;
     try {
       const res = await fetch(`/api/admin/subscription/workout-days?id=${id}`, {
         method: "DELETE"
@@ -659,7 +695,7 @@ export default function SubscriptionsManagement() {
   };
 
   const handleDeleteExercise = async (id: string) => {
-    if (!confirm("آیا از حذف این حرکت تمرینی اطمینان دارید؟")) return;
+    if (!(await showConfirm("حذف حرکت تمرینی", "آیا از حذف این حرکت تمرینی اطمینان دارید؟"))) return;
     try {
       const res = await fetch(`/api/admin/subscription/workout-exercises?id=${id}`, {
         method: "DELETE"
@@ -944,7 +980,7 @@ export default function SubscriptionsManagement() {
                                   if (sub.packageId) {
                                     handleOpenPlanModal(sub.packageId);
                                   } else {
-                                    alert("پکیج یافت نشد!");
+                                    showAlert("خطا", "پکیج یافت نشد!", "error");
                                   }
                                 }}
                                 className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-lg flex items-center gap-1 text-xs transition-colors"
