@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dumbbell,
   Users,
@@ -25,6 +25,37 @@ export default function AdminSidebar({ isAdmin = false }) {
   const { isOpen, onToggle } = useSidebar();
   const pathname = usePathname();
 
+  const [counts, setCounts] = useState({
+    users: 0,
+    subscriptions: 0,
+    articles: 0
+  });
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/admin/sidebar-stats");
+        if (res.ok) {
+          const data = await res.json();
+          setCounts({
+            users: data.usersCount || 0,
+            subscriptions: data.subscriptionsCount || 0,
+            articles: data.articlesCount || 0
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load sidebar stats:", err);
+      }
+    }
+    if (isAdmin) {
+      loadStats();
+    }
+  }, [isAdmin, pathname]);
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat("fa-IR").format(num);
+  };
+
   const adminMenuItems = [
     {
       title: "منوی اصلی",
@@ -40,7 +71,7 @@ export default function AdminSidebar({ isAdmin = false }) {
           id: "users",
           label: "کاربران",
           icon: Users,
-          badge: "۲,۵۴۳",
+          badge: counts.users > 0 ? formatNumber(counts.users) : null,
           href: "/admin/users",
         },
         {
@@ -54,7 +85,7 @@ export default function AdminSidebar({ isAdmin = false }) {
           id: "subscriptions",
           label: "اشتراک‌ها",
           icon: Calendar,
-          badge: "۱۲۳",
+          badge: counts.subscriptions > 0 ? formatNumber(counts.subscriptions) : null,
           href: "/admin/subscriptions",
         },
       ],
@@ -66,7 +97,7 @@ export default function AdminSidebar({ isAdmin = false }) {
           id: "articles",
           label: "مقالات",
           icon: BookOpen,
-          badge: "۱۵۶",
+          badge: counts.articles > 0 ? formatNumber(counts.articles) : null,
           href: "/admin/articles",
         },
         {

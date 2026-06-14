@@ -2,7 +2,12 @@
 import { Bell, Menu, Settings } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 
-export default function AdminHeader({ username, role }) {
+interface AdminHeaderProps {
+  username?: string;
+  role?: string;
+}
+
+export default function AdminHeader({ username = "مدیر", role = "admin" }: AdminHeaderProps) {
   const { onToggle } = useSidebar();
 
   return (
