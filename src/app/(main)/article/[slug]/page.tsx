@@ -3,6 +3,8 @@ import Blog from "@/model/Blog";
 import ArticleDetail from "@/modules/article/ArticleDetail";
 import { notFound } from "next/navigation";
 
+import Comment from "@/model/Comment";
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -14,10 +16,15 @@ export default async function page({ params }: PageProps) {
 
   const decodedSlug = decodeURIComponent(slug);
 
-  // Fetch current article by slug
+  // Fetch current article by slug and populate virtual comments
   const blog = await Blog.findOne({ slug: decodedSlug, status: "published" })
     .populate("authorId", "username fullName email role")
-    .lean();
+    .populate({
+      path: "comments",
+      match: { isApproved: true },
+      options: { sort: { createdAt: -1 } },
+      strictPopulate: false
+    });
 
   if (!blog) {
     notFound();
@@ -32,7 +39,6 @@ export default async function page({ params }: PageProps) {
     .sort({ createdAt: -1 })
     .limit(3)
     .lean();
-
 
   const serializedArticle = JSON.parse(JSON.stringify(blog));
   const serializedRelated = JSON.parse(JSON.stringify(relatedBlogs));

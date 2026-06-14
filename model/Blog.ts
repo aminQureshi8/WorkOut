@@ -38,7 +38,17 @@ const BlogSchema = new Schema<IBlog>(
     authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     views: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
+
+BlogSchema.virtual("comments", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "blogId",
+});
 
 export default mongoose.models.Blog || mongoose.model<IBlog>("Blog", BlogSchema);

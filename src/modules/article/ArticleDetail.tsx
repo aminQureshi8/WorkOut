@@ -33,57 +33,52 @@ export default function ArticleDetail({
     article?.views ? Math.max(12, Math.ceil(article.views * 0.15)) : 86,
   );
   const [newComment, setNewComment] = useState("");
-  const [commentList, setCommentList] = useState([
-    {
-      name: "رضا ت.",
-      avatar: "ر",
-      time: "۲ روز پیش",
-      text: "مقاله خیلی مفیدی بود. ممنون از انتشار این مطالب ارزشمند!",
-      likes: 12,
-    },
-    {
-      name: "نیلوفر م.",
-      avatar: "ن",
-      time: "۵ روز پیش",
-      text: "ممنون از اطلاعات کامل. آیا تمرینات ذکر شده برای افراد مبتدی هم مناسب است؟",
-      likes: 7,
-    },
-    {
-      name: "کامران ب.",
-      avatar: "ک",
-      time: "۱ هفته پیش",
-      text: "من تغییرات برنامه غذایی رو بر اساس این نکات اعمال کردم و خیلی حس بهتری دارم.",
-      likes: 24,
-    },
-  ]);
+  const [commentList, setCommentList] = useState<any[]>(article?.comments || []);
 
   const handleLike = () => {
     setLiked(!liked);
     setLikeCount(liked ? likeCount - 1 : likeCount + 1);
   };
 
-  const handleSendComment = () => {
+  const handleSendComment = async () => {
     if (!newComment.trim()) return;
-    setCommentList([
-      {
-        name: "کاربر فیت‌کوچ",
-        avatar: "ک",
-        time: "الان",
-        text: newComment.trim(),
-        likes: 0,
-      },
-      ...commentList,
-    ]);
-    setNewComment("");
-    Swal.fire({
-      title: "ثبت شد",
-      text: "نظر شما با موفقیت ثبت گردید.",
-      icon: "success",
-      timer: 1500,
-      showConfirmButton: false,
-      background: "#111827",
-      color: "#ffffff",
-    });
+    try {
+      const res = await fetch("/api/blog/comment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          blogId: article._id,
+          name: "کاربر فیت‌کوچ",
+          text: newComment.trim(),
+        }),
+      });
+
+      if (res.ok) {
+        setNewComment("");
+        Swal.fire({
+          title: "ثبت شد",
+          text: "نظر شما با موفقیت ثبت شد و پس از تایید مدیریت نمایش داده خواهد شد.",
+          icon: "success",
+          confirmButtonText: "باشه",
+          background: "#111827",
+          color: "#ffffff",
+          confirmButtonColor: "#7c3aed",
+        });
+      } else {
+        throw new Error("ثبت نظر ناموفق بود");
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire({
+        title: "خطا",
+        text: "ثبت نظر با خطا مواجه شد. لطفاً دوباره تلاش کنید.",
+        icon: "error",
+        confirmButtonText: "باشه",
+        background: "#111827",
+        color: "#ffffff",
+        confirmButtonColor: "#7c3aed",
+      });
+    }
   };
 
   const formatDate = (dateString?: string | Date) => {
@@ -338,40 +333,44 @@ export default function ArticleDetail({
               </div>
 
               <div className="space-y-4">
-                {commentList.map((c, i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl p-5 bg-white/5 border border-white/10"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #7c3aed, #ec4899)",
-                        }}
-                      >
-                        {c.avatar}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-white text-sm font-medium">
-                            {c.name}
-                          </span>
-                          <span className="text-gray-600 text-xs">
-                            {c.time}
-                          </span>
+                {commentList.length > 0 ? (
+                  commentList.map((c, i) => (
+                    <div
+                      key={i}
+                      className="rounded-2xl p-5 bg-white/5 border border-white/10"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div
+                          className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #7c3aed, #ec4899)",
+                          }}
+                        >
+                          {c.avatar || c.name.charAt(0)}
                         </div>
-                        <p className="text-gray-400 text-sm leading-6">
-                          {c.text}
-                        </p>
-                        <button className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-400 mt-3 transition-colors cursor-pointer">
-                          <ThumbsUp size={12} /> {c.likes} پسند
-                        </button>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-white text-sm font-medium">
+                              {c.name}
+                            </span>
+                            <span className="text-gray-600 text-xs">
+                              {c.time || formatDate(c.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-gray-400 text-sm leading-6">
+                            {c.text}
+                          </p>
+                          <button className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-400 mt-3 transition-colors cursor-pointer">
+                            <ThumbsUp size={12} /> {c.likes} پسند
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-white/40 text-center py-8 text-sm">هیچ نظری برای این مقاله ثبت نشده است.</p>
+                )}
               </div>
             </div>
           </div>
