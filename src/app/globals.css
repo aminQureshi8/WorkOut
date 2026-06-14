@@ -73,3 +73,17 @@
   scrollbar-color: #f97316 #000000;
 }
 
+/* Responsive SweetAlert2 Font & Size Adjustments */
+@media (max-width: 768px) {
+  .swal2-popup {
+    font-size: 0.85rem !important; /* Scales down text, icons, buttons and spacing proportionally */
+  }
+}
+
+@media (max-width: 480px) {
+  .swal2-popup {
+    font-size: 0.75rem !important;
+  }
+}
+
+
