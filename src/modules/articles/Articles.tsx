@@ -140,7 +140,7 @@ export default function Articles() {
       </section>
 
       <section className="pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto">
           {articles.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {articles.map((article) => {
@@ -208,7 +208,7 @@ export default function Articles() {
             </div>
           )}
 
-          {/* Load More Button */}
+         
           {!loading && page < totalPages && (
             <div className="text-center mt-12">
               <button
