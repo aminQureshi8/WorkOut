@@ -1,76 +1,18 @@
+"use client";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { BiDumbbell, BiSearch, BiUser } from "react-icons/bi";
-import { CiLock } from "react-icons/ci";
+import Image from "next/image";
+import { Search, User, Clock, BookOpen, Loader2, Inbox } from "lucide-react";
 
 export default function Articles() {
-  const articles = [
-    {
-      id: 1,
-      title: "۱۰ نکته طلایی برای افزایش حجم عضلانی",
-      excerpt:
-        "برای رشد عضلات، تنها تمرین کافی نیست. در این مقاله به نکات کلیدی تغذیه و استراحت می‌پردازیم...",
-      author: "علی محمدی",
-      date: "۱۵ اردیبهشت ۱۴۰۳",
-      readTime: "۵ دقیقه",
-      category: "بدنسازی",
-      image: "🏋️",
-    },
-    {
-      id: 2,
-      title: "راهنمای کامل تغذیه ورزشی",
-      excerpt:
-        "تغذیه صحیح ۷۰٪ موفقیت شما را تشکیل می‌دهد. بیاموزید چگونه برنامه غذایی خود را بهینه کنید...",
-      author: "سارا احمدی",
-      date: "۱۲ اردیبهشت ۱۴۰۳",
-      readTime: "۸ دقیقه",
-      category: "تغذیه",
-      image: "🥗",
-    },
-    {
-      id: 3,
-      title: "بهترین تمرینات برای کاهش وزن",
-      excerpt:
-        "ترکیبی از تمرینات کاردیو و قدرتی می‌تواند بهترین نتیجه را برای کاهش وزن به شما بدهد...",
-      author: "محمد رضایی",
-      date: "۱۰ اردیبهشت ۱۴۰۳",
-      readTime: "۶ دقیقه",
-      category: "کاهش وزن",
-      image: "🏃",
-    },
-    {
-      id: 4,
-      title: "اهمیت استراحت در ورزش",
-      excerpt:
-        "بسیاری از ورزشکاران اهمیت استراحت را نادیده می‌گیرند. بدانید چرا استراحت به اندازه تمرین مهم است...",
-      author: "فاطمه کریمی",
-      date: "۸ اردیبهشت ۱۴۰۳",
-      readTime: "۴ دقیقه",
-      category: "سلامت",
-      image: "😴",
-    },
-    {
-      id: 5,
-      title: "مکمل‌های ضروری برای بدنسازان",
-      excerpt:
-        "آیا واقعاً به مکمل نیاز دارید؟ کدام مکمل‌ها واقعاً کارآمد هستند و کدام‌ها فقط تبلیغ...",
-      author: "حسین نوری",
-      date: "۵ اردیبهشت ۱۴۰۳",
-      readTime: "۷ دقیقه",
-      category: "مکمل",
-      image: "💊",
-    },
-    {
-      id: 6,
-      title: "تکنیک‌های پیشرفته اسکات",
-      excerpt:
-        "اسکات پادشاه تمرینات پا است. یاد بگیرید چگونه این حرکت را با فرم صحیح اجرا کنید...",
-      author: "علی محمدی",
-      date: "۳ اردیبهشت ۱۴۰۳",
-      readTime: "۶ دقیقه",
-      category: "تکنیک",
-      image: "🦵",
-    },
-  ];
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [category, setCategory] = useState("همه");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const categories = [
     "همه",
@@ -82,15 +24,82 @@ export default function Articles() {
     "تکنیک",
   ];
 
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Reset page to 1 when category changes
+  useEffect(() => {
+    setPage(1);
+  }, [category]);
+
+  // Fetch articles
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        setLoading(true);
+        const queryParams = new URLSearchParams({
+          status: "published",
+          page: String(page),
+          limit: "9",
+        });
+        if (category && category !== "همه") {
+          queryParams.append("category", category);
+        }
+        if (debouncedSearch) {
+          queryParams.append("search", debouncedSearch);
+        }
+
+        const res = await fetch(`/api/admin/blog?${queryParams.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (page === 1) {
+            setArticles(data.blogs || []);
+          } else {
+            setArticles((prev) => [...prev, ...(data.blogs || [])]);
+          }
+          setTotalPages(data.totalPages || 1);
+          setTotal(data.total || 0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch articles:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchArticles();
+  }, [category, debouncedSearch, page]);
+
+  const formatDate = (dateString?: string | Date) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("fa-IR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const getReadTime = (content: string) => {
+    const words = content ? content.replace(/<[^>]+>/g, "").split(/\s+/).filter(Boolean).length : 0;
+    const minutes = Math.max(1, Math.ceil(words / 200));
+    return new Intl.NumberFormat("fa-IR").format(minutes) + " دقیقه";
+  };
+
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 font-danaMed to-gray-900"
+      className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
       dir="rtl"
     >
-      
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 text-center" style={{ fontFamily: "Marbeh, sans-serif" }}>
             مقالات آموزشی
           </h1>
           <p className="text-xl text-white/70 text-center max-w-2xl mx-auto mb-12">
@@ -102,10 +111,12 @@ export default function Articles() {
             <div className="relative">
               <input
                 type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="جستجو در مقالات..."
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-12 py-4 text-white placeholder:text-white/50 focus:outline-none focus:border-orange-500"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-12 py-4 text-white placeholder:text-white/50 focus:outline-none focus:border-orange-500 transition-colors"
               />
-              <BiSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
             </div>
           </div>
 
@@ -114,9 +125,10 @@ export default function Articles() {
             {categories.map((cat) => (
               <button
                 key={cat}
-                className={`px-6 py-2 rounded-full transition-colors ${
-                  cat === "همه"
-                    ? "bg-orange-500 text-white"
+                onClick={() => setCategory(cat)}
+                className={`px-6 py-2 rounded-full transition-colors cursor-pointer ${
+                  cat === category
+                    ? "bg-orange-500 text-white font-bold"
                     : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
                 }`}
               >
@@ -127,54 +139,86 @@ export default function Articles() {
         </div>
       </section>
 
-    
       <section className="pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {articles.map((article) => (
-              <article
-                key={article.id}
-                className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-all hover:scale-105"
-              >
-                <div className="aspect-video bg-gradient-to-br from-orange-500/20 to-purple-500/20 flex items-center justify-center text-6xl">
-                  {article.image}
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full">
-                      {article.category}
-                    </span>
-                    <span className="text-xs text-white/50 flex items-center gap-1">
-                      <CiLock className="w-3 h-3" />
-                      {article.readTime}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
-                    {article.title}
-                  </h3>
-                  <p className="text-white/70 text-sm mb-4 line-clamp-3">
-                    {article.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                    <div className="flex items-center gap-2 text-sm text-white/60">
-                      <BiUser className="w-4 h-4" />
-                      <span>{article.author}</span>
+          {articles.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {articles.map((article) => {
+                const authorName = article.authorId?.fullName || article.authorId?.username || "نویسنده فیت‌کوچ";
+                return (
+                  <article
+                    key={article._id}
+                    className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-all hover:scale-105 flex flex-col h-full"
+                  >
+                    <div className="relative aspect-video bg-gradient-to-br from-orange-500/20 to-purple-500/20 flex items-center justify-center text-6xl overflow-hidden">
+                      {article.image ? (
+                        <Image
+                          src={article.image}
+                          alt={article.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <BookOpen className="w-16 h-16 text-white/20" />
+                      )}
                     </div>
-                    <span className="text-xs text-white/50">
-                      {article.date}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full">
+                          {article.category}
+                        </span>
+                        <span className="text-xs text-white/50 flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          {getReadTime(article.content)}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-3 line-clamp-2" style={{ fontFamily: "Marbeh, sans-serif" }}>
+                        {article.title}
+                      </h3>
+                      <p className="text-white/70 text-sm mb-6 line-clamp-3 flex-1">
+                        {article.excerpt || article.content?.replace(/<[^>]+>/g, "").slice(0, 150) + "..."}
+                      </p>
+                      <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
+                        <div className="flex items-center gap-2 text-sm text-white/60">
+                          <User className="w-4 h-4" />
+                          <span>{authorName}</span>
+                        </div>
+                        <span className="text-xs text-white/50">
+                          {formatDate(article.publishDate || article.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            !loading && (
+              <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10 max-w-lg mx-auto">
+                <Inbox className="w-16 h-16 text-white/20 mx-auto mb-4" />
+                <h3 className="text-white text-lg font-medium mb-1">هیچ مقاله‌ای یافت نشد</h3>
+                <p className="text-white/40 text-sm">شاید با فیلترهای دیگر جستجو کنید.</p>
+              </div>
+            )
+          )}
 
-          {/* Load More */}
-          <div className="text-center mt-12">
-            <button className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-8 py-3 rounded-lg transition-colors">
-              مشاهده مقالات بیشتر
-            </button>
-          </div>
+          {loading && (
+            <div className="flex justify-center items-center py-10">
+              <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+            </div>
+          )}
+
+          {/* Load More Button */}
+          {!loading && page < totalPages && (
+            <div className="text-center mt-12">
+              <button
+                onClick={() => setPage((prev) => prev + 1)}
+                className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-8 py-3 rounded-lg transition-colors cursor-pointer"
+              >
+                مشاهده مقالات بیشتر
+              </button>
+            </div>
+          )}
         </div>
       </section>
     </div>

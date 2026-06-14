@@ -20,7 +20,13 @@ const banks = [
   { id: "tejarat", name: "بانک تجارت", logo: "🏦" },
 ];
 
-export default function OrderPage({ package: initialPackage, userId, email }) {
+interface OrderPageProps {
+  package?: any;
+  userId?: string;
+  email?: string;
+}
+
+export default function OrderPage({ package: initialPackage, userId, email }: OrderPageProps) {
   const { register, handleSubmit, watch, setValue } = useForm({
     mode: "onBlur",
     defaultValues: {
@@ -67,11 +73,11 @@ export default function OrderPage({ package: initialPackage, userId, email }) {
 
   const getFinalPrice = () => getPrice() - getDiscount();
 
-  const formatNumber = (num) => {
+  const formatNumber = (num: any) => {
     return new Intl.NumberFormat("fa-IR").format(num || 0);
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: any) => {
     if (!data.fullName || !data.email || !data.phone) {
       alert("لطفاً تمام اطلاعات را وارد کنید");
       return;

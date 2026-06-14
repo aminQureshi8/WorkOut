@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export default function WorkoutProgram({ plan, days }) {
+export default function WorkoutProgram({ plan, days }: { plan: any; days: any }) {
   const workoutProgram = [
     {
       day: "شنبه",
@@ -213,7 +213,7 @@ export default function WorkoutProgram({ plan, days }) {
           </h2>
 
           <div className="space-y-6">
-            {days.map((day, index) => (
+            {days.map((day: any, index: number) => (
               <div
                 key={index}
                 className="bg-white/5 backdrop-blur-lg ss02 border border-white/10 rounded-xl overflow-hidden"
@@ -243,7 +243,7 @@ export default function WorkoutProgram({ plan, days }) {
                 {day.exercises.length > 0 ? (
                   <div className="p-6">
                     <div className="space-y-4">
-                      {day.exercises.map((exercise, exIndex) => (
+                      {day.exercises.map((exercise: any, exIndex: number) => (
                         <div
                           key={exIndex}
                           className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"

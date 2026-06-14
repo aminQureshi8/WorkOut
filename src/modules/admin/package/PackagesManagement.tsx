@@ -18,7 +18,7 @@ import {
 import { IPackage } from "../../../../model/Package";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-type PackageItem = IPackage;
+type PackageItem = any;
 
 type PackageFormData = {
   name: string;
@@ -420,7 +420,7 @@ export default function PackagesManagement() {
                   امکانات:
                 </h4>
                 <ul className="space-y-2 mb-4">
-                  {pkg.features?.slice(0, 4).map((feature, index) => (
+                  {pkg.features?.slice(0, 4).map((feature: any, index: number) => (
                     <li
                       key={index}
                       className="flex items-start gap-2 text-white/70 text-sm"

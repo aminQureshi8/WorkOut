@@ -50,6 +50,15 @@ export async function GET(req: NextRequest) {
   try {
     await dbConnect();
     const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (id) {
+      const blog = await Blog.findById(id).populate("authorId", "username fullName email role").lean();
+      if (!blog) {
+        return NextResponse.json({ message: "مقاله مورد نظر پیدا نشد" }, { status: 404 });
+      }
+      return NextResponse.json({ blog });
+    }
+
     const page = searchParams.get("page") || "1";
     const limit = searchParams.get("limit") || "10";
     const status = searchParams.get("status");

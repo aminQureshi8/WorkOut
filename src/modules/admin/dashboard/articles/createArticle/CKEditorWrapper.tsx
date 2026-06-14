@@ -18,7 +18,7 @@ export default function CKEditorWrapper({ value, onChange }: Props) {
       }
       data={value}
       onChange={(_: any, editor: any) =>
-        onChange((editor as InstanceType<typeof ClassicEditor>).getData())
+        onChange(editor.getData())
       }
       config={{
         licenseKey: "GPL",

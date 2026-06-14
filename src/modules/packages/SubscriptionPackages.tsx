@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BiCheck, BiDumbbell } from "react-icons/bi";
 import { BsArrowLeft } from "react-icons/bs";
 
-export default function SubscriptionPackages({ packages }) {
+export default function SubscriptionPackages({ packages }: { packages: any }) {
   console.log(packages);
 
   // const packages = [
@@ -78,7 +78,7 @@ export default function SubscriptionPackages({ packages }) {
       <section className="pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
-            {packages.map((pkg) => (
+            {packages.map((pkg: any) => (
               <div
                 key={pkg.id}
                 className={`relative bg-white/5 backdrop-blur-lg border ${pkg.popular ? "border-orange-500 scale-105" : "border-white/10"} rounded-2xl p-8 hover:bg-white/10 transition-all`}
@@ -115,7 +115,7 @@ export default function SubscriptionPackages({ packages }) {
                 </div>
 
                 <ul className="space-y-4 mb-8">
-                  {pkg.features.map((feature, index) => (
+                  {pkg.features.map((feature: any, index: number) => (
                     <li
                       key={index}
                       className="flex items-start gap-3 text-white/80"
