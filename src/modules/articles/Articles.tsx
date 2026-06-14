@@ -24,7 +24,6 @@ export default function Articles() {
     "تکنیک",
   ];
 
-  // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -34,12 +33,10 @@ export default function Articles() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Reset page to 1 when category changes
   useEffect(() => {
     setPage(1);
   }, [category]);
 
-  // Fetch articles
   useEffect(() => {
     async function fetchArticles() {
       try {
@@ -146,49 +143,48 @@ export default function Articles() {
               {articles.map((article) => {
                 const authorName = article.authorId?.fullName || article.authorId?.username || "نویسنده فیت‌کوچ";
                 return (
-                  <article
-                    key={article._id}
-                    className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-all hover:scale-105 flex flex-col h-full"
-                  >
-                    <div className="relative aspect-video bg-gradient-to-br from-orange-500/20 to-purple-500/20 flex items-center justify-center text-6xl overflow-hidden">
-                      {article.image ? (
-                        <Image
-                          src={article.image}
-                          alt={article.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <BookOpen className="w-16 h-16 text-white/20" />
-                      )}
-                    </div>
-                    <div className="p-6 flex flex-col flex-1">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full">
-                          {article.category}
-                        </span>
-                        <span className="text-xs text-white/50 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          {getReadTime(article.content)}
-                        </span>
+                  <Link href={`/article/${article.slug}`} key={article._id} className="block h-full">
+                    <article className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-all hover:scale-105 flex flex-col h-full cursor-pointer">
+                      <div className="relative aspect-video bg-gradient-to-br from-orange-500/20 to-purple-500/20 flex items-center justify-center text-6xl overflow-hidden">
+                        {article.image ? (
+                          <Image
+                            src={article.image}
+                            alt={article.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <BookOpen className="w-16 h-16 text-white/20" />
+                        )}
                       </div>
-                      <h3 className="text-xl font-bold text-white mb-3 line-clamp-2" style={{ fontFamily: "Marbeh, sans-serif" }}>
-                        {article.title}
-                      </h3>
-                      <p className="text-white/70 text-sm mb-6 line-clamp-3 flex-1">
-                        {article.excerpt || article.content?.replace(/<[^>]+>/g, "").slice(0, 150) + "..."}
-                      </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
-                        <div className="flex items-center gap-2 text-sm text-white/60">
-                          <User className="w-4 h-4" />
-                          <span>{authorName}</span>
+                      <div className="p-6 flex flex-col flex-1">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full">
+                            {article.category}
+                          </span>
+                          <span className="text-xs text-white/50 flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" />
+                            {getReadTime(article.content)}
+                          </span>
                         </div>
-                        <span className="text-xs text-white/50">
-                          {formatDate(article.publishDate || article.createdAt)}
-                        </span>
+                        <h3 className="text-xl font-bold text-white mb-3 line-clamp-2" style={{ fontFamily: "Marbeh, sans-serif" }}>
+                          {article.title}
+                        </h3>
+                        <p className="text-white/70 text-sm mb-6 line-clamp-3 flex-1">
+                          {article.excerpt || article.content?.replace(/<[^>]+>/g, "").slice(0, 150) + "..."}
+                        </p>
+                        <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
+                          <div className="flex items-center gap-2 text-sm text-white/60">
+                            <User className="w-4 h-4" />
+                            <span>{authorName}</span>
+                          </div>
+                          <span className="text-xs text-white/50">
+                            {formatDate(article.publishDate || article.createdAt)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </article>
+                    </article>
+                  </Link>
                 );
               })}
             </div>

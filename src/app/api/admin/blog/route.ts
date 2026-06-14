@@ -59,6 +59,16 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ blog });
     }
 
+    const slug = searchParams.get("slug");
+    if (slug) {
+      const decodedSlug = decodeURIComponent(slug);
+      const blog = await Blog.findOne({ slug: decodedSlug }).populate("authorId", "username fullName email role").lean();
+      if (!blog) {
+        return NextResponse.json({ message: "مقاله مورد نظر پیدا نشد" }, { status: 404 });
+      }
+      return NextResponse.json({ blog });
+    }
+
     const page = searchParams.get("page") || "1";
     const limit = searchParams.get("limit") || "10";
     const status = searchParams.get("status");
