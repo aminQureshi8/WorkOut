@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import Link from "next/link";
-import { ArrowRight, Save, Eye, X, Image as ImageIcon } from "lucide-react";
+import { ArrowRight, Save, Eye, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 const CKEditorWrapper = dynamic(() => import("./CKEditorWrapper"), {
   ssr: false,
@@ -22,9 +24,30 @@ type FormValues = {
 };
 
 export default function CreateArticle() {
+  const router = useRouter();
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [featuredImage, setFeaturedImage] = useState("");
+  const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [author, setAuthor] = useState<{ fullName?: string; username?: string; role?: string } | null>(null);
+
+  useEffect(() => {
+    async function loadAuthor() {
+      try {
+        const res = await fetch("/api/user/profile");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) {
+            setAuthor(data.user);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load author details:", err);
+      }
+    }
+    loadAuthor();
+  }, []);
 
   const categories = ["بدنسازی", "تغذیه", "کاهش وزن", "سلامت", "مکمل", "تکنیک"];
 
@@ -67,6 +90,7 @@ export default function CreateArticle() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setFeaturedImageFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         setFeaturedImage(event.target?.result as string);
@@ -75,12 +99,70 @@ export default function CreateArticle() {
     }
   };
 
-  const onSubmit = (data: FormValues, submitStatus: "draft" | "published") => {
-    const payload = { ...data, status: submitStatus, tags, featuredImage };
-    console.log(payload);
-    alert(
-      `مقاله با موفقیت ${submitStatus === "draft" ? "به عنوان پیش‌نویس ذخیره" : "منتشر"} شد!`,
-    );
+  const onSubmit = async (data: FormValues, submitStatus: "draft" | "published") => {
+    setSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("category", data.category);
+      formData.append("content", data.content);
+      formData.append("excerpt", data.excerpt || "");
+      formData.append("status", submitStatus);
+      if (data.publishDate) {
+        formData.append("publishDate", data.publishDate);
+      }
+      formData.append("seoTitle", data.seoTitle || "");
+      formData.append("seoDescription", data.seoDescription || "");
+      formData.append("tags", JSON.stringify(tags));
+      if (featuredImageFile) {
+        formData.append("image", featuredImageFile);
+      }
+
+      const res = await fetch("/api/admin/blog", {
+        method: "POST",
+        body: formData,
+      });
+
+      const resData = await res.json();
+
+      if (res.ok) {
+        Swal.fire({
+          title: "موفقیت‌آمیز",
+          text: `مقاله با موفقیت ${submitStatus === "draft" ? "به عنوان پیش‌نویس ذخیره" : "منتشر"} شد!`,
+          icon: "success",
+          confirmButtonText: "باشه",
+          background: "#111827",
+          color: "#ffffff",
+          confirmButtonColor: "#7c3aed",
+        }).then(() => {
+          router.push("/admin/articles");
+          router.refresh();
+        });
+      } else {
+        Swal.fire({
+          title: "خطا",
+          text: resData.message || "خطا در ثبت مقاله رخ داده است.",
+          icon: "error",
+          confirmButtonText: "باشه",
+          background: "#111827",
+          color: "#ffffff",
+          confirmButtonColor: "#7c3aed",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "خطا",
+        text: "خطا در ارتباط با سرور رخ داده است.",
+        icon: "error",
+        confirmButtonText: "باشه",
+        background: "#111827",
+        color: "#ffffff",
+        confirmButtonColor: "#7c3aed",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -102,16 +184,26 @@ export default function CreateArticle() {
           <div className="flex gap-3">
             <button
               onClick={handleSubmit((data) => onSubmit(data, "draft"))}
-              className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2"
+              disabled={saving}
+              className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              <Save className="w-5 h-5" />
+              {saving ? (
+                <Loader2 className="w-5 h-5 animate-spin text-white" />
+              ) : (
+                <Save className="w-5 h-5" />
+              )}
               ذخیره پیش‌نویس
             </button>
             <button
               onClick={handleSubmit((data) => onSubmit(data, "published"))}
-              className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:shadow-lg hover:shadow-orange-500/30 transition-all"
+              disabled={saving}
+              className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:shadow-lg hover:shadow-orange-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              <Eye className="w-5 h-5" />
+              {saving ? (
+                <Loader2 className="w-5 h-5 animate-spin text-white" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
               انتشار مقاله
             </button>
           </div>
@@ -146,7 +238,10 @@ export default function CreateArticle() {
                     className="w-full h-64 object-cover rounded-lg"
                   />
                   <button
-                    onClick={() => setFeaturedImage("")}
+                    onClick={() => {
+                      setFeaturedImage("");
+                      setFeaturedImageFile(null);
+                    }}
                     className="absolute top-2 left-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"
                   >
                     <X className="w-5 h-5" />
@@ -379,12 +474,16 @@ export default function CreateArticle() {
                 اطلاعات نویسنده
               </h3>
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white text-xl">
-                  ع
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white text-xl font-bold">
+                  {author ? (author.fullName ? author.fullName.charAt(0) : author.username?.charAt(0) || "U") : "..."}
                 </div>
                 <div>
-                  <div className="text-white">علی احمدی</div>
-                  <div className="text-white/60 text-sm">مدیر سایت</div>
+                  <div className="text-white">
+                    {author ? author.fullName || author.username : "در حال بارگذاری..."}
+                  </div>
+                  <div className="text-white/60 text-sm">
+                    {author ? (author.role === "admin" ? "مدیر سایت" : author.role === "coach" ? "مربی مجرب" : "کاربر") : "..."}
+                  </div>
                 </div>
               </div>
             </div>
