@@ -16,6 +16,7 @@ import {
   Menu,
   LogOut,
   HelpCircle,
+  MessageSquare,
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import Link from "next/link";
@@ -28,7 +29,8 @@ export default function AdminSidebar({ isAdmin = false }) {
   const [counts, setCounts] = useState({
     users: 0,
     subscriptions: 0,
-    articles: 0
+    articles: 0,
+    comments: 0
   });
 
   useEffect(() => {
@@ -40,7 +42,8 @@ export default function AdminSidebar({ isAdmin = false }) {
           setCounts({
             users: data.usersCount || 0,
             subscriptions: data.subscriptionsCount || 0,
-            articles: data.articlesCount || 0
+            articles: data.articlesCount || 0,
+            comments: data.pendingCommentsCount || 0
           });
         }
       } catch (err) {
@@ -99,6 +102,13 @@ export default function AdminSidebar({ isAdmin = false }) {
           icon: BookOpen,
           badge: counts.articles > 0 ? formatNumber(counts.articles) : null,
           href: "/admin/articles",
+        },
+        {
+          id: "comments",
+          label: "کامنت‌ها",
+          icon: MessageSquare,
+          badge: counts.comments > 0 ? formatNumber(counts.comments) : null,
+          href: "/admin/comments",
         },
         {
           id: "workouts",

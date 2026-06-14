@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
     const body = await req.json();
-    const { blogId, name, text } = body;
+    const { blogId, name, text, userId } = body;
 
     if (!blogId || !name || !text) {
       return NextResponse.json(
@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       name,
       text,
       likes: 0,
+      userId: userId || null,
     });
 
     return NextResponse.json({ success: true, comment }, { status: 201 });

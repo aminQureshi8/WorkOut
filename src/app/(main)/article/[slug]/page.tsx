@@ -2,8 +2,10 @@ import dbConnect from "@/lib/dbConnect";
 import Blog from "@/model/Blog";
 import ArticleDetail from "@/modules/article/ArticleDetail";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-import Comment from "@/model/Comment";
+import "@/model/Comment";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -13,6 +15,8 @@ export default async function page({ params }: PageProps) {
   const { slug } = await params;
 
   await dbConnect();
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id || null;
 
   const decodedSlug = decodeURIComponent(slug);
 
@@ -23,7 +27,7 @@ export default async function page({ params }: PageProps) {
       path: "comments",
       match: { isApproved: true },
       options: { sort: { createdAt: -1 } },
-      strictPopulate: false
+      strictPopulate: false,
     });
 
   if (!blog) {
@@ -47,6 +51,8 @@ export default async function page({ params }: PageProps) {
     <ArticleDetail
       article={serializedArticle}
       relatedArticles={serializedRelated}
+      userId={userId}
+      currentUser={session?.user || null}
     />
   );
 }

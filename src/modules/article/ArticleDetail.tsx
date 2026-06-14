@@ -21,11 +21,22 @@ import Swal from "sweetalert2";
 interface ArticleDetailProps {
   article: any;
   relatedArticles?: any[];
+  userId?: string | null;
+  currentUser?: {
+    id: string;
+    username: string;
+    fullName?: string;
+    email: string;
+    avatar?: string;
+    role: string;
+  } | null;
 }
 
 export default function ArticleDetail({
   article,
   relatedArticles = [],
+  userId = null,
+  currentUser = null,
 }: ArticleDetailProps) {
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
@@ -43,13 +54,18 @@ export default function ArticleDetail({
   const handleSendComment = async () => {
     if (!newComment.trim()) return;
     try {
+      const commenterName = currentUser
+        ? (currentUser.fullName || currentUser.username || "کاربر فیت‌کوچ")
+        : "کاربر فیت‌کوچ";
+
       const res = await fetch("/api/blog/comment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           blogId: article._id,
-          name: "کاربر فیت‌کوچ",
+          name: commenterName,
           text: newComment.trim(),
+          userId: userId,
         }),
       });
 
