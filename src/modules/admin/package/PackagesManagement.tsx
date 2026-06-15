@@ -1,12 +1,11 @@
 "use client";
-import { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Search,
   Plus,
   Edit,
   Trash2,
   Eye,
-  MoreVertical,
   Users,
   DollarSign,
   TrendingUp,
@@ -14,11 +13,33 @@ import {
   Crown,
   Award,
 } from "lucide-react";
-
-import { IPackage } from "../../../../model/Package";
+import Swal from "sweetalert2";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-type PackageItem = any;
+const cleanNumberString = (str: string) => {
+  if (!str) return "";
+  const persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+  const arabicDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+  let cleaned = str;
+  for (let i = 0; i < 10; i++) {
+    cleaned = cleaned.replace(new RegExp(persianDigits[i], "g"), i.toString());
+    cleaned = cleaned.replace(new RegExp(arabicDigits[i], "g"), i.toString());
+  }
+  return cleaned.replace(/[^0-9]/g, "");
+};
+
+const formatToPersianWithCommas = (value: string | number) => {
+  if (value === undefined || value === null || value === "") return "";
+  const cleaned = cleanNumberString(value.toString());
+  if (!cleaned) return "";
+  return new Intl.NumberFormat("fa-IR").format(parseInt(cleaned, 10));
+};
+
+const parsePersianPrice = (val: string) => {
+  if (!val) return 0;
+  const cleaned = cleanNumberString(val);
+  return cleaned ? parseInt(cleaned, 10) : 0;
+};
 
 type PackageFormData = {
   name: string;
@@ -31,113 +52,236 @@ type PackageFormData = {
   isPopular: boolean;
   isActive: boolean;
   price: {
-    monthly: number;
-    quarterly: number;
-    biannual: number;
+    monthly: string;
+    quarterly: string;
+    biannual: string;
   };
   originalPrice: {
-    monthly: number;
-    quarterly: number;
-    biannual: number;
+    monthly: string;
+    quarterly: string;
+    biannual: string;
   };
+  featuresText: string;
 };
 
-const mockPackages: PackageItem[] = [
-  {
-    _id: "1",
-    name: "بسته پایه",
-    slug: "basic-package",
-    tagline: "پایه",
-    description: "مناسب برای مبتدیان و افرادی که تازه شروع کرده‌اند",
-    price: { monthly: 200000, quarterly: 540000, biannual: 960000 },
-    originalPrice: { monthly: 200000, quarterly: 540000, biannual: 960000 },
-    icon: "",
-    colorClass: "bg-blue-500",
-    rating: 0,
-    reviewCount: 0,
-    studentCount: 542,
-    isPopular: false,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    _id: "2",
-    name: "بسته حرفه‌ای",
-    slug: "professional-package",
-    tagline: "حرفه‌ای",
-    description: "برای ورزشکارانی که به دنبال پیشرفت جدی هستند",
-    price: { monthly: 350000, quarterly: 900000, biannual: 1500000 },
-    originalPrice: { monthly: 350000, quarterly: 900000, biannual: 1500000 },
-    icon: "",
-    colorClass: "bg-purple-500",
-    rating: 0,
-    reviewCount: 0,
-    studentCount: 823,
-    isPopular: true,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    tier: "professional",
-  },
-  {
-    _id: "3",
-    name: "بسته VIP",
-    slug: "vip-package",
-    tagline: "وی‌آی‌پی",
-    description: "بهترین انتخاب برای حرفه‌ای‌ها و افراد جدی",
-    price: { monthly: 500000, quarterly: 1350000, biannual: 2400000 },
-    originalPrice: { monthly: 500000, quarterly: 1350000, biannual: 2400000 },
-    icon: "",
-    colorClass: "bg-orange-500",
-    rating: 0,
-    reviewCount: 0,
-    studentCount: 178,
-    isPopular: true,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    tier: "vip",
-  },
-];
-
 export default function PackagesManagement() {
+  const [packages, setPackages] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<any | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<PackageFormData>();
 
-  const createPackage = async (data: PackageFormData) => {
-    const response = await fetch("/api/admin/package", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+  const showAlert = (
+    title: string,
+    text: string,
+    icon: "success" | "error" | "warning" | "info" = "info",
+  ) => {
+    Swal.fire({
+      title,
+      text,
+      icon,
+      confirmButtonText: "باشه",
+      background: "#111827",
+      color: "#ffffff",
+      confirmButtonColor: "#f97316",
+      customClass: {
+        popup: "border border-orange-500/20 rounded-2xl",
+      },
     });
-    const result = await response.json();
-
-    console.log(result);
-
-    if (!response.ok)
-      throw new Error(result.error || "Failed to create package");
-    return result.package as IPackage;
   };
 
-  const onSubmit: SubmitHandler<PackageFormData> = async (data) => {
+  const fetchPackages = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      await createPackage(data);
-      setShowCreateModal(false);
-      reset();
-      alert("پکیج جدید با موفقیت ایجاد شد!");
-    } catch (e) {
-      console.error(e);
-      alert("خطا در ایجاد پکیج");
+      const res = await fetch("/api/admin/package");
+      if (!res.ok) throw new Error("خطا در دریافت لیست پکیج‌ها");
+      const data = await res.json();
+      setPackages(data.packages || []);
+    } catch (err: any) {
+      setError(err.message || "بارگذاری اطلاعات با خطا مواجه شد.");
+    } finally {
+      setIsLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    fetchPackages();
+  }, [fetchPackages]);
+
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setEditingPackage(null);
+    reset({
+      name: "",
+      slug: "",
+      tagline: "",
+      description: "",
+      icon: "",
+      colorClass: "",
+      tier: "",
+      isPopular: false,
+      isActive: true,
+      price: { monthly: "", quarterly: "", biannual: "" },
+      originalPrice: { monthly: "", quarterly: "", biannual: "" },
+      featuresText: "",
+    });
+  };
+
+  const handleEditClick = (pkg: any) => {
+    setEditingPackage(pkg);
+    setShowCreateModal(true);
+    const featuresText = pkg.features
+      ? pkg.features.map((f: any) => (typeof f === "string" ? f : f.name)).join("\n")
+      : "";
+    reset({
+      name: pkg.name,
+      slug: pkg.slug,
+      tagline: pkg.tagline,
+      description: pkg.description,
+      icon: pkg.icon,
+      colorClass: pkg.colorClass,
+      tier: pkg.tier || "",
+      isPopular: pkg.isPopular,
+      isActive: pkg.isActive,
+      price: {
+        monthly: formatToPersianWithCommas(pkg.price?.monthly || ""),
+        quarterly: formatToPersianWithCommas(pkg.price?.quarterly || ""),
+        biannual: formatToPersianWithCommas(pkg.price?.biannual || ""),
+      },
+      originalPrice: {
+        monthly: formatToPersianWithCommas(pkg.originalPrice?.monthly || ""),
+        quarterly: formatToPersianWithCommas(pkg.originalPrice?.quarterly || ""),
+        biannual: formatToPersianWithCommas(pkg.originalPrice?.biannual || ""),
+      },
+      featuresText,
+    });
+  };
+
+  const onSubmit: SubmitHandler<PackageFormData> = async (formData) => {
+    try {
+      const features = formData.featuresText
+        ? formData.featuresText.split("\n").filter((f) => f.trim() !== "")
+        : [];
+
+      const payload = {
+        ...formData,
+        features,
+        price: {
+          monthly: parsePersianPrice(formData.price.monthly),
+          quarterly: parsePersianPrice(formData.price.quarterly),
+          biannual: parsePersianPrice(formData.price.biannual),
+        },
+        originalPrice: {
+          monthly: parsePersianPrice(formData.originalPrice.monthly),
+          quarterly: parsePersianPrice(formData.originalPrice.quarterly),
+          biannual: parsePersianPrice(formData.originalPrice.biannual),
+        },
+      };
+
+      if (editingPackage) {
+        // update package
+        const res = await fetch(`/api/admin/package/${editingPackage._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "خطا در ویرایش پکیج");
+        }
+        showAlert("موفقیت", "پکیج با موفقیت ویرایش شد", "success");
+      } else {
+        // create package
+        const res = await fetch("/api/admin/package", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "خطا در ایجاد پکیج");
+        }
+        showAlert("موفقیت", "پکیج با موفقیت ایجاد شد", "success");
+      }
+      handleCloseModal();
+      fetchPackages();
+    } catch (err: any) {
+      showAlert("خطا", err.message || "عملیات ناموفق بود", "error");
+    }
+  };
+
+  const handleDeletePackage = async (id: string) => {
+    Swal.fire({
+      title: "آیا مطمئن هستید؟",
+      text: "این پکیج و ویژگی‌های آن به طور کامل حذف خواهند شد!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "بله، حذف شود",
+      cancelButtonText: "انصراف",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      background: "#111827",
+      color: "#ffffff",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`/api/admin/package/${id}`, {
+            method: "DELETE",
+          });
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || "خطا در حذف پکیج");
+          }
+          showAlert("موفقیت", "پکیج با موفقیت حذف شد", "success");
+          setSelectedPackages((prev) => prev.filter((pid) => pid !== id));
+          fetchPackages();
+        } catch (err: any) {
+          showAlert("خطا", err.message || "حذف پکیج ناموفق بود", "error");
+        }
+      }
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedPackages.length === 0) return;
+    Swal.fire({
+      title: "آیا مطمئن هستید؟",
+      text: `تعداد ${formatNumber(selectedPackages.length)} پکیج انتخاب شده به همراه ویژگی‌هایشان حذف خواهند شد!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "بله، حذف شوند",
+      cancelButtonText: "انصراف",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      background: "#111827",
+      color: "#ffffff",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const deletePromises = selectedPackages.map((id) =>
+            fetch(`/api/admin/package/${id}`, { method: "DELETE" })
+          );
+          await Promise.all(deletePromises);
+          showAlert("موفقیت", "پکیج‌های انتخاب شده با موفقیت حذف شدند", "success");
+          setSelectedPackages([]);
+          fetchPackages();
+        } catch (err: any) {
+          showAlert("خطا", "برخی از پکیج‌ها با خطا مواجه شدند", "error");
+        }
+      }
+    });
   };
 
   const handleSelectPackage = (id: string) => {
@@ -194,18 +338,20 @@ export default function PackagesManagement() {
   const formatNumber = (num: number) =>
     new Intl.NumberFormat("fa-IR").format(num);
 
-  const totalUsers = mockPackages.reduce(
-    (sum, pkg) => sum + pkg.studentCount,
+  const totalUsers = packages.reduce(
+    (sum, pkg) => sum + (pkg.studentCount || 0),
     0,
   );
-  const totalRevenue = mockPackages.reduce(
-    (sum, pkg) => sum + pkg.price.monthly * pkg.studentCount,
+  const totalRevenue = packages.reduce(
+    (sum, pkg) => sum + ((pkg.price?.monthly || 0) * (pkg.studentCount || 0)),
     0,
   );
-  const activePackages = mockPackages.filter((p) => p.isActive).length;
-  const filteredPackages = mockPackages.filter((pkg) =>
+  const activePackages = packages.filter((p) => p.isActive).length;
+  const filteredPackages = packages.filter((pkg) =>
     pkg.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  const mostPopularPackage = packages.find((p) => p.isPopular) || packages[0];
 
   return (
     <div
@@ -226,7 +372,7 @@ export default function PackagesManagement() {
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:shadow-lg hover:shadow-orange-500/30 transition-all"
+            className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:shadow-lg hover:shadow-orange-500/30 transition-all cursor-pointer font-semibold text-sm"
           >
             <Plus className="w-5 h-5" />
             ایجاد پکیج جدید
@@ -244,7 +390,7 @@ export default function PackagesManagement() {
               className="text-3xl text-white mb-1"
               style={{ fontFamily: "Marbeh, sans-serif" }}
             >
-              {formatNumber(mockPackages.length)}
+              {formatNumber(packages.length)}
             </div>
             <div className="text-green-400 text-sm">
               {formatNumber(activePackages)} پکیج فعال
@@ -267,7 +413,7 @@ export default function PackagesManagement() {
 
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-white/60 text-sm">درآمد کل</div>
+              <div className="text-white/60 text-sm">درآمد کل تخمینی</div>
               <DollarSign className="w-5 h-5 text-orange-400" />
             </div>
             <div
@@ -278,23 +424,23 @@ export default function PackagesManagement() {
             </div>
             <div className="text-orange-400 text-sm flex items-center gap-1">
               <TrendingUp className="w-4 h-4" />
-              +۱۸٪ این ماه
+              ماهانه
             </div>
           </div>
 
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-white/60 text-sm">محبوب‌ترین</div>
+              <div className="text-white/60 text-sm">محبوب‌ترین بسته</div>
               <Award className="w-5 h-5 text-green-400" />
             </div>
             <div
-              className="text-xl text-white mb-1"
+              className="text-xl text-white mb-1 truncate"
               style={{ fontFamily: "Marbeh, sans-serif" }}
             >
-              بسته حرفه‌ای
+              {mostPopularPackage ? mostPopularPackage.name : "—"}
             </div>
             <div className="text-green-400 text-sm">
-              {formatNumber(823)} کاربر فعال
+              {mostPopularPackage ? formatNumber(mostPopularPackage.studentCount || 0) : 0} کاربر فعال
             </div>
           </div>
         </div>
@@ -308,7 +454,7 @@ export default function PackagesManagement() {
               placeholder="جستجوی پکیج..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg pr-10 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+              className="w-full bg-white/5 border border-white/10 rounded-lg pr-10 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
             />
           </div>
         </div>
@@ -316,143 +462,165 @@ export default function PackagesManagement() {
         {/* Bulk Actions Bar */}
         {selectedPackages.length > 0 && (
           <div className="bg-orange-500/20 backdrop-blur-lg border border-orange-500/30 rounded-xl p-4 mb-6 flex items-center justify-between">
-            <div className="text-white">
+            <div className="text-white text-sm">
               <span className="font-bold">
                 {formatNumber(selectedPackages.length)}
               </span>{" "}
               پکیج انتخاب شده
             </div>
             <div className="flex gap-2">
-              <button className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+              <button
+                onClick={handleBulkDelete}
+                className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-xs cursor-pointer"
+              >
                 <Trash2 className="w-4 h-4" />
-                حذف
-              </button>
-              <button className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-2 rounded-lg transition-colors">
-                غیرفعال کردن
+                حذف دسته‌جمعی
               </button>
             </div>
           </div>
         )}
 
         {/* Packages Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {filteredPackages.map((pkg) => (
-            <div
-              key={pkg._id}
-              className={`bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden transition-all hover:shadow-lg hover:shadow-white/5 ${
-                selectedPackages.includes(pkg._id)
-                  ? "ring-2 ring-orange-500"
-                  : ""
-              }`}
-            >
-              <div className="p-6 border-b border-white/10">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedPackages.includes(pkg._id)}
-                      onChange={() => handleSelectPackage(pkg._id)}
-                      className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-orange-500 cursor-pointer"
-                    />
-                    <div className="w-14 h-14 bg-gradient-to-br from-white/10 to-white/5 rounded-xl flex items-center justify-center">
-                      {getPackageIcon(pkg.tier)}
+        {isLoading ? (
+          <div className="p-12 text-center text-white/50 bg-white/5 border border-white/10 rounded-2xl">
+            در حال بارگذاری اطلاعات پکیج‌ها...
+          </div>
+        ) : error ? (
+          <div className="p-12 text-center text-red-400 bg-white/5 border border-white/10 rounded-2xl">
+            {error}
+          </div>
+        ) : filteredPackages.length === 0 ? (
+          <div className="p-12 text-center text-white/40 bg-white/5 border border-white/10 rounded-2xl">
+            هیچ پکیجی یافت نشد. پکیج جدیدی ایجاد کنید.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {filteredPackages.map((pkg) => (
+              <div
+                key={pkg._id}
+                className={`bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden transition-all hover:shadow-lg hover:shadow-white/5 ${
+                  selectedPackages.includes(pkg._id)
+                    ? "ring-2 ring-orange-500"
+                    : ""
+                }`}
+              >
+                <div className="p-6 border-b border-white/10">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedPackages.includes(pkg._id)}
+                        onChange={() => handleSelectPackage(pkg._id)}
+                        className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-orange-500 cursor-pointer"
+                      />
+                      <div className="w-14 h-14 bg-gradient-to-br from-white/10 to-white/5 rounded-xl flex items-center justify-center">
+                        {getPackageIcon(pkg.tier)}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      {getPackageBadge(pkg.tier)}
+                      {getStatusBadge(pkg.isActive)}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    {getPackageBadge(pkg.tier)}
-                    {getStatusBadge(pkg.isActive)}
+
+                  <h3
+                    className="text-2xl text-white mb-2"
+                    style={{ fontFamily: "Marbeh, sans-serif" }}
+                  >
+                    {pkg.name}
+                  </h3>
+                  <p className="text-white/60 text-sm mb-4 min-h-[40px] line-clamp-2">
+                    {pkg.description}
+                  </p>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-white/60">یک ماهه:</span>
+                      <span className="text-white font-medium">
+                        {formatNumber(pkg.price?.monthly || 0)} تومان
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-white/60">سه ماهه:</span>
+                      <span className="text-white font-medium">
+                        {formatNumber(pkg.price?.quarterly || 0)} تومان
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-white/60">شش ماهه:</span>
+                      <span className="text-white font-medium">
+                        {formatNumber(pkg.price?.biannual || 0)} تومان
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white/5 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
+                        <Users className="w-4 h-4" />
+                        کاربران فعال
+                      </div>
+                      <div className="text-white font-medium">
+                        {formatNumber(pkg.studentCount || 0)}
+                      </div>
+                    </div>
+                    <div className="bg-white/5 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
+                        <DollarSign className="w-4 h-4" />
+                        درآمد ماهانه
+                      </div>
+                      <div className="text-white font-medium text-sm">
+                        {formatNumber((pkg.price?.monthly || 0) * (pkg.studentCount || 0))} تومان
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <h3
-                  className="text-2xl text-white mb-2"
-                  style={{ fontFamily: "Marbeh, sans-serif" }}
-                >
-                  {pkg.name}
-                </h3>
-                <p className="text-white/60 text-sm mb-4">{pkg.description}</p>
+                <div className="p-6">
+                  <h4 className="text-white text-sm font-medium mb-3">
+                    امکانات:
+                  </h4>
+                  <ul className="space-y-2 mb-6 min-h-[120px]">
+                    {pkg.features?.slice(0, 4).map((feature: any, index: number) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-2 text-white/70 text-sm"
+                      >
+                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
+                        <span>{typeof feature === "string" ? feature : feature.name}</span>
+                      </li>
+                    ))}
+                    {(!pkg.features || pkg.features.length === 0) && (
+                      <li className="text-white/40 text-xs">بدون ویژگی ثبت شده</li>
+                    )}
+                    {pkg.features && pkg.features.length > 4 && (
+                      <li className="text-orange-400 text-sm">
+                        +{pkg.features.length - 4} مورد دیگر
+                      </li>
+                    )}
+                  </ul>
 
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-white/60">یک ماهه:</span>
-                    <span className="text-white font-medium">
-                      {formatNumber(pkg.price.monthly)} تومان
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-white/60">سه ماهه:</span>
-                    <span className="text-white font-medium">
-                      {formatNumber(pkg.price.quarterly)} تومان
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-white/60">شش ماهه:</span>
-                    <span className="text-white font-medium">
-                      {formatNumber(pkg.price.biannual)} تومان
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white/5 rounded-lg p-3">
-                    <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
-                      <Users className="w-4 h-4" />
-                      کاربران فعال
-                    </div>
-                    <div className="text-white font-medium">
-                      {formatNumber(pkg.studentCount)}
-                    </div>
-                  </div>
-                  <div className="bg-white/5 rounded-lg p-3">
-                    <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
-                      <DollarSign className="w-4 h-4" />
-                      درآمد کل
-                    </div>
-                    <div className="text-white font-medium text-sm">
-                      {formatNumber(pkg.price.monthly * pkg.studentCount)} تومان
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6">
-                <h4 className="text-white text-sm font-medium mb-3">
-                  امکانات:
-                </h4>
-                <ul className="space-y-2 mb-4">
-                  {pkg.features?.slice(0, 4).map((feature: any, index: number) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-2 text-white/70 text-sm"
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditClick(pkg)}
+                      className="flex-1 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-400 px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm cursor-pointer"
                     >
-                      <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                  {pkg.features && pkg.features.length > 4 && (
-                    <li className="text-orange-400 text-sm">
-                      +{pkg.features.length - 4} مورد دیگر
-                    </li>
-                  )}
-                </ul>
-
-                <div className="flex gap-2">
-                  <button className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm">
-                    <Eye className="w-4 h-4" />
-                    مشاهده
-                  </button>
-                  <button className="flex-1 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-400 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm">
-                    <Edit className="w-4 h-4" />
-                    ویرایش
-                  </button>
-                  <button className="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-3 py-2 rounded-lg transition-colors">
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
+                      <Edit className="w-4 h-4" />
+                      ویرایش
+                    </button>
+                    <button
+                      onClick={() => handleDeletePackage(pkg._id)}
+                      className="bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 text-red-400 px-3.5 py-2.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
+                      title="حذف پکیج"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Create Package Modal */}
         {showCreateModal && (
@@ -460,17 +628,14 @@ export default function PackagesManagement() {
             <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-gray-900/80 backdrop-blur-lg">
                 <h2
-                  className="text-2xl text-white"
+                  className="text-2xl text-white font-bold"
                   style={{ fontFamily: "Marbeh, sans-serif" }}
                 >
-                  ایجاد پکیج جدید
+                  {editingPackage ? "ویرایش پکیج" : "ایجاد پکیج جدید"}
                 </h2>
                 <button
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    reset();
-                  }}
-                  className="text-white/60 hover:text-white transition-colors"
+                  onClick={handleCloseModal}
+                  className="text-white/60 hover:text-white transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
@@ -479,11 +644,11 @@ export default function PackagesManagement() {
               <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
                 {/* Name */}
                 <div>
-                  <label className="block text-white mb-2">نام پکیج</label>
+                  <label className="block text-white mb-2 text-xs">نام پکیج</label>
                   <input
                     type="text"
                     placeholder="مثال: بسته طلایی"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                     {...register("name", {
                       required: "نام پکیج ضروری است",
                       minLength: 2,
@@ -498,11 +663,11 @@ export default function PackagesManagement() {
 
                 {/* Slug */}
                 <div>
-                  <label className="block text-white mb-2">اسلاگ (URL)</label>
+                  <label className="block text-white mb-2 text-xs">اسلاگ (URL)</label>
                   <input
                     type="text"
                     placeholder="مثال: gold-package"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                     {...register("slug", {
                       required: "اسلاگ ضروری است",
                       pattern: {
@@ -520,11 +685,11 @@ export default function PackagesManagement() {
 
                 {/* Tagline */}
                 <div>
-                  <label className="block text-white mb-2">تاگلاین</label>
+                  <label className="block text-white mb-2 text-xs">تاگلاین (معرفی کوتاه)</label>
                   <input
                     type="text"
-                    placeholder="توضیح کوتاه"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                    placeholder="توضیح کوتاه و جذاب"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                     {...register("tagline", {
                       required: "تاگلاین ضروری است",
                       minLength: 2,
@@ -539,11 +704,11 @@ export default function PackagesManagement() {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-white mb-2">توضیحات</label>
+                  <label className="block text-white mb-2 text-xs">توضیحات</label>
                   <textarea
                     rows={3}
-                    placeholder="توضیحات کوتاه درباره پکیج..."
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 resize-none"
+                    placeholder="توضیحات کامل درباره خدمات این پکیج..."
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 resize-none text-sm"
                     {...register("description", {
                       required: "توضیحات ضروری است",
                       minLength: 2,
@@ -559,17 +724,19 @@ export default function PackagesManagement() {
                 {/* Prices */}
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-white mb-2 text-sm">
+                    <label className="block text-white mb-2 text-xs">
                       قیمت یک ماهه
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       placeholder="۰"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                       {...register("price.monthly", {
                         required: "ضروری است",
-                        min: 0,
-                        valueAsNumber: true,
+                        onChange: (e) => {
+                          const formatted = formatToPersianWithCommas(e.target.value);
+                          setValue("price.monthly", formatted);
+                        }
                       })}
                     />
                     {errors.price?.monthly && (
@@ -579,17 +746,19 @@ export default function PackagesManagement() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-white mb-2 text-sm">
+                    <label className="block text-white mb-2 text-xs">
                       قیمت سه ماهه
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       placeholder="۰"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                       {...register("price.quarterly", {
                         required: "ضروری است",
-                        min: 0,
-                        valueAsNumber: true,
+                        onChange: (e) => {
+                          const formatted = formatToPersianWithCommas(e.target.value);
+                          setValue("price.quarterly", formatted);
+                        }
                       })}
                     />
                     {errors.price?.quarterly && (
@@ -599,17 +768,19 @@ export default function PackagesManagement() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-white mb-2 text-sm">
+                    <label className="block text-white mb-2 text-xs">
                       قیمت شش ماهه
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       placeholder="۰"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                       {...register("price.biannual", {
                         required: "ضروری است",
-                        min: 0,
-                        valueAsNumber: true,
+                        onChange: (e) => {
+                          const formatted = formatToPersianWithCommas(e.target.value);
+                          setValue("price.biannual", formatted);
+                        }
                       })}
                     />
                     {errors.price?.biannual && (
@@ -623,17 +794,19 @@ export default function PackagesManagement() {
                 {/* Original Prices */}
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-white mb-2 text-sm">
+                    <label className="block text-white mb-2 text-xs">
                       قیمت اصلی یک ماهه
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       placeholder="۰"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                       {...register("originalPrice.monthly", {
                         required: "ضروری است",
-                        min: 0,
-                        valueAsNumber: true,
+                        onChange: (e) => {
+                          const formatted = formatToPersianWithCommas(e.target.value);
+                          setValue("originalPrice.monthly", formatted);
+                        }
                       })}
                     />
                     {errors.originalPrice?.monthly && (
@@ -643,17 +816,19 @@ export default function PackagesManagement() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-white mb-2 text-sm">
+                    <label className="block text-white mb-2 text-xs">
                       قیمت اصلی سه ماهه
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       placeholder="۰"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                       {...register("originalPrice.quarterly", {
                         required: "ضروری است",
-                        min: 0,
-                        valueAsNumber: true,
+                        onChange: (e) => {
+                          const formatted = formatToPersianWithCommas(e.target.value);
+                          setValue("originalPrice.quarterly", formatted);
+                        }
                       })}
                     />
                     {errors.originalPrice?.quarterly && (
@@ -663,17 +838,19 @@ export default function PackagesManagement() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-white mb-2 text-sm">
+                    <label className="block text-white mb-2 text-xs">
                       قیمت اصلی شش ماهه
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       placeholder="۰"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                       {...register("originalPrice.biannual", {
                         required: "ضروری است",
-                        min: 0,
-                        valueAsNumber: true,
+                        onChange: (e) => {
+                          const formatted = formatToPersianWithCommas(e.target.value);
+                          setValue("originalPrice.biannual", formatted);
+                        }
                       })}
                     />
                     {errors.originalPrice?.biannual && (
@@ -687,22 +864,22 @@ export default function PackagesManagement() {
                 {/* Icon & Color */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white mb-2">
-                      آیکون (URL یا کلاس)
+                    <label className="block text-white mb-2 text-xs">
+                      آیکون (نام آیکون)
                     </label>
                     <input
                       type="text"
-                      placeholder="آیکن یا کلاس"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                      placeholder="مثال: award, crown, package"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                       {...register("icon")}
                     />
                   </div>
                   <div>
-                    <label className="block text-white mb-2">کلاس رنگ</label>
+                    <label className="block text-white mb-2 text-xs">کلاس رنگ</label>
                     <input
                       type="text"
                       placeholder="مثال: bg-blue-500"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 text-sm"
                       {...register("colorClass")}
                     />
                   </div>
@@ -710,67 +887,67 @@ export default function PackagesManagement() {
 
                 {/* Tier */}
                 <div>
-                  <label className="block text-white mb-2">دسته‌بندی</label>
+                  <label className="block text-white mb-2 text-xs">دسته‌بندی پکیج</label>
                   <select
-                    className="w-full bg-gray-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500/50"
+                    className="w-full bg-gray-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500/50 text-sm cursor-pointer"
                     {...register("tier")}
                   >
                     <option value="">انتخاب کنید</option>
-                    <option value="basic">پایه</option>
-                    <option value="professional">حرفه‌ای</option>
+                    <option value="basic">پایه (Basic)</option>
+                    <option value="professional">حرفه‌ای (Professional)</option>
                     <option value="vip">VIP</option>
                   </select>
                 </div>
 
                 {/* Toggles */}
-                <div className="flex items-center gap-6">
-                  <label className="flex items-center gap-2 text-white cursor-pointer">
+                <div className="flex items-center gap-6 py-2">
+                  <label className="flex items-center gap-2 text-white cursor-pointer text-sm">
                     <input
                       type="checkbox"
-                      className="w-4 h-4"
+                      className="w-4 h-4 cursor-pointer accent-orange-500"
                       {...register("isPopular")}
                     />
-                    بسته محبوب
+                    بسته محبوب (Popular)
                   </label>
-                  <label className="flex items-center gap-2 text-white cursor-pointer">
+                  <label className="flex items-center gap-2 text-white cursor-pointer text-sm">
                     <input
                       type="checkbox"
-                      className="w-4 h-4"
+                      className="w-4 h-4 cursor-pointer accent-orange-500"
                       {...register("isActive")}
                     />
-                    فعال باشد
+                    پکیج فعال باشد
                   </label>
                 </div>
 
                 {/* Features */}
                 <div>
-                  <label className="block text-white mb-2">
-                    امکانات (هر خط یک مورد)
+                  <label className="block text-white mb-2 text-xs">
+                    امکانات پکیج (هر ویژگی در یک خط)
                   </label>
                   <textarea
-                    rows={6}
+                    rows={5}
                     placeholder={
-                      "دسترسی به برنامه تمرینی\nرژیم غذایی شخصی‌سازی شده\nپشتیبانی ۲۴/۷"
+                      "برنامه تمرینی شخصی‌سازی شده\nبرنامه غذایی اختصاصی\nپشتیبانی روزانه آنلاین"
                     }
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 resize-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 resize-none text-sm"
+                    {...register("featuresText")}
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-3 pt-4 border-t border-white/10">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:shadow-lg hover:shadow-orange-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:shadow-lg hover:shadow-orange-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-bold text-sm"
                   >
-                    {isSubmitting ? "در حال ایجاد..." : "ایجاد پکیج"}
+                    {isSubmitting
+                      ? (editingPackage ? "در حال ثبت تغییرات..." : "در حال ایجاد...")
+                      : (editingPackage ? "ثبت تغییرات" : "ایجاد پکیج")}
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowCreateModal(false);
-                      reset();
-                    }}
-                    className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg transition-colors"
+                    onClick={handleCloseModal}
+                    className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg transition-colors cursor-pointer text-sm"
                   >
                     انصراف
                   </button>
