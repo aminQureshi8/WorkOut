@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle,
@@ -27,6 +28,7 @@ interface OrderPageProps {
 }
 
 export default function OrderPage({ package: initialPackage, userId, email }: OrderPageProps) {
+  const router = useRouter();
   const { register, handleSubmit, watch, setValue } = useForm({
     mode: "onBlur",
     defaultValues: {
@@ -125,7 +127,7 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
         return;
       }
 
-      console.log("subscription ساخته شد:", verifyResult.subscription);
+      router.push("/payment/success");
     } catch (error) {
       console.error(error);
       alert("خطا در ثبت سفارش");
