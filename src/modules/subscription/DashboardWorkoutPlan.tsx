@@ -18,6 +18,7 @@ interface ExerciseItem {
   reps: string;
   restSec: number;
   videoId?: VideoInfo | null;
+  videoId2?: VideoInfo | null;
 }
 
 interface DayItem {
@@ -38,7 +39,7 @@ interface WorkoutPlanProps {
 
 export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({
-    [days[0]?._id]: true // default expand first day
+    [days[0]?._id]: true 
   });
   const [activeVideo, setActiveVideo] = useState<VideoInfo | null>(null);
 
@@ -60,7 +61,7 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
 
   return (
     <div className="space-y-6">
-      {/* Plan Header */}
+      
       <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-white/10 rounded-2xl p-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl -z-10" />
         <div className="flex items-center gap-3 mb-2">
@@ -70,7 +71,7 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
         <p className="text-white/60 text-xs md:text-sm leading-relaxed">{plan.description || "بدون توضیحات"}</p>
       </div>
 
-      {/* Days List Accordion */}
+      
       <div className="space-y-4">
         {days.length === 0 ? (
           <div className="text-center p-8 border border-dashed border-white/10 rounded-2xl text-white/40">
@@ -84,7 +85,7 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
                 key={day._id}
                 className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition-all duration-350"
               >
-                {/* Header click */}
+                
                 <button
                   onClick={() => toggleDay(day._id)}
                   className="w-full text-right p-5 flex items-center justify-between hover:bg-white/3 transition-colors cursor-pointer"
@@ -110,7 +111,7 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
                   </div>
                 </button>
 
-                {/* Exercises content */}
+                
                 {isExpanded && (
                   <div className="p-5 pt-0 border-t border-white/5 bg-black/10">
                     {day.exercises.length === 0 ? (
@@ -135,17 +136,44 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
                               </div>
                             </div>
                             
-                            {ex.videoId ? (
-                              <button
-                                onClick={() => setActiveVideo(ex.videoId!)}
-                                className="w-full sm:w-auto bg-purple-500/10 hover:bg-purple-500/25 border border-purple-500/20 text-purple-400 px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                              >
-                                <Play className="w-3.5 h-3.5 fill-current" />
-                                تماشای ویدیو آموزشی
-                              </button>
-                            ) : (
-                              <span className="text-[10px] text-white/20 italic">بدون ویدیو</span>
-                            )}
+                            <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
+                              {ex.videoId && ex.videoId2 ? (
+                                <>
+                                  <button
+                                    onClick={() => setActiveVideo(ex.videoId!)}
+                                    className="w-full sm:w-auto bg-purple-500/10 hover:bg-purple-500/25 border border-purple-500/20 text-purple-400 px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                  >
+                                    <Play className="w-3.5 h-3.5 fill-current" />
+                                    ویدیو آموزشی ۱
+                                  </button>
+                                  <button
+                                    onClick={() => setActiveVideo(ex.videoId2!)}
+                                    className="w-full sm:w-auto bg-pink-500/10 hover:bg-pink-500/25 border border-pink-500/20 text-pink-400 px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                  >
+                                    <Play className="w-3.5 h-3.5 fill-current" />
+                                    ویدیو آموزشی ۲
+                                  </button>
+                                </>
+                              ) : ex.videoId ? (
+                                <button
+                                  onClick={() => setActiveVideo(ex.videoId!)}
+                                  className="w-full sm:w-auto bg-purple-500/10 hover:bg-purple-500/25 border border-purple-500/20 text-purple-400 px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                >
+                                  <Play className="w-3.5 h-3.5 fill-current" />
+                                  تماشای ویدیو آموزشی
+                                </button>
+                              ) : ex.videoId2 ? (
+                                <button
+                                  onClick={() => setActiveVideo(ex.videoId2!)}
+                                  className="w-full sm:w-auto bg-pink-500/10 hover:bg-pink-500/25 border border-pink-500/20 text-pink-400 px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                >
+                                  <Play className="w-3.5 h-3.5 fill-current" />
+                                  تماشای ویدیو آموزشی
+                                </button>
+                              ) : (
+                                <span className="text-[10px] text-white/20 italic">بدون ویدیو</span>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -158,7 +186,7 @@ export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
         )}
       </div>
 
-      {/* Video Modal Player */}
+      
       {activeVideo && (
         <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gray-950 border border-white/10 rounded-2xl overflow-hidden w-full max-w-3xl relative">

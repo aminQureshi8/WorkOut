@@ -85,6 +85,7 @@ interface WorkoutExercise {
   _id: string;
   dayId: string;
   videoId?: VideoInfo | null;
+  videoId2?: VideoInfo | null;
   name: string;
   sets: number;
   reps: string;
@@ -128,10 +129,10 @@ export default function SubscriptionsManagement() {
     return result.isConfirmed;
   };
 
-  // Main Tab Navigation
+  
   const [activeTab, setActiveTab] = useState<"subscriptions" | "videos">("subscriptions");
 
-  // Subscriptions List state
+  
   const [subscriptions, setSubscriptions] = useState<SubscriptionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -141,7 +142,7 @@ export default function SubscriptionsManagement() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Stats state
+  
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -149,21 +150,21 @@ export default function SubscriptionsManagement() {
     expired: 0
   });
 
-  // Modal control states
+  
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   
-  // Selected items for modals
+  
   const [selectedSubscription, setSelectedSubscription] = useState<SubscriptionItem | null>(null);
   const [selectedPackageForPlan, setSelectedPackageForPlan] = useState<PackageInfo | null>(null);
 
-  // Forms states
-  // Edit Subscription
+  
+  
   const [editStatus, setEditStatus] = useState<SubscriptionItem["status"]>("active");
   const [editEndsAt, setEditEndsAt] = useState("");
 
-  // Create Subscription (Manual)
+  
   const [userSearchTerm, setUserSearchTerm] = useState("");
   const [searchedUsers, setSearchedUsers] = useState<UserInfo[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
@@ -172,19 +173,19 @@ export default function SubscriptionsManagement() {
   const [createStatus, setCreateStatus] = useState<SubscriptionItem["status"]>("active");
   const [createEndsAt, setCreateEndsAt] = useState("");
 
-  // Workout Plan details state
+  
   const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
   const [workoutDays, setWorkoutDays] = useState<WorkoutDay[]>([]);
   const [selectedDay, setSelectedDay] = useState<WorkoutDay | null>(null);
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [videos, setVideos] = useState<VideoInfo[]>([]);
 
-  // Video management states
+  
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [searchVideoTerm, setSearchVideoTerm] = useState("");
   const [showUploadVideoModal, setShowUploadVideoModal] = useState(false);
   
-  // Video upload form state
+  
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [newVideoTitle, setNewVideoTitle] = useState("");
@@ -194,10 +195,10 @@ export default function SubscriptionsManagement() {
   const [newVideoTags, setNewVideoTags] = useState("");
   const [uploadingVideo, setUploadingVideo] = useState(false);
 
-  // Watch video modal state
+  
   const [watchingVideo, setWatchingVideo] = useState<VideoInfo | null>(null);
 
-  // Sub-forms inside Workout Plan Modal
+  
   const [planForm, setPlanForm] = useState({ title: "", description: "" });
   const [isEditingPlanInfo, setIsEditingPlanInfo] = useState(false);
 
@@ -213,15 +214,16 @@ export default function SubscriptionsManagement() {
     reps: "12-10-8",
     restSec: 60,
     videoId: "",
+    videoId2: "",
     sortOrder: 0
   });
 
-  // Load subscriptions on search or page change
+  
   useEffect(() => {
     fetchSubscriptions();
   }, [currentPage, debouncedSearch, statusFilter]);
 
-  // Debounce search term
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -230,13 +232,13 @@ export default function SubscriptionsManagement() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch Packages and Videos on load for manual subscription creation
+  
   useEffect(() => {
     fetchPackages();
     fetchVideos();
   }, []);
 
-  // Fetch search users when term changes
+  
   useEffect(() => {
     if (userSearchTerm.length > 1) {
       const fetchSearchUsers = async () => {
@@ -267,7 +269,7 @@ export default function SubscriptionsManagement() {
       setTotal(data.total || 0);
       setTotalPages(data.totalPages || 1);
 
-      // Simple stats aggregation
+      
       const statsRes = await fetch("/api/admin/subscription?limit=10000");
       if (statsRes.ok) {
         const statsData = await statsRes.json();
@@ -314,7 +316,7 @@ export default function SubscriptionsManagement() {
     }
   };
 
-  // Video operations
+  
   const handleUploadVideo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!videoFile || !thumbnailFile || !newVideoTitle) {
@@ -344,7 +346,7 @@ export default function SubscriptionsManagement() {
       if (res.ok) {
         showAlert("موفقیت", "ویدیو با موفقیت آپلود شد", "success");
         setShowUploadVideoModal(false);
-        // Reset form
+        
         setVideoFile(null);
         setThumbnailFile(null);
         setNewVideoTitle("");
@@ -383,7 +385,7 @@ export default function SubscriptionsManagement() {
     }
   };
 
-  // CRUD Subscriptions
+  
   const handleCreateSubscription = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser || !selectedPackageId) {
@@ -466,7 +468,7 @@ export default function SubscriptionsManagement() {
     }
   };
 
-  // Workout Plan Management
+  
   const handleOpenPlanModal = async (pkg: PackageInfo) => {
     setSelectedPackageForPlan(pkg);
     setWorkoutPlan(null);
@@ -559,7 +561,7 @@ export default function SubscriptionsManagement() {
     }
   };
 
-  // Days management
+  
   const fetchDays = async (planId: string) => {
     try {
       const res = await fetch(`/api/admin/subscription/workout-days?planId=${planId}`);
@@ -634,7 +636,7 @@ export default function SubscriptionsManagement() {
     }
   };
 
-  // Exercises management
+  
   const fetchExercises = async (dayId: string) => {
     try {
       const res = await fetch(`/api/admin/subscription/workout-exercises?dayId=${dayId}`);
@@ -662,6 +664,7 @@ export default function SubscriptionsManagement() {
             reps: exerciseForm.reps,
             restSec: Number(exerciseForm.restSec),
             videoId: exerciseForm.videoId || null,
+            videoId2: exerciseForm.videoId2 || null,
             sortOrder: Number(exerciseForm.sortOrder)
           })
         });
@@ -681,6 +684,7 @@ export default function SubscriptionsManagement() {
             reps: exerciseForm.reps,
             restSec: Number(exerciseForm.restSec),
             videoId: exerciseForm.videoId || undefined,
+            videoId2: exerciseForm.videoId2 || undefined,
             sortOrder: Number(exerciseForm.sortOrder)
           })
         });
@@ -708,7 +712,7 @@ export default function SubscriptionsManagement() {
     }
   };
 
-  // Helpers
+  
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat("fa-IR").format(num);
   };
@@ -771,7 +775,7 @@ export default function SubscriptionsManagement() {
     );
   };
 
-  // Filtered videos for grid search
+  
   const filteredVideos = videos.filter((vid) =>
     vid.title.toLowerCase().includes(searchVideoTerm.toLowerCase()) ||
     (vid.description && vid.description.toLowerCase().includes(searchVideoTerm.toLowerCase()))
@@ -781,7 +785,7 @@ export default function SubscriptionsManagement() {
     <div className="min-h-screen bg-gradient-to-br bg-black/30 p-4 md:p-8" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
-        {/* Header */}
+        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl text-white mb-2" style={{ fontFamily: "Marbeh, sans-serif" }}>
@@ -810,7 +814,7 @@ export default function SubscriptionsManagement() {
           </div>
         </div>
 
-        {/* Tab System Toggle */}
+        
         <div className="border-b border-white/10 mb-6 flex gap-4">
           <button
             onClick={() => setActiveTab("subscriptions")}
@@ -836,10 +840,10 @@ export default function SubscriptionsManagement() {
           </button>
         </div>
 
-        {/* TAB 1: SUBSCRIPTIONS */}
+        
         {activeTab === "subscriptions" && (
           <>
-            {/* Stats Grid */}
+            
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
                 <div className="flex items-center justify-between mb-2">
@@ -879,7 +883,7 @@ export default function SubscriptionsManagement() {
               </div>
             </div>
 
-            {/* Filters and Search */}
+            
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
               <div className="relative w-full md:w-96">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
@@ -917,7 +921,7 @@ export default function SubscriptionsManagement() {
               </div>
             </div>
 
-            {/* Subscription Table */}
+            
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden mb-6">
               <div className="overflow-x-auto">
                 <table className="w-full text-right border-collapse">
@@ -1016,7 +1020,7 @@ export default function SubscriptionsManagement() {
                 </table>
               </div>
 
-              {/* Pagination */}
+              
               {totalPages > 1 && (
                 <div className="p-4 border-t border-white/10 bg-white/5 flex items-center justify-between">
                   <span className="text-white/60 text-xs">
@@ -1044,11 +1048,11 @@ export default function SubscriptionsManagement() {
           </>
         )}
 
-        {/* TAB 2: VIDEOS BANK */}
+        
         {activeTab === "videos" && (
           <div className="space-y-6">
             
-            {/* Search and Action Bar */}
+            
             <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col sm:flex-row gap-4 justify-between items-center">
               <div className="relative w-full sm:w-80">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
@@ -1069,7 +1073,7 @@ export default function SubscriptionsManagement() {
               </button>
             </div>
 
-            {/* Video Cards Grid */}
+            
             {loadingVideos ? (
               <div className="p-16 text-center text-white/60 flex items-center justify-center gap-2">
                 <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
@@ -1087,7 +1091,7 @@ export default function SubscriptionsManagement() {
                     key={vid._id}
                     className="bg-white/5 border border-white/10 rounded-xl overflow-hidden flex flex-col group hover:border-white/20 transition-all"
                   >
-                    {/* Thumbnail box */}
+                    
                     <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
                       {vid.thumbnailUrl ? (
                         <img
@@ -1098,7 +1102,7 @@ export default function SubscriptionsManagement() {
                       ) : (
                         <Film className="w-8 h-8 text-white/20" />
                       )}
-                      {/* Play Button Overlay */}
+                      
                       <button
                         onClick={() => setWatchingVideo(vid)}
                         className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1108,18 +1112,18 @@ export default function SubscriptionsManagement() {
                         </div>
                       </button>
                       
-                      {/* Duration Badge */}
+                      
                       <span className="absolute bottom-2 left-2 bg-black/75 text-white text-[10px] px-1.5 py-0.5 rounded font-mono">
                         {formatDuration(vid.durationSec)}
                       </span>
 
-                      {/* Level Badge */}
+                      
                       <span className="absolute top-2 right-2">
                         {getVideoLevelBadge(vid.level)}
                       </span>
                     </div>
 
-                    {/* Content */}
+                    
                     <div className="p-4 flex-1 flex flex-col justify-between">
                       <div>
                         <h4 className="text-white font-bold text-sm line-clamp-1 mb-1" title={vid.title}>
@@ -1154,7 +1158,7 @@ export default function SubscriptionsManagement() {
           </div>
         )}
 
-        {/* Upload Video Modal */}
+        
         {showUploadVideoModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -1174,7 +1178,7 @@ export default function SubscriptionsManagement() {
               ) : (
                 <form onSubmit={handleUploadVideo} className="p-6 space-y-4">
                   
-                  {/* File Uploads */}
+                  
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-white/80 text-xs mb-2 font-medium">فایل ویدیو (MP4)*</label>
@@ -1198,7 +1202,7 @@ export default function SubscriptionsManagement() {
                     </div>
                   </div>
 
-                  {/* Title */}
+                  
                   <div>
                     <label className="block text-white/80 text-xs mb-2 font-medium">عنوان ویدیو*</label>
                     <input
@@ -1211,7 +1215,7 @@ export default function SubscriptionsManagement() {
                     />
                   </div>
 
-                  {/* Description */}
+                  
                   <div>
                     <label className="block text-white/80 text-xs mb-2 font-medium">توضیحات حرکت</label>
                     <textarea
@@ -1222,7 +1226,7 @@ export default function SubscriptionsManagement() {
                     />
                   </div>
 
-                  {/* Level & Duration */}
+                  
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-white/80 text-xs mb-2 font-medium">سطح سختی*</label>
@@ -1248,7 +1252,7 @@ export default function SubscriptionsManagement() {
                     </div>
                   </div>
 
-                  {/* Tags */}
+                  
                   <div>
                     <label className="block text-white/80 text-xs mb-2 font-medium">تگ‌ها (با ویرگول انگلیسی جدا کنید)</label>
                     <input
@@ -1281,7 +1285,7 @@ export default function SubscriptionsManagement() {
           </div>
         )}
 
-        {/* Video Player Modal */}
+        
         {watchingVideo && (
           <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-gray-950 border border-white/10 rounded-2xl overflow-hidden w-full max-w-3xl relative">
@@ -1311,7 +1315,7 @@ export default function SubscriptionsManagement() {
           </div>
         )}
 
-        {/* Create Manual Subscription Modal */}
+        
         {showCreateModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -1322,7 +1326,7 @@ export default function SubscriptionsManagement() {
                 <button onClick={() => setShowCreateModal(false)} className="text-white/60 hover:text-white">✕</button>
               </div>
               <form onSubmit={handleCreateSubscription} className="p-6 space-y-4">
-                {/* User Search & Select */}
+                
                 <div>
                   <label className="block text-white/80 text-sm mb-2 font-medium">جستجو و انتخاب کاربر</label>
                   {selectedUser ? (
@@ -1371,7 +1375,7 @@ export default function SubscriptionsManagement() {
                   )}
                 </div>
 
-                {/* Package Select */}
+                
                 <div>
                   <label className="block text-white/80 text-sm mb-2 font-medium">پکیج</label>
                   <select
@@ -1389,7 +1393,7 @@ export default function SubscriptionsManagement() {
                   </select>
                 </div>
 
-                {/* Status */}
+                
                 <div>
                   <label className="block text-white/80 text-sm mb-2 font-medium">وضعیت اشتراک</label>
                   <select
@@ -1403,7 +1407,7 @@ export default function SubscriptionsManagement() {
                   </select>
                 </div>
 
-                {/* End Date */}
+                
                 <div>
                   <label className="block text-white/80 text-sm mb-2 font-medium">تاریخ پایان (اختیاری - پیش‌فرض ۳۰ روز آینده)</label>
                   <input
@@ -1434,7 +1438,7 @@ export default function SubscriptionsManagement() {
           </div>
         )}
 
-        {/* Edit Subscription Modal */}
+        
         {showEditModal && selectedSubscription && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-md w-full">
@@ -1495,11 +1499,11 @@ export default function SubscriptionsManagement() {
           </div>
         )}
 
-        {/* Workout Plan management Modal */}
+        
         {showPlanModal && selectedPackageForPlan && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 border border-white/10 rounded-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl">
-              {/* Header */}
+              
               <div className="p-6 border-b border-white/10 flex items-center justify-between bg-black/30">
                 <div>
                   <span className="text-xs text-orange-400 font-bold bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/20">
@@ -1517,13 +1521,13 @@ export default function SubscriptionsManagement() {
                 </button>
               </div>
 
-              {/* Main Body */}
+              
               <div className="flex-1 overflow-y-auto p-6 flex flex-col lg:flex-row gap-6 min-h-0">
                 
-                {/* PLAN INFO & DAYS LIST PANEL (1/3 WIDTH) */}
+                
                 <div className="w-full lg:w-80 flex flex-col gap-4 border-l border-white/10 pl-0 lg:pl-6">
                   
-                  {/* Plan Info Card */}
+                  
                   {!workoutPlan ? (
                     <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
                       <p className="text-white/60 text-sm mb-4">برنامه تمرینی برای این پکیج ثبت نشده است.</p>
@@ -1608,7 +1612,7 @@ export default function SubscriptionsManagement() {
                     </div>
                   )}
 
-                  {/* Days Section Header */}
+                  
                   {workoutPlan && (
                     <div className="flex-1 flex flex-col min-h-[300px]">
                       <div className="flex justify-between items-center mb-3">
@@ -1626,7 +1630,7 @@ export default function SubscriptionsManagement() {
                         </button>
                       </div>
 
-                      {/* Day Creation / Edit Form Overlay */}
+                      
                       {showDayForm && (
                         <form onSubmit={handleDaySubmit} className="bg-white/5 border border-white/10 rounded-xl p-3 mb-3 space-y-2.5">
                           <div className="text-white font-bold text-xs">
@@ -1683,7 +1687,7 @@ export default function SubscriptionsManagement() {
                         </form>
                       )}
 
-                      {/* Days List */}
+                      
                       <div className="space-y-2 overflow-y-auto max-h-[350px]">
                         {workoutDays.length === 0 ? (
                           <div className="text-white/40 text-center text-xs p-6 border border-dashed border-white/10 rounded-lg">
@@ -1737,7 +1741,7 @@ export default function SubscriptionsManagement() {
                   )}
                 </div>
 
-                {/* EXERCISES PANEL (2/3 WIDTH) */}
+                
                 <div className="flex-1 flex flex-col min-h-[300px]">
                   {!selectedDay ? (
                     <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-2xl p-8 text-center text-white/40">
@@ -1746,7 +1750,7 @@ export default function SubscriptionsManagement() {
                     </div>
                   ) : (
                     <div className="flex-1 flex flex-col h-full">
-                      {/* Exercise Header */}
+                      
                       <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
                         <div>
                           <span className="text-white font-bold text-sm block">تمرین‌های {selectedDay.dayName}</span>
@@ -1755,7 +1759,7 @@ export default function SubscriptionsManagement() {
                         <button
                           onClick={() => {
                             setEditingExercise(null);
-                            setExerciseForm({ name: "", sets: 3, reps: "12-10-8", restSec: 60, videoId: "", sortOrder: exercises.length + 1 });
+                            setExerciseForm({ name: "", sets: 3, reps: "12-10-8", restSec: 60, videoId: "", videoId2: "", sortOrder: exercises.length + 1 });
                             setShowExerciseForm(true);
                           }}
                           className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-orange-500/10 hover:shadow-orange-500/20 transition-all"
@@ -1765,13 +1769,13 @@ export default function SubscriptionsManagement() {
                         </button>
                       </div>
 
-                      {/* Exercise Create / Edit Form */}
+                      
                       {showExerciseForm && (
                         <form onSubmit={handleExerciseSubmit} className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4 space-y-3">
                           <div className="text-white font-bold text-xs">
                             {editingExercise ? "ویرایش حرکت ورزشی" : "ثبت حرکت ورزشی جدید"}
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
                               <label className="block text-white/70 text-[10px] mb-1">نام حرکت</label>
                               <input
@@ -1784,13 +1788,28 @@ export default function SubscriptionsManagement() {
                               />
                             </div>
                             <div>
-                              <label className="block text-white/70 text-[10px] mb-1">ویدیو آموزشی (انتخاب از بانک ویدیوها)</label>
+                              <label className="block text-white/70 text-[10px] mb-1">ویدیو آموزشی ۱</label>
                               <select
                                 value={exerciseForm.videoId}
                                 onChange={(e) => setExerciseForm({ ...exerciseForm, videoId: e.target.value })}
                                 className="w-full bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-orange-500"
                               >
-                                <option value="">بدون ویدیو (در صورت نیاز ویدیو انتخاب کنید)</option>
+                                <option value="">بدون ویدیو اول</option>
+                                {videos.map((vid) => (
+                                  <option key={vid._id} value={vid._id}>
+                                    {vid.title} ({getVideoLevelBadge(vid.level)?.props.children || "مبتدی"})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-white/70 text-[10px] mb-1">ویدیو آموزشی ۲ (اختیاری)</label>
+                              <select
+                                value={exerciseForm.videoId2}
+                                onChange={(e) => setExerciseForm({ ...exerciseForm, videoId2: e.target.value })}
+                                className="w-full bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-orange-500"
+                              >
+                                <option value="">بدون ویدیو دوم</option>
                                 {videos.map((vid) => (
                                   <option key={vid._id} value={vid._id}>
                                     {vid.title} ({getVideoLevelBadge(vid.level)?.props.children || "مبتدی"})
@@ -1867,7 +1886,7 @@ export default function SubscriptionsManagement() {
                         </form>
                       )}
 
-                      {/* Exercises Table/List */}
+                      
                       <div className="flex-1 overflow-y-auto max-h-[450px] space-y-3">
                         {exercises.length === 0 ? (
                           <div className="text-white/40 text-center text-xs p-12 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center">
@@ -1903,10 +1922,27 @@ export default function SubscriptionsManagement() {
                                                 setWatchingVideo(ex.videoId);
                                               }
                                             }}
-                                            className="text-orange-400 hover:text-orange-300 flex items-center gap-0.5 font-semibold"
+                                            className="text-orange-400 hover:text-orange-300 flex items-center gap-0.5 font-semibold cursor-pointer"
                                           >
                                             <Play className="w-3 h-3 fill-current" />
-                                            ویدیو: {ex.videoId.title}
+                                            ویدیو ۱: {ex.videoId.title}
+                                          </button>
+                                        </>
+                                      )}
+                                      {ex.videoId2 && (
+                                        <>
+                                          <span>|</span>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              if (ex.videoId2) {
+                                                setWatchingVideo(ex.videoId2);
+                                              }
+                                            }}
+                                            className="text-pink-400 hover:text-pink-300 flex items-center gap-0.5 font-semibold cursor-pointer"
+                                          >
+                                            <Play className="w-3 h-3 fill-current" />
+                                            ویدیو ۲: {ex.videoId2.title}
                                           </button>
                                         </>
                                       )}
@@ -1923,6 +1959,7 @@ export default function SubscriptionsManagement() {
                                         reps: ex.reps,
                                         restSec: ex.restSec,
                                         videoId: ex.videoId ? ex.videoId._id : "",
+                                        videoId2: ex.videoId2 ? ex.videoId2._id : "",
                                         sortOrder: ex.sortOrder
                                       });
                                       setShowExerciseForm(true);

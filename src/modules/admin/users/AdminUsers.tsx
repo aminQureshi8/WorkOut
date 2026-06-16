@@ -88,8 +88,8 @@ export default function AdminUsers() {
           signal: controller.signal,
         });
         const data = await res.json();
+
         
-        // Search results mapping
         const mappedUsers = (data.userFind || []).map((u: any) => {
           let persianStatus = "فعال";
           if (u.status === "blocked") persianStatus = "مسدود";
@@ -301,7 +301,7 @@ export default function AdminUsers() {
   return (
     <div className="overflow-hidden font-danaMed" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Title */}
+        
         <div className="mb-8">
           <h1
             className="text-3xl text-white mb-2"
@@ -312,7 +312,7 @@ export default function AdminUsers() {
           <p className="text-white/60 text-sm">مشاهده و ویرایش دسترسی‌های کاربران سیستم</p>
         </div>
 
-        {/* Stats Grid */}
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
@@ -371,7 +371,7 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        {/* Filters */}
+        
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -399,7 +399,7 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        {/* Users Table */}
+        
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -600,7 +600,7 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        {/* Bulk Actions Panel */}
+        
         {selectedUsers.length > 0 && (
           <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-orange-500 backdrop-blur-lg border border-orange-400 rounded-xl p-4 shadow-2xl z-50">
             <div className="flex items-center gap-4">
@@ -619,11 +619,11 @@ export default function AdminUsers() {
           </div>
         )}
 
-        {/* Edit Modal */}
+        
         {showEditModal && editingUser && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-              {/* Modal Header */}
+              
               <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-gray-900/80 backdrop-blur-lg">
                 <h2
                   className="text-2xl text-white font-bold"
@@ -642,9 +642,9 @@ export default function AdminUsers() {
                 </button>
               </div>
 
-              {/* Modal Body */}
+              
               <div className="p-6 space-y-6">
-                {/* User Avatar Details */}
+                
                 <div className="flex items-center gap-4 pb-4 border-b border-white/10">
                   <div className="w-20 h-20 bg-orange-500/20 rounded-full flex items-center justify-center text-4xl font-bold text-orange-400">
                     {editingUser.avatar || editingUser.username[0]?.toUpperCase() || "👤"}
@@ -659,7 +659,7 @@ export default function AdminUsers() {
                   </div>
                 </div>
 
-                {/* Form Fields */}
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-white mb-2 text-xs">
@@ -767,7 +767,7 @@ export default function AdminUsers() {
                   </div>
                 </div>
 
-                {/* Payments & Login */}
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
                   <div className="bg-white/5 rounded-lg p-4">
                     <div className="text-white/60 text-xs mb-1">آخرین ورود</div>
@@ -789,7 +789,7 @@ export default function AdminUsers() {
                 </div>
               </div>
 
-              {/* Modal Footer */}
+              
               <div className="p-6 border-t border-white/10 flex gap-3">
                 <button
                   onClick={handleSaveEdit}

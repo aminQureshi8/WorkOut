@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
 
     const exercises = await WorkoutExercise.find({ dayId })
       .populate("videoId", "url thumbnailUrl title")
+      .populate("videoId2", "url thumbnailUrl title")
       .sort({ sortOrder: 1 });
 
     return NextResponse.json({ exercises });
@@ -41,7 +42,7 @@ export async function PUT(req: NextRequest) {
   try {
     await dbConnect();
     const body = await req.json();
-    const { id, name, sets, reps, restSec, videoId, sortOrder } = body;
+    const { id, name, sets, reps, restSec, videoId, videoId2, sortOrder } = body;
 
     if (!id) {
       return NextResponse.json({ message: "شناسه حرکت الزامی است" }, { status: 400 });
@@ -53,6 +54,7 @@ export async function PUT(req: NextRequest) {
     if (reps !== undefined) updatedData.reps = reps;
     if (restSec !== undefined) updatedData.restSec = restSec;
     if (videoId !== undefined) updatedData.videoId = videoId || null;
+    if (videoId2 !== undefined) updatedData.videoId2 = videoId2 || null;
     if (sortOrder !== undefined) updatedData.sortOrder = sortOrder;
 
     const exercise = await WorkoutExercise.findByIdAndUpdate(id, updatedData, { new: true });

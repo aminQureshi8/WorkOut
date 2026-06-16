@@ -23,7 +23,7 @@ import {
   ArrowUpLeft,
 } from "lucide-react";
 
-// Register Mongoose models to prevent schema compilation errors on populate
+
 import SubscriptionModel from "@/model/Subscription";
 import PackageModel from "@/model/Package";
 import CoachModel from "@/model/Coach";
@@ -35,7 +35,7 @@ import WorkoutExerciseModel from "@/model/WorkoutExercise";
 import VideoModel from "@/model/Video";
 import DashboardWorkoutPlan from "@/modules/subscription/DashboardWorkoutPlan";
 
-// Touch models to prevent bundler from tree-shaking the schema registration
+
 const registerModels = () => {
   return [
     SubscriptionModel,
@@ -52,7 +52,7 @@ const registerModels = () => {
 
 export const dynamic = "force-dynamic";
 
-// Helper function to format date to Persian Solar Hijri (Jalali)
+
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("fa-IR", {
     year: "numeric",
@@ -61,7 +61,7 @@ const formatDate = (date: Date) => {
   }).format(new Date(date));
 };
 
-// Helper to translate and format cycle labels
+
 const getCycleLabel = (cycle: string) => {
   switch (cycle) {
     case "monthly":
@@ -75,7 +75,7 @@ const getCycleLabel = (cycle: string) => {
   }
 };
 
-// Helper to style and label status badges
+
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "active":
@@ -118,7 +118,7 @@ export default async function SubscriptionPage() {
     redirect("/login");
   }
 
-  // Fetch active or trial subscription
+  
   const subscription = await SubscriptionModel.findOne({
     userId: session.user.id,
     status: { $in: ["active", "trial"] },
@@ -128,7 +128,7 @@ export default async function SubscriptionPage() {
     .populate("coachId")
     .populate("orderId");
 
-  // Fetch Workout Plan for the user's package
+  
   let workoutPlan = null;
   let workoutDays: any[] = [];
   
@@ -146,6 +146,7 @@ export default async function SubscriptionPage() {
       const dayIds = days.map(d => d._id);
       const exercises = await WorkoutExerciseModel.find({ dayId: { $in: dayIds } })
         .populate("videoId")
+        .populate("videoId2")
         .sort({ sortOrder: 1 })
         .lean();
 
@@ -160,20 +161,24 @@ export default async function SubscriptionPage() {
             videoId: e.videoId ? {
               ...e.videoId,
               _id: e.videoId._id.toString()
+            } : null,
+            videoId2: e.videoId2 ? {
+              ...e.videoId2,
+              _id: e.videoId2._id.toString()
             } : null
           }))
       }));
     }
   }
 
-  // Fetch all payment orders (history)
+  
   const orders = await OrderModel.find({
     userId: session.user.id,
   })
     .populate("packageId")
     .sort({ createdAt: -1 });
 
-  // Calculation parameters if subscription exists
+  
   let daysRemaining = 0;
   let totalDays = 1;
   let progressPercent = 0;
@@ -200,7 +205,7 @@ export default async function SubscriptionPage() {
   return (
     <div className="min-h-screen text-white font-danaMed pb-12">
       <div className="max-w-6xl mx-auto px-4 md:px-6 pt-6 space-y-8">
-        {/* Page Header */}
+        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="font-morabbaReg text-2xl md:text-3xl font-bold text-white">
@@ -223,11 +228,11 @@ export default async function SubscriptionPage() {
         </div>
 
         {subscription ? (
-          /* Subscribed State Grid */
+          
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Right Side: Package & Status Details (2 Columns) */}
+            
             <div className="lg:col-span-2 space-y-6">
-              {/* Package Card */}
+              
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8 shadow-xl">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -z-10" />
 
@@ -251,7 +256,7 @@ export default async function SubscriptionPage() {
 
                 <hr className="border-white/10 my-6" />
 
-                {/* Subscription progress */}
+                
                 <div className="space-y-4">
                   <div className="flex justify-between items-end text-xs md:text-sm">
                     <div className="flex items-center gap-1.5 text-gray-400">
@@ -263,7 +268,7 @@ export default async function SubscriptionPage() {
                     </span>
                   </div>
 
-                  {/* Visual Progress Bar */}
+                  
                   <div className="h-3 rounded-full bg-white/10 overflow-hidden">
                     <div
                       className="h-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-500"
@@ -271,7 +276,7 @@ export default async function SubscriptionPage() {
                     />
                   </div>
 
-                  {/* Dates list */}
+                  
                   <div className="grid grid-cols-2 gap-4 pt-2 text-xs md:text-sm text-gray-400">
                     <div className="flex flex-col gap-1 bg-white/3 p-3 rounded-xl border border-white/5">
                       <span className="text-gray-500">تاریخ شروع</span>
@@ -292,7 +297,7 @@ export default async function SubscriptionPage() {
               </div>
 
 
-              {/* Workout Plan Section */}
+              
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl">
                 <h3 className="text-lg font-bold font-morabbaReg text-white mb-6 flex items-center gap-2">
                   <Activity className="w-5 h-5 text-purple-400 animate-pulse" />
@@ -301,7 +306,7 @@ export default async function SubscriptionPage() {
                 <DashboardWorkoutPlan plan={workoutPlan} days={workoutDays} />
               </div>
 
-              {/* Access Features info */}
+              
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl">
                 <h3 className="text-lg font-bold font-morabbaReg text-white mb-4 flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-purple-400" />
@@ -356,9 +361,9 @@ export default async function SubscriptionPage() {
               </div>
             </div>
 
-            {/* Left Side: Coach Info & Billing Metadata (1 Column) */}
+            
             <div className="space-y-6">
-              {/* Assigned Coach Card */}
+              
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl relative overflow-hidden">
                 <h3 className="text-base font-bold text-gray-400 mb-4 flex items-center gap-2">
                   <User className="w-4 h-4 text-purple-400" />
@@ -421,7 +426,7 @@ export default async function SubscriptionPage() {
                 )}
               </div>
 
-              {/* Billing Info Card */}
+              
               {subscription.orderId && (
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl">
                   <h3 className="text-base font-bold text-gray-400 mb-4 flex items-center gap-2">
@@ -456,7 +461,7 @@ export default async function SubscriptionPage() {
             </div>
           </div>
         ) : (
-          /* Empty/No Active Subscription State */
+          
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8 md:p-16 text-center max-w-2xl mx-auto shadow-2xl relative overflow-hidden">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl -z-10" />
 
@@ -494,7 +499,7 @@ export default async function SubscriptionPage() {
           </div>
         )}
 
-        {/* Transaction History (Always Displayed) */}
+        
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl">
           <h3 className="text-lg font-bold font-morabbaReg text-white mb-6 flex items-center gap-2">
             <FileText className="w-5 h-5 text-purple-400" />

@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
     const dayIds = days.map((d) => d._id);
     const exercises = await WorkoutExercise.find({ dayId: { $in: dayIds } })
       .populate("videoId", "url thumbnailUrl title")
+      .populate("videoId2", "url thumbnailUrl title")
       .sort({ sortOrder: 1 });
 
     const daysWithExercises = days.map((day) => ({

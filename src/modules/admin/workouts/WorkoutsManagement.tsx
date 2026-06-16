@@ -59,6 +59,7 @@ interface WorkoutExercise {
   _id: string;
   dayId: string;
   videoId?: VideoInfo | null;
+  videoId2?: VideoInfo | null;
   name: string;
   sets: number;
   reps: string;
@@ -67,29 +68,29 @@ interface WorkoutExercise {
 }
 
 export default function WorkoutsManagement() {
-  // Packages and Videos
+  
   const [packages, setPackages] = useState<PackageInfo[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<PackageInfo | null>(null);
   const [videos, setVideos] = useState<VideoInfo[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
 
-  // Workout Plan details state
+  
   const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
   const [workoutDays, setWorkoutDays] = useState<WorkoutDay[]>([]);
   const [selectedDay, setSelectedDay] = useState<WorkoutDay | null>(null);
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [loadingPlan, setLoadingPlan] = useState(false);
 
-  // Plan info form
+  
   const [planForm, setPlanForm] = useState({ title: "", description: "" });
   const [isEditingPlanInfo, setIsEditingPlanInfo] = useState(false);
 
-  // Day Form State
+  
   const [showDayForm, setShowDayForm] = useState(false);
   const [editingDay, setEditingDay] = useState<WorkoutDay | null>(null);
   const [dayForm, setDayForm] = useState({ dayName: "", muscleGroup: "", sortOrder: 0 });
 
-  // Exercise Form State
+  
   const [showExerciseForm, setShowExerciseForm] = useState(false);
   const [editingExercise, setEditingExercise] = useState<WorkoutExercise | null>(null);
   const [exerciseForm, setExerciseForm] = useState({
@@ -98,10 +99,11 @@ export default function WorkoutsManagement() {
     reps: "12-10-8",
     restSec: 60,
     videoId: "",
+    videoId2: "",
     sortOrder: 0,
   });
 
-  // Watch video modal state
+  
   const [watchingVideo, setWatchingVideo] = useState<VideoInfo | null>(null);
 
   const showAlert = (title: string, text: string, icon: "success" | "error" | "warning" | "info" = "info") => {
@@ -138,7 +140,7 @@ export default function WorkoutsManagement() {
     return result.isConfirmed;
   };
 
-  // Fetch Packages and Videos on mount
+  
   useEffect(() => {
     async function loadData() {
       try {
@@ -162,7 +164,7 @@ export default function WorkoutsManagement() {
     loadData();
   }, []);
 
-  // Fetch Days and Plan for Selected Package
+  
   const fetchDays = useCallback(async (planId: string) => {
     try {
       const res = await fetch(`/api/admin/subscription/workout-days?planId=${planId}`);
@@ -215,7 +217,7 @@ export default function WorkoutsManagement() {
     }
   };
 
-  // Plan actions
+  
   const handleCreatePlan = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPackage) return;
@@ -288,7 +290,7 @@ export default function WorkoutsManagement() {
     }
   };
 
-  // Day actions
+  
   const handleDaySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!workoutPlan) return;
@@ -354,7 +356,7 @@ export default function WorkoutsManagement() {
     }
   };
 
-  // Exercise actions
+  
   const handleExerciseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDay) return;
@@ -370,6 +372,7 @@ export default function WorkoutsManagement() {
             reps: exerciseForm.reps,
             restSec: Number(exerciseForm.restSec),
             videoId: exerciseForm.videoId || null,
+            videoId2: exerciseForm.videoId2 || null,
             sortOrder: Number(exerciseForm.sortOrder),
           }),
         });
@@ -389,6 +392,7 @@ export default function WorkoutsManagement() {
             reps: exerciseForm.reps,
             restSec: Number(exerciseForm.restSec),
             videoId: exerciseForm.videoId || undefined,
+            videoId2: exerciseForm.videoId2 || undefined,
             sortOrder: Number(exerciseForm.sortOrder),
           }),
         });
@@ -429,7 +433,7 @@ export default function WorkoutsManagement() {
   return (
     <div className="overflow-hidden font-danaMed" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Title */}
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "Marbeh, sans-serif" }}>
             مدیریت برنامه‌های تمرینی
@@ -439,14 +443,14 @@ export default function WorkoutsManagement() {
           </p>
         </div>
 
-        {/* Loading Packages State */}
+        
         {loadingPackages ? (
           <div className="p-12 text-center text-white/50 bg-white/5 border border-white/10 rounded-xl">
             در حال بارگذاری اطلاعات اولیه...
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* 1. PACKAGE SELECTOR PANEL (1/4 Width) */}
+            
             <div className="lg:col-span-1 space-y-4">
               <h2 className="text-white font-bold text-lg flex items-center gap-2">
                 <Package className="w-5 h-5 text-orange-500" />
@@ -480,7 +484,7 @@ export default function WorkoutsManagement() {
               </div>
             </div>
 
-            {/* 2. PLAN DETAILS & DAYS/EXERCISES (3/4 Width) */}
+            
             <div className="lg:col-span-3">
               {!selectedPackage ? (
                 <div className="h-64 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-white/40 text-center p-8 bg-white/5">
@@ -496,7 +500,7 @@ export default function WorkoutsManagement() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Active Package Banner */}
+                  
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-orange-500/5 to-pink-500/5">
                     <div>
                       <div className="text-xs text-orange-400 font-bold mb-1">پکیج انتخاب شده</div>
@@ -513,7 +517,7 @@ export default function WorkoutsManagement() {
                     )}
                   </div>
 
-                  {/* PLAN FORM / DETAIL CARD */}
+                  
                   {!workoutPlan ? (
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
                       <Info className="w-10 h-10 text-orange-500/60 mx-auto mb-3" />
@@ -610,10 +614,10 @@ export default function WorkoutsManagement() {
                     </div>
                   )}
 
-                  {/* SPLIT LAYOUT FOR DAYS & EXERCISES */}
+                  
                   {workoutPlan && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {/* DAYS PANEL (1/3 Width) */}
+                      
                       <div className="md:col-span-1 space-y-4">
                         <div className="flex justify-between items-center">
                           <span className="text-white font-bold text-sm">روزهای تمرینی</span>
@@ -634,7 +638,7 @@ export default function WorkoutsManagement() {
                           </button>
                         </div>
 
-                        {/* Day Creation / Edit Form Overlay */}
+                        
                         {showDayForm && (
                           <form
                             onSubmit={handleDaySubmit}
@@ -694,7 +698,7 @@ export default function WorkoutsManagement() {
                           </form>
                         )}
 
-                        {/* Days List */}
+                        
                         <div className="space-y-2 overflow-y-auto max-h-[400px]">
                           {workoutDays.length === 0 ? (
                             <div className="text-white/40 text-center text-xs p-8 border border-dashed border-white/10 rounded-xl">
@@ -761,7 +765,7 @@ export default function WorkoutsManagement() {
                         </div>
                       </div>
 
-                      {/* EXERCISES PANEL (2/3 Width) */}
+                      
                       <div className="md:col-span-2 space-y-4">
                         {!selectedDay ? (
                           <div className="h-[300px] border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-white/40 p-8 text-center bg-white/5">
@@ -786,6 +790,7 @@ export default function WorkoutsManagement() {
                                     reps: "12-10-8",
                                     restSec: 60,
                                     videoId: "",
+                                    videoId2: "",
                                     sortOrder: exercises.length + 1,
                                   });
                                   setShowExerciseForm(true);
@@ -797,7 +802,7 @@ export default function WorkoutsManagement() {
                               </button>
                             </div>
 
-                            {/* Exercise Form Overlay */}
+                            
                             {showExerciseForm && (
                               <form
                                 onSubmit={handleExerciseSubmit}
@@ -806,7 +811,7 @@ export default function WorkoutsManagement() {
                                 <div className="text-white font-bold text-xs">
                                   {editingExercise ? "ویرایش حرکت ورزشی" : "ثبت حرکت ورزشی جدید"}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                   <div>
                                     <label className="block text-white/70 text-[10px] mb-1">نام حرکت</label>
                                     <input
@@ -819,13 +824,13 @@ export default function WorkoutsManagement() {
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-white/70 text-[10px] mb-1">ویدیو آموزشی</label>
+                                    <label className="block text-white/70 text-[10px] mb-1">ویدیو آموزشی ۱</label>
                                     <select
                                       value={exerciseForm.videoId}
                                       onChange={(e) => setExerciseForm({ ...exerciseForm, videoId: e.target.value })}
                                       className="w-full bg-gray-900 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-orange-500"
                                     >
-                                      <option value="">بدون ویدیو</option>
+                                      <option value="">بدون ویدیو اول</option>
                                       {videos.map((vid) => (
                                         <option key={vid._id} value={vid._id}>
                                           {vid.title} ({getVideoLevelLabel(vid.level)})
@@ -833,6 +838,23 @@ export default function WorkoutsManagement() {
                                       ))}
                                     </select>
                                   </div>
+                                  <div>
+                                    <label className="block text-white/70 text-[10px] mb-1">ویدیو آموزشی ۲ (اختیاری)</label>
+                                    <select
+                                      value={exerciseForm.videoId2}
+                                      onChange={(e) => setExerciseForm({ ...exerciseForm, videoId2: e.target.value })}
+                                      className="w-full bg-gray-900 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-orange-500"
+                                    >
+                                      <option value="">بدون ویدیو دوم</option>
+                                      {videos.map((vid) => (
+                                        <option key={vid._id} value={vid._id}>
+                                          {vid.title} ({getVideoLevelLabel(vid.level)})
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
                                   <div>
                                     <label className="block text-white/70 text-[10px] mb-1">تعداد ست</label>
                                     <input
@@ -896,7 +918,7 @@ export default function WorkoutsManagement() {
                               </form>
                             )}
 
-                            {/* Exercises List */}
+                            
                             <div className="space-y-3 overflow-y-auto max-h-[500px]">
                               {exercises.length === 0 ? (
                                 <div className="text-white/40 text-center text-xs p-12 border border-dashed border-white/10 rounded-xl bg-white/5">
@@ -925,10 +947,19 @@ export default function WorkoutsManagement() {
                                         {ex.videoId && (
                                           <button
                                             onClick={() => setWatchingVideo(ex.videoId!)}
-                                            className="text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors"
+                                            className="text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors cursor-pointer"
                                           >
                                             <Play className="w-3 h-3 fill-orange-400/20" />
-                                            ویدیو آموزشی: {ex.videoId.title}
+                                            ویدیو ۱: {ex.videoId.title}
+                                          </button>
+                                        )}
+                                        {ex.videoId2 && (
+                                          <button
+                                            onClick={() => setWatchingVideo(ex.videoId2!)}
+                                            className="text-pink-400 hover:text-pink-300 flex items-center gap-1 transition-colors cursor-pointer"
+                                          >
+                                            <Play className="w-3 h-3 fill-pink-400/20" />
+                                            ویدیو ۲: {ex.videoId2.title}
                                           </button>
                                         )}
                                       </div>
@@ -943,6 +974,7 @@ export default function WorkoutsManagement() {
                                             reps: ex.reps,
                                             restSec: ex.restSec,
                                             videoId: ex.videoId?._id || "",
+                                            videoId2: ex.videoId2?._id || "",
                                             sortOrder: ex.sortOrder,
                                           });
                                           setShowExerciseForm(true);
@@ -976,11 +1008,11 @@ export default function WorkoutsManagement() {
         )}
       </div>
 
-      {/* WATCH VIDEO MODAL */}
+      
       {watchingVideo && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-gray-950 to-gray-900 border border-white/10 rounded-2xl w-full max-w-4xl overflow-hidden flex flex-col shadow-2xl">
-            {/* Header */}
+            
             <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/40">
               <span className="text-white font-bold">{watchingVideo.title}</span>
               <button
@@ -990,7 +1022,7 @@ export default function WorkoutsManagement() {
                 ✕
               </button>
             </div>
-            {/* Video Player */}
+            
             <div className="aspect-video w-full bg-black relative">
               <video
                 src={watchingVideo.url}
@@ -1000,7 +1032,7 @@ export default function WorkoutsManagement() {
                 className="w-full h-full object-contain"
               />
             </div>
-            {/* Footer / Description */}
+            
             <div className="p-4 bg-black/20 text-right">
               <p className="text-white/60 text-xs leading-relaxed">
                 {watchingVideo.description || "بدون توضیحات"}
