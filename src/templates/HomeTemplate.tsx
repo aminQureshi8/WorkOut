@@ -6,14 +6,18 @@ import Testimonials from "@/modules/home/Testimonials";
 import LiveStats from "@/modules/home/LiveStats";
 import LatestArticles from "@/modules/home/LatestArticles";
 
-export default function HomeTemplate() {
+interface HomeTemplateProps {
+  articles: any[];
+}
+
+export default function HomeTemplate({ articles }: HomeTemplateProps) {
   return (
     <>
       <HeroSection />
       <WhyChooseUs />
       <WorkoutPlans />
       <Testimonials />
-      <LatestArticles />
+      <LatestArticles articles={articles} />
       <LiveStats />
       <FAQ />
     </>
