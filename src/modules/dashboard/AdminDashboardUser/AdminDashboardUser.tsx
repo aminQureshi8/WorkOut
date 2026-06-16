@@ -30,24 +30,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-const user = {
-  name: "علی رضایی",
-  avatar: "ع",
-  email: "ali@example.com",
-  level: "کاربر حرفه‌ای",
-  joinDate: "فروردین ۱۴۰۳",
-  coachName: "مربی احمد کریمی",
-};
-
-const subscription = {
-  packageName: "بسته حرفه‌ای",
-  status: "active",
-  daysRemaining: 28,
-  totalDays: 60,
-  endDate: "۱ تیر ۱۴۰۳",
-  nextPayment: "۱,۲۰۰,۰۰۰",
-};
-
 const stats = [
   {
     label: "روز تمرین",
@@ -79,40 +61,6 @@ const stats = [
     color: "from-yellow-500 to-orange-500",
     change: "+۸۰ این هفته",
   },
-];
-
-const recentWorkouts = [
-  {
-    day: "شنبه",
-    type: "سینه و سه‌سر",
-    duration: "۶۵ دقیقه",
-    done: true,
-    sets: 18,
-  },
-  {
-    day: "یک‌شنبه",
-    type: "کمر و دوسر",
-    duration: "۵۵ دقیقه",
-    done: true,
-    sets: 16,
-  },
-  { day: "دوشنبه", type: "استراحت", duration: "—", done: true, sets: 0 },
-  {
-    day: "سه‌شنبه",
-    type: "پا و سرشانه",
-    duration: "۷۰ دقیقه",
-    done: true,
-    sets: 20,
-  },
-  {
-    day: "چهارشنبه",
-    type: "کاردیو",
-    duration: "۴۰ دقیقه",
-    done: false,
-    sets: 0,
-  },
-  { day: "پنج‌شنبه", type: "بدن کامل", duration: "—", done: false, sets: 0 },
-  { day: "جمعه", type: "استراحت", duration: "—", done: false, sets: 0 },
 ];
 
 const upcomingSessions = [
@@ -167,47 +115,59 @@ const recentArticles = [
   },
 ];
 
-const menuItems = [
-  {
-    id: "dashboard",
-    label: "داشبورد",
-    icon: LayoutDashboard,
-    path: "/dashboard",
-  },
-  {
-    id: "subscription",
-    label: "اشتراک من",
-    icon: CreditCard,
-    path: "/my-subscription/1",
-  },
-  {
-    id: "tickets",
-    label: "تیکت‌ها",
-    icon: MessageSquare,
-    badge: "۲",
-    path: "/tickets",
-  },
-  { id: "articles", label: "مقالات", icon: BookOpen, path: "/articles" },
-  { id: "profile", label: "پروفایل", icon: User, path: "/dashboard" },
-];
+interface DashboardProps {
+  initialUser: {
+    name: string;
+    avatar: string;
+    email: string;
+    level: string;
+    joinDate: string;
+    coachName: string;
+  };
+  initialSubscription: {
+    packageName: string;
+    status: string;
+    daysRemaining: number;
+    totalDays: number;
+    endDate: string;
+    nextPayment: string;
+  } | null;
+  initialWorkouts: {
+    day: string;
+    type: string;
+    duration: string;
+    done: boolean;
+    sets: number;
+  }[];
+}
 
-export default function UserDashboard() {
+export default function UserDashboard({
+  initialUser,
+  initialSubscription,
+  initialWorkouts,
+}: DashboardProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activePage, setActivePage] = useState("dashboard");
-  const navigate = usePathname();
+  const user = initialUser;
+  const subscription = initialSubscription;
+  const recentWorkouts = initialWorkouts;
 
-  const progressPercent = Math.round(
-    ((subscription.totalDays - subscription.daysRemaining) /
-      subscription.totalDays) *
-      100,
-  );
+  const progressPercent = subscription
+    ? Math.round(
+        ((subscription.totalDays - subscription.daysRemaining) /
+          subscription.totalDays) *
+          100,
+      )
+    : 0;
+
+  const weekDaysFa = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"];
+  const todayNameFa = weekDaysFa[new Date().getDay()];
+  const todayWorkout = recentWorkouts.find((w) => w.day.includes(todayNameFa)) || null;
 
   return (
     <div
       className="min-h-screen bg-gray-950 text-white"
       style={{ fontFamily: "Dana, Marbuta, sans-serif", direction: "rtl" }}
     >
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-20 lg:hidden"
@@ -215,17 +175,8 @@ export default function UserDashboard() {
         />
       )}
 
-      {/* Sidebar */}
- 
-
-      {/* Main content */}
-      <div
-        className={`transition-all duration-300`}
-      >
-     
-
+      <div className="transition-all duration-300">
         <main className="p-4 md:p-6 space-y-6">
-          {/* Welcome banner */}
           <div
             className="relative rounded-2xl p-6 overflow-hidden"
             style={{
@@ -248,11 +199,14 @@ export default function UserDashboard() {
                 <p className="text-gray-400 text-sm">
                   تمرین امروز:{" "}
                   <span className="text-white font-semibold">
-                    کاردیو ۴۰ دقیقه‌ای
+                    {todayWorkout
+                      ? `${todayWorkout.type} (${todayWorkout.duration})`
+                      : "روز استراحت و ریکاوری"}
                   </span>
                 </p>
               </div>
-              <button
+              <Link
+                href="/dashboard/subscription"
                 className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90"
                 style={{
                   background: "linear-gradient(135deg, #7c3aed, #ec4899)",
@@ -260,11 +214,10 @@ export default function UserDashboard() {
               >
                 <Play size={16} />
                 شروع تمرین
-              </button>
+              </Link>
             </div>
           </div>
 
-          {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, i) => {
               const Icon = stat.icon;
@@ -300,7 +253,6 @@ export default function UserDashboard() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Subscription card */}
             <div
               className="lg:col-span-1 rounded-2xl p-5"
               style={{
@@ -310,72 +262,82 @@ export default function UserDashboard() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-white">اشتراک فعال</h3>
-                <Link
-                  href="/my-subscription/1"
-                  className="text-purple-400 text-xs hover:text-purple-300 flex items-center gap-1"
-                >
-                  جزئیات <ChevronLeft size={14} />
-                </Link>
+                {subscription && (
+                  <Link
+                    href="/dashboard/subscription"
+                    className="text-purple-400 text-xs hover:text-purple-300 flex items-center gap-1"
+                  >
+                    جزئیات <ChevronLeft size={14} />
+                  </Link>
+                )}
               </div>
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: "linear-gradient(135deg, #7c3aed, #ec4899)",
-                  }}
-                >
-                  <Award size={22} className="text-white" />
+              {subscription ? (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{
+                        background: "linear-gradient(135deg, #7c3aed, #ec4899)",
+                      }}
+                    >
+                      <Award size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">
+                        {subscription.packageName}
+                      </p>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
+                        فعال
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+                      <span>پیشرفت اشتراک</span>
+                      <span>{subscription.daysRemaining} روز مانده</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-white/10">
+                      <div
+                        className="h-2 rounded-full transition-all"
+                        style={{
+                          width: `${progressPercent}%`,
+                          background: "linear-gradient(90deg, #7c3aed, #ec4899)",
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">تاریخ پایان</span>
+                      <span className="text-white">{subscription.endDate}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">پرداخت بعدی</span>
+                      <span className="text-white">
+                        {subscription.nextPayment} تومان
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">مربی</span>
+                      <span className="text-purple-300">{user.coachName}</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-6 text-white/40 text-xs">
+                  <AlertCircle className="w-8 h-8 mx-auto mb-2 text-white/20" />
+                  <p>اشتراک فعالی برای شما ثبت نشده است</p>
                 </div>
-                <div>
-                  <p className="font-semibold text-white">
-                    {subscription.packageName}
-                  </p>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
-                    فعال
-                  </span>
-                </div>
-              </div>
-              <div className="mb-3">
-                <div className="flex justify-between text-xs text-gray-400 mb-1.5">
-                  <span>پیشرفت اشتراک</span>
-                  <span>{subscription.daysRemaining} روز مانده</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10">
-                  <div
-                    className="h-2 rounded-full transition-all"
-                    style={{
-                      width: `${progressPercent}%`,
-                      background: "linear-gradient(90deg, #7c3aed, #ec4899)",
-                    }}
-                  ></div>
-                </div>
-              </div>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">تاریخ پایان</span>
-                  <span className="text-white">{subscription.endDate}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">پرداخت بعدی</span>
-                  <span className="text-white">
-                    {subscription.nextPayment} تومان
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">مربی</span>
-                  <span className="text-purple-300">{user.coachName}</span>
-                </div>
-              </div>
+              )}
               <Link
                 href="/packages"
                 className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-medium text-purple-300 border border-purple-500/30 hover:border-purple-500/60 transition-all"
               >
                 <Zap size={14} />
-                ارتقا پکیج
+                ارتقا یا خرید پکیج
               </Link>
             </div>
 
-            {/* Weekly workouts */}
             <div
               className="lg:col-span-2 rounded-2xl p-5"
               style={{
@@ -387,53 +349,49 @@ export default function UserDashboard() {
                 <h3 className="font-bold text-white">برنامه هفتگی</h3>
                 <span className="text-xs text-gray-500">هفته جاری</span>
               </div>
-              <div className="space-y-2">
-                {recentWorkouts.map((w, i) => (
-                  <div
-                    key={i}
-                    className={`flex items-center gap-3 p-3 rounded-xl transition-all ${w.done ? "opacity-100" : "opacity-60"}`}
-                    style={{
-                      background: w.done
-                        ? "rgba(124,58,237,0.1)"
-                        : "rgba(255,255,255,0.03)",
-                      border: `1px solid ${w.done ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.05)"}`,
-                    }}
-                  >
+              {recentWorkouts.length > 0 ? (
+                <div className="space-y-2">
+                  {recentWorkouts.map((w, i) => (
                     <div
-                      className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${w.done ? "bg-green-500/20" : "bg-white/10"}`}
+                      key={i}
+                      className="flex items-center gap-3 p-3 rounded-xl transition-all"
+                      style={{
+                        background: "rgba(124,58,237,0.1)",
+                        border: "1px solid rgba(124,58,237,0.3)",
+                      }}
                     >
-                      {w.done ? (
-                        <CheckCircle size={14} className="text-green-400" />
-                      ) : (
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-white/10">
                         <Clock size={14} className="text-gray-500" />
+                      </div>
+                      <span className="text-gray-400 text-xs w-16 flex-shrink-0">
+                        {w.day}
+                      </span>
+                      <span className="flex-1 text-sm text-white">
+                        {w.type}
+                      </span>
+                      {w.duration !== "—" && (
+                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                          <Clock size={11} /> {w.duration}
+                        </span>
+                      )}
+                      {w.sets > 0 && (
+                        <span className="text-xs text-purple-400">
+                          {w.sets} ست
+                        </span>
                       )}
                     </div>
-                    <span className="text-gray-400 text-xs w-16 flex-shrink-0">
-                      {w.day}
-                    </span>
-                    <span
-                      className={`flex-1 text-sm ${w.done ? "text-white" : "text-gray-500"}`}
-                    >
-                      {w.type}
-                    </span>
-                    {w.duration !== "—" && (
-                      <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Clock size={11} /> {w.duration}
-                      </span>
-                    )}
-                    {w.sets > 0 && (
-                      <span className="text-xs text-purple-400">
-                        {w.sets} ست
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-white/40 text-xs">
+                  <Dumbbell className="w-8 h-8 mx-auto mb-2 text-white/20" />
+                  <p>برنامه تمرینی برای این هفته تعریف نشده است</p>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Upcoming sessions */}
             <div
               className="rounded-2xl p-5"
               style={{
@@ -478,7 +436,6 @@ export default function UserDashboard() {
               </div>
             </div>
 
-            {/* Recent tickets */}
             <div
               className="rounded-2xl p-5"
               style={{
@@ -533,7 +490,6 @@ export default function UserDashboard() {
             </div>
           </div>
 
-          {/* Recent articles */}
           <div
             className="rounded-2xl p-5"
             style={{
@@ -582,7 +538,6 @@ export default function UserDashboard() {
             </div>
           </div>
 
-          {/* Progress chart placeholder */}
           <div
             className="rounded-2xl p-5"
             style={{
@@ -611,7 +566,6 @@ export default function UserDashboard() {
                 ))}
               </div>
             </div>
-            {/* Simple bar chart */}
             <div className="flex items-end gap-2 h-32">
               {[40, 65, 50, 80, 60, 90, 70].map((h, i) => (
                 <div
