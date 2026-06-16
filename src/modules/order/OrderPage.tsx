@@ -127,7 +127,7 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
         return;
       }
 
-      router.push("/payment/success");
+      router.push(`/payment/success?orderId=${orderId}`);
     } catch (error) {
       console.error(error);
       alert("خطا در ثبت سفارش");

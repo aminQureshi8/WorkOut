@@ -1,9 +1,42 @@
-"use client";
-
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import dbConnect from "@/lib/dbConnect";
+import Order from "@/model/Order";
+import Package from "@/model/Package";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, ArrowLeft, ShieldCheck, Zap, Calendar } from "lucide-react";
 
-export default function PaymentSuccessPage() {
+export default async function PaymentSuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ orderId?: string }>;
+}) {
+  const { orderId } = await searchParams;
+
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user || !session.user.id) {
+    redirect("/");
+  }
+
+  if (!orderId) {
+    redirect("/");
+  }
+
+  await dbConnect();
+
+  const order = await Order.findOne({
+    _id: orderId,
+    userId: session.user.id,
+    status: "paid",
+  }).lean();
+
+  if (!order) {
+    redirect("/");
+  }
+
+  const orderPackage = await Package.findById(order.packageId).lean();
+
   return (
     <div
       className="min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 py-12 px-4"
@@ -29,6 +62,13 @@ export default function PaymentSuccessPage() {
         </p>
 
         <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 mb-8 space-y-4 text-right">
+          <div className="flex justify-between items-center text-sm border-b border-white/5 pb-3">
+            <span className="text-white/40">نام پکیج</span>
+            <span className="text-white font-medium">
+              {orderPackage?.name || "پکیج تمرینی"}
+            </span>
+          </div>
+
           <div className="flex justify-between items-center text-sm border-b border-white/5 pb-3">
             <span className="text-white/40">وضعیت پرداخت</span>
             <span className="text-emerald-400 font-medium flex items-center gap-1.5">
