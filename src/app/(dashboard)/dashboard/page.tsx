@@ -11,6 +11,7 @@ import PackageModel from "@/model/Package";
 import CoachModel from "@/model/Coach";
 import VideoModel from "@/model/Video";
 import OrderModel from "@/model/Order";
+import TicketModel from "@/model/Ticket";
 import AdminDashboardUser from "@/modules/dashboard/AdminDashboardUser/AdminDashboardUser";
 
 const registerModels = () => {
@@ -23,10 +24,12 @@ const registerModels = () => {
     PackageModel,
     CoachModel,
     VideoModel,
-    OrderModel
+    OrderModel,
+    TicketModel
   ];
 };
 
+export const dynamic = "force-dynamic";
 
 export default async function page() {
   registerModels();
@@ -109,6 +112,31 @@ export default async function page() {
     }
   }
 
+  const dbTickets = await TicketModel.find({ userId: session.user.id })
+    .sort({ updatedAt: -1 })
+    .limit(3)
+    .lean();
+
+  const ticketsProps = dbTickets.map(t => {
+    let persianStatus = "در حال بررسی";
+    if (t.status === "answered") persianStatus = "پاسخ داده شده";
+    if (t.status === "closed") persianStatus = "بسته شده";
+
+    const formattedTime = new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(new Date(t.updatedAt || t.createdAt));
+
+    return {
+      id: t._id.toString(),
+      subject: t.subject,
+      status: persianStatus,
+      rawStatus: t.status,
+      time: formattedTime,
+    };
+  });
+
   const joinDateString = new Intl.DateTimeFormat("fa-IR", {
     year: "numeric",
     month: "long",
@@ -128,6 +156,7 @@ export default async function page() {
       initialUser={userProps}
       initialSubscription={subscriptionProps}
       initialWorkouts={workoutDaysProps}
+      initialTickets={ticketsProps}
     />
   );
 }
