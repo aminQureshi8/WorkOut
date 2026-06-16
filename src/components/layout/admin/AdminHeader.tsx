@@ -5,9 +5,10 @@ import { useSidebar } from "./SidebarContext";
 interface AdminHeaderProps {
   username?: string;
   role?: string;
+  avatar?: string;
 }
 
-export default function AdminHeader({ username = "مدیر", role = "admin" }: AdminHeaderProps) {
+export default function AdminHeader({ username = "مدیر", role = "admin", avatar = "م" }: AdminHeaderProps) {
   const { onToggle } = useSidebar();
 
   return (
@@ -28,7 +29,7 @@ export default function AdminHeader({ username = "مدیر", role = "admin" }: A
               >
                 داشبورد
               </h1>
-              <p className="text-white/50 text-xs">خوش آمدید مربی علی محمدی</p>
+              <p className="text-white/50 text-xs">خوش آمدید، {username}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -49,7 +50,7 @@ export default function AdminHeader({ username = "مدیر", role = "admin" }: A
                 </div>
               </div>
               <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
-                ع
+                {avatar}
               </div>
             </div>
           </div>

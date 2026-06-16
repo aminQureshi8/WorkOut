@@ -13,43 +13,42 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const recentUsers = [
-  {
-    id: 1,
-    name: "محمد رضایی",
-    package: "بسته حرفه‌ای",
-    status: "فعال",
-    joinDate: "۱۵ اردیبهشت",
-  },
-  {
-    id: 2,
-    name: "سارا احمدی",
-    package: "بسته VIP",
-    status: "فعال",
-    joinDate: "۱۲ اردیبهشت",
-  },
-  {
-    id: 3,
-    name: "علی کریمی",
-    package: "بسته پایه",
-    status: "منقضی",
-    joinDate: "۸ فروردین",
-  },
-  {
-    id: 4,
-    name: "فاطمه نوری",
-    package: "بسته حرفه‌ای",
-    status: "فعال",
-    joinDate: "۵ اردیبهشت",
-  },
-  {
-    id: 5,
-    name: "حسین محمدی",
-    package: "بسته VIP",
-    status: "فعال",
-    joinDate: "۳ اردیبهشت",
-  },
+const gradients = [
+  "from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/30",
+  "from-blue-500/20 to-cyan-500/20 text-blue-300 border-blue-500/30",
+  "from-amber-500/20 to-orange-500/20 text-amber-300 border-amber-500/30",
+  "from-emerald-500/20 to-teal-500/20 text-emerald-300 border-emerald-500/30",
+  "from-rose-500/20 to-red-500/20 text-rose-300 border-rose-500/30",
 ];
+
+const statusMap: Record<string, { text: string; bg: string; dot: string }> = {
+  active: {
+    text: "فعال",
+    bg: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+    dot: "bg-emerald-400 animate-pulse",
+  },
+  expired: {
+    text: "منقضی شده",
+    bg: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+    dot: "bg-amber-400",
+  },
+  blocked: {
+    text: "مسدود شده",
+    bg: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
+    dot: "bg-rose-400",
+  },
+};
+
+const roleMap: Record<string, { text: string; bg: string }> = {
+  admin: {
+    text: "مدیر",
+    bg: "bg-purple-500/10 text-purple-300 border border-purple-500/20",
+  },
+  coach: {
+    text: "مربی",
+    bg: "bg-cyan-500/10 text-cyan-300 border border-cyan-500/20",
+  },
+};
 
 const recentTickets = [
   {
@@ -78,7 +77,7 @@ const recentTickets = [
 export default async function AdminDashboardAdmin() {
   await dbConnect();
 
-  const users = await User.find({}, "username createdAt")
+  const users = await User.find({}, "username email fullName role status createdAt")
     .sort({ createdAt: -1 })
     .limit(5);
 
@@ -199,44 +198,69 @@ export default async function AdminDashboardAdmin() {
           </div>
           <div className="p-3 sm:p-6">
             <div className="space-y-2 sm:space-y-4">
-              {users.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
-                >
-                  <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                    <div className="w-9 h-9 sm:w-12 sm:h-12 bg-orange-500/20 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
-                      {user.username.charAt(0)}
+              {users.map((user, index) => {
+                const displayName = user.fullName || user.username || "?";
+                const initial = displayName.charAt(0).toUpperCase();
+                const dateStr = new Date(user.createdAt).toLocaleDateString("fa-IR", {
+                  day: "numeric",
+                  month: "long",
+                });
+                const statusInfo = statusMap[user.status] || {
+                  text: "نامشخص",
+                  bg: "bg-white/5 text-white/60 border border-white/10",
+                  dot: "bg-white/40",
+                };
+                const roleInfo = roleMap[user.role];
+                const gradientClass = gradients[index % gradients.length];
+
+                return (
+                  <div
+                    key={user._id.toString()}
+                    className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-white/[0.03] to-white/[0.01] hover:from-white/[0.08] hover:to-white/[0.04] border border-white/5 hover:border-white/10 rounded-2xl transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:shadow-orange-500/[0.02]"
+                  >
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                      <div className={`w-9 h-9 sm:w-12 sm:h-12 bg-gradient-to-br border rounded-full flex items-center justify-center font-bold text-sm sm:text-base flex-shrink-0 shadow-inner ${gradientClass}`}>
+                        {initial}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5">
+                          <span className="text-white font-semibold text-sm sm:text-base truncate">
+                            {displayName}
+                          </span>
+                          {roleInfo && (
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium leading-none ${roleInfo.bg}`}>
+                              {roleInfo.text}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-white/40 text-xs truncate font-mono tracking-wide">
+                          {user.email || user.username}
+                        </div>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <div className="text-white font-medium text-sm sm:text-base truncate">
-                        {user.username}
+                    <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                      <div className="text-left hidden md:block">
+                        <div className="text-white/40 text-[10px] uppercase tracking-wider mb-0.5">
+                          تاریخ عضویت
+                        </div>
+                        <div className="text-white/85 text-xs sm:text-sm font-medium">
+                          {dateStr}
+                        </div>
                       </div>
-                      <div className="text-white/60 text-xs sm:text-sm truncate">
-                        {/* {user.package} */}
-                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-xs flex items-center gap-1.5 font-medium ${statusInfo.bg}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`} />
+                        {statusInfo.text}
+                      </span>
+                      <Link
+                        href="/admin/users"
+                        className="text-white/40 hover:text-white transition-colors p-1.5 hover:bg-white/5 rounded-lg hidden sm:block"
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </Link>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-                    <div className="text-left hidden md:block">
-                      <div className="text-white/60 text-xs sm:text-sm">
-                        تاریخ عضویت
-                      </div>
-                      <div className="text-white text-xs sm:text-sm">
-                        {new Date(user.createdAt).toLocaleDateString("fa-IR")}
-                      </div>
-                    </div>
-                    <span
-                      className={`px-2 sm:px-3 py-1 rounded-full text-xs ${user.status === "فعال" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}
-                    >
-                      {/* {user.status} */}
-                    </span>
-                    <button className="text-white/50 hover:text-white hidden sm:block">
-                      <MoreVertical className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
