@@ -3,39 +3,12 @@
 import React, { useState } from "react";
 import { Dumbbell, Calendar, Play, ChevronDown, ChevronUp, Film } from "lucide-react";
 
-interface VideoInfo {
-  _id: string;
-  title: string;
-  description?: string;
-  url: string;
-  thumbnailUrl?: string;
-}
-
-interface ExerciseItem {
-  _id: string;
-  name: string;
-  sets: number;
-  reps: string;
-  restSec: number;
-  videoId?: VideoInfo | null;
-  videoId2?: VideoInfo | null;
-}
-
-interface DayItem {
-  _id: string;
-  dayName: string;
-  muscleGroup: string;
-  exercises: ExerciseItem[];
-}
-
-interface WorkoutPlanProps {
-  plan: {
-    _id: string;
-    title: string;
-    description?: string;
-  } | null;
-  days: DayItem[];
-}
+import {
+  VideoInfo,
+  ExerciseItem,
+  DayItem,
+  WorkoutPlanProps,
+} from "@/types/workout";
 
 export default function DashboardWorkoutPlan({ plan, days }: WorkoutPlanProps) {
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({

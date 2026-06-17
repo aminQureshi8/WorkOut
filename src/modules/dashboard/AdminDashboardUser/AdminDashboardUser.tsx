@@ -79,26 +79,7 @@ const upcomingSessions = [
   { title: "تجدید اشتراک", time: "۱ تیر ۱۴۰۳", type: "مالی", icon: "💳" },
 ];
 
-const recentArticles = [
-  {
-    title: "راهنمای تغذیه قبل از تمرین",
-    category: "تغذیه",
-    readTime: "۵ دقیقه",
-    image: "🥗",
-  },
-  {
-    title: "۱۰ تمرین برای تقویت عضله سینه",
-    category: "تمرین",
-    readTime: "۷ دقیقه",
-    image: "💪",
-  },
-  {
-    title: "اهمیت خواب در عضله‌سازی",
-    category: "سلامت",
-    readTime: "۴ دقیقه",
-    image: "😴",
-  },
-];
+
 
 interface DashboardProps {
   initialUser: {

@@ -25,73 +25,15 @@ import {
   Film
 } from "lucide-react";
 
-interface UserInfo {
-  _id: string;
-  username: string;
-  fullName: string;
-  email: string;
-  phone: string;
-}
-
-interface PackageInfo {
-  _id: string;
-  name: string;
-  slug: string;
-  colorClass: string;
-  price?: {
-    monthly: number;
-  };
-}
-
-interface SubscriptionItem {
-  _id: string;
-  userId: UserInfo | null;
-  packageId: PackageInfo | null;
-  status: "trial" | "active" | "expired" | "cancelled";
-  startsAt: string;
-  endsAt: string;
-  createdAt: string;
-}
-
-interface WorkoutPlan {
-  _id: string;
-  packageId: string;
-  title: string;
-  description?: string;
-  isActive: boolean;
-}
-
-interface WorkoutDay {
-  _id: string;
-  planId: string;
-  dayName: string;
-  muscleGroup: string;
-  sortOrder: number;
-}
-
-interface VideoInfo {
-  _id: string;
-  title: string;
-  description?: string;
-  url: string;
-  thumbnailUrl?: string;
-  level?: string;
-  durationSec?: number;
-  tags?: string[];
-  createdAt?: string;
-}
-
-interface WorkoutExercise {
-  _id: string;
-  dayId: string;
-  videoId?: VideoInfo | null;
-  videoId2?: VideoInfo | null;
-  name: string;
-  sets: number;
-  reps: string;
-  restSec: number;
-  sortOrder: number;
-}
+import {
+  UserInfo,
+  PackageInfo,
+  SubscriptionItem,
+  WorkoutPlan,
+  WorkoutDay,
+  VideoInfo,
+  WorkoutExercise,
+} from "@/types/workout";
 
 export default function SubscriptionsManagement() {
 
