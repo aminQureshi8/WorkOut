@@ -20,7 +20,6 @@ export default async function page({ params }: PageProps) {
 
   const decodedSlug = decodeURIComponent(slug);
 
-  // Fetch current article by slug and populate virtual comments
   const blog = await Blog.findOne({ slug: decodedSlug, status: "published" })
     .populate("authorId", "username fullName email role")
     .populate({
@@ -34,7 +33,6 @@ export default async function page({ params }: PageProps) {
     notFound();
   }
 
-  // Fetch related articles in same category (excluding current article)
   const relatedBlogs = await Blog.find({
     category: blog.category,
     status: "published",
@@ -43,6 +41,20 @@ export default async function page({ params }: PageProps) {
     .sort({ createdAt: -1 })
     .limit(3)
     .lean();
+
+  // let isWished = false;
+  let isLiked = false;
+  if (userId) {
+    // const existingWish = await Wish.findOne({ userId, blogId: blog._id }).lean();
+    // if (existingWish) {
+    //   isWished = true;
+    // }
+    if (blog.likedUsers) {
+      isLiked = blog.likedUsers.some(
+        (id: any) => id.toString() === userId.toString()
+      );
+    }
+  }
 
   const serializedArticle = JSON.parse(JSON.stringify(blog));
   const serializedRelated = JSON.parse(JSON.stringify(relatedBlogs));
@@ -53,6 +65,8 @@ export default async function page({ params }: PageProps) {
       relatedArticles={serializedRelated}
       userId={userId}
       currentUser={session?.user || null}
+      // isWished={isWished}
+      isLiked={isLiked}
     />
   );
 }

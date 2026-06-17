@@ -12,6 +12,8 @@ import CoachModel from "@/model/Coach";
 import VideoModel from "@/model/Video";
 import OrderModel from "@/model/Order";
 import TicketModel from "@/model/Ticket";
+import BlogModel from "@/model/Blog";
+import WishModel from "@/model/Wish";
 import AdminDashboardUser from "@/modules/dashboard/AdminDashboardUser/AdminDashboardUser";
 
 const registerModels = () => {
@@ -25,7 +27,9 @@ const registerModels = () => {
     CoachModel,
     VideoModel,
     OrderModel,
-    TicketModel
+    TicketModel,
+    BlogModel,
+    WishModel
   ];
 };
 
@@ -151,12 +155,32 @@ export default async function page() {
     coachName: activeSubscription?.coachId?.fullName || "بدون مربی اختصاصی",
   };
 
+  const dbWishlist = await WishModel.find({ userId: session.user.id })
+    .populate("blogId")
+    .lean();
+
+  const wishlistProps: any[] = dbWishlist
+    .map((w: any) => {
+      const b = w.blogId;
+      if (!b) return null;
+      return {
+        id: b._id?.toString() || "",
+        title: b.title || "",
+        slug: b.slug || "",
+        image: b.image || "",
+        category: b.category || "",
+        views: b.views || 0,
+      };
+    })
+    .filter(Boolean);
+
   return (
     <AdminDashboardUser 
       initialUser={userProps}
       initialSubscription={subscriptionProps}
       initialWorkouts={workoutDaysProps}
       initialTickets={ticketsProps}
+      initialWishlist={wishlistProps}
     />
   );
 }

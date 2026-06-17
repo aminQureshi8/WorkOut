@@ -14,6 +14,9 @@ export interface IBlog extends Document {
   tags?: string[];
   authorId: mongoose.Types.ObjectId;
   views: number;
+  viewedUsers?: mongoose.Types.ObjectId[];
+  likes?: number;
+  likedUsers?: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +40,9 @@ const BlogSchema = new Schema<IBlog>(
     tags: { type: [String], default: [] },
     authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     views: { type: Number, default: 0 },
+    viewedUsers: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
+    likes: { type: Number, default: 0 },
+    likedUsers: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
   },
   { 
     timestamps: true,

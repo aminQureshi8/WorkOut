@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Clock,
   Calendar,
@@ -30,6 +30,8 @@ interface ArticleDetailProps {
     avatar?: string;
     role: string;
   } | null;
+  isWished?: boolean;
+  isLiked?: boolean;
 }
 
 export default function ArticleDetail({
@@ -37,18 +39,107 @@ export default function ArticleDetail({
   relatedArticles = [],
   userId = null,
   currentUser = null,
+  isWished = false,
+  isLiked = false,
 }: ArticleDetailProps) {
-  const [liked, setLiked] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
-  const [likeCount, setLikeCount] = useState(
-    article?.views ? Math.max(12, Math.ceil(article.views * 0.15)) : 86,
-  );
+  const [liked, setLiked] = useState(isLiked);
+  const [bookmarked, setBookmarked] = useState(isWished);
+  const [likeCount, setLikeCount] = useState(article?.likedUsers?.length || 0);
   const [newComment, setNewComment] = useState("");
   const [commentList, setCommentList] = useState<any[]>(article?.comments || []);
+  const [viewCount, setViewCount] = useState(article?.views || 0);
 
-  const handleLike = () => {
-    setLiked(!liked);
-    setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+  useEffect(() => {
+    const recordView = async () => {
+      try {
+        const res = await fetch("/api/blog/view", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ blogId: article._id }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.incremented) {
+            setViewCount(data.views);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    recordView();
+  }, [article._id]);
+
+  const handleBookmark = async () => {
+    if (!userId) {
+      Swal.fire({
+        title: "ورود به حساب کاربری",
+        text: "برای افزودن به لیست علاقه‌مندی‌ها، ابتدا وارد حساب کاربری خود شوید.",
+        icon: "warning",
+        confirmButtonText: "باشه",
+        background: "#111827",
+        color: "#ffffff",
+        confirmButtonColor: "#7c3aed",
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/blog/wish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blogId: article._id }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarked(data.wished);
+        Swal.fire({
+          title: data.wished ? "افزوده شد" : "حذف شد",
+          text: data.wished
+            ? "این مقاله به لیست علاقه‌مندی‌های شما اضافه شد."
+            : "این مقاله از لیست علاقه‌مندی‌های شما حذف شد.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+          background: "#111827",
+          color: "#ffffff",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!userId) {
+      Swal.fire({
+        title: "ورود به حساب کاربری",
+        text: "برای پسندیدن مقالات، ابتدا وارد حساب کاربری خود شوید.",
+        icon: "warning",
+        confirmButtonText: "باشه",
+        background: "#111827",
+        color: "#ffffff",
+        confirmButtonColor: "#7c3aed",
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/blog/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blogId: article._id }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setLiked(data.liked);
+        setLikeCount(data.likes);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSendComment = async () => {
@@ -241,7 +332,7 @@ export default function ArticleDetail({
                   <Clock size={13} /> {getReadTime(article.content)}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Eye size={13} /> {article.views || 0} بازدید
+                  <Eye size={13} /> {viewCount} بازدید
                 </span>
               </div>
             </div>
@@ -257,7 +348,7 @@ export default function ArticleDetail({
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleLike}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all cursor-pointer ${liked ? "text-red-400" : "text-gray-400 hover:text-white"}`}
+                  className={`flex items-center ss02 gap-2 px-4 py-2 rounded-xl text-sm transition-all cursor-pointer ${liked ? "text-red-400" : "text-gray-400 hover:text-white"}`}
                   style={{
                     background: liked
                       ? "rgba(239,68,68,0.15)"
@@ -268,7 +359,7 @@ export default function ArticleDetail({
                   {likeCount}
                 </button>
                 <button
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-gray-400 hover:text-white transition-all cursor-pointer"
+                  className="flex ss02 items-center gap-2 px-4 py-2 rounded-xl text-sm text-gray-400 hover:text-white transition-all cursor-pointer"
                   style={{ background: "rgba(255,255,255,0.05)" }}
                 >
                   <MessageSquare size={16} />
@@ -277,7 +368,7 @@ export default function ArticleDetail({
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setBookmarked(!bookmarked)}
+                  onClick={handleBookmark}
                   className={`p-2 rounded-xl transition-all cursor-pointer ${bookmarked ? "text-yellow-400" : "text-gray-400 hover:text-white"}`}
                   style={{
                     background: bookmarked

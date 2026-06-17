@@ -8,6 +8,7 @@ export interface IUser extends Document {
   fullName: string;
   phone: string;
   status: "active" | "expired" | "blocked";
+  wishlist?: mongoose.Types.ObjectId[];
   lastLogin?: Date;
   createdAt: Date;
 }
@@ -21,6 +22,7 @@ const UserSchema = new Schema<IUser>(
     phone: { type: String, default: "" },
     role: { type: String, enum: ["user", "admin", "coach"], default: "user" },
     status: { type: String, enum: ["active", "expired", "blocked"], default: "active" },
+    wishlist: { type: [Schema.Types.ObjectId], ref: "Blog", default: [] },
     lastLogin: { type: Date, default: null },
   },
   { timestamps: true },
