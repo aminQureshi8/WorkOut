@@ -46,8 +46,47 @@ export default function ArticleDetail({
   const [bookmarked, setBookmarked] = useState(isWished);
   const [likeCount, setLikeCount] = useState(article?.likedUsers?.length || 0);
   const [newComment, setNewComment] = useState("");
-  const [commentList, setCommentList] = useState<any[]>(article?.comments || []);
+  const [commentList, setCommentList] = useState<any[]>([]);
+  const [commentPage, setCommentPage] = useState(1);
+  const [totalComments, setTotalComments] = useState(0);
+  const [hasMoreComments, setHasMoreComments] = useState(false);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [viewCount, setViewCount] = useState(article?.views || 0);
+
+  useEffect(() => {
+    if (!article?._id) return;
+    const fetchComments = async () => {
+      setIsLoadingComments(true);
+      try {
+        const res = await fetch(
+          `/api/blog/comment?blogId=${article._id}&page=${commentPage}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            const newComments = data.comments || [];
+            if (commentPage === 1) {
+              setCommentList(newComments);
+              setTotalComments(data.totalCount || 0);
+              setHasMoreComments(newComments.length < (data.totalCount || 0));
+            } else {
+              setCommentList((prev) => {
+                const updated = [...prev, ...newComments];
+                setTotalComments(data.totalCount || 0);
+                setHasMoreComments(updated.length < (data.totalCount || 0));
+                return updated;
+              });
+            }
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoadingComments(false);
+      }
+    };
+    fetchComments();
+  }, [article?._id, commentPage]);
 
   useEffect(() => {
     const recordView = async () => {
@@ -363,7 +402,7 @@ export default function ArticleDetail({
                   style={{ background: "rgba(255,255,255,0.05)" }}
                 >
                   <MessageSquare size={16} />
-                  {commentList.length}
+                  {totalComments}
                 </button>
               </div>
               <div className="flex items-center gap-2">
@@ -415,7 +454,7 @@ export default function ArticleDetail({
                 className="text-xl font-bold text-white mb-6"
                 style={{ fontFamily: "Marbeh, sans-serif" }}
               >
-                نظرات ({commentList.length})
+                نظرات ({totalComments})
               </h3>
 
               <div className="rounded-2xl p-5 mb-6 bg-white/5 border border-white/10">
@@ -440,7 +479,12 @@ export default function ArticleDetail({
               </div>
 
               <div className="space-y-4">
-                {commentList.length > 0 ? (
+                {isLoadingComments && commentList.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <span className="w-8 h-8 border-3 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-2"></span>
+                    <p className="text-white/40 text-sm">در حال بارگذاری نظرات...</p>
+                  </div>
+                ) : commentList.length > 0 ? (
                   commentList.map((c, i) => (
                     <div
                       key={i}
@@ -479,6 +523,25 @@ export default function ArticleDetail({
                   <p className="text-white/40 text-center py-8 text-sm">هیچ نظری برای این مقاله ثبت نشده است.</p>
                 )}
               </div>
+
+              {hasMoreComments && (
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={() => setCommentPage((prev) => prev + 1)}
+                    disabled={isLoadingComments}
+                    className="px-6 py-2.5 rounded-xl text-sm font-medium text-white transition-all bg-white/5 border border-white/10 hover:bg-white/10 disabled:opacity-50 cursor-pointer flex items-center gap-2"
+                  >
+                    {isLoadingComments ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                        در حال بارگذاری...
+                      </>
+                    ) : (
+                      "مشاهده بیشتر"
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

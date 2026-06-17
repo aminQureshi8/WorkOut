@@ -131,15 +131,17 @@ export default async function SubscriptionPage() {
   
   let workoutPlan = null;
   let workoutDays: any[] = [];
-  
+
   if (subscription) {
-    workoutPlan = await WorkoutPlanModel.findOne({
+    const rawPlan = await WorkoutPlanModel.findOne({
       packageId: subscription.packageId?._id,
       isActive: true,
     }).lean();
 
-    if (workoutPlan) {
-      const days = await WorkoutDayModel.find({ planId: workoutPlan._id })
+    if (rawPlan) {
+      workoutPlan = JSON.parse(JSON.stringify(rawPlan));
+
+      const days = await WorkoutDayModel.find({ planId: rawPlan._id })
         .sort({ sortOrder: 1 })
         .lean();
 
@@ -150,24 +152,12 @@ export default async function SubscriptionPage() {
         .sort({ sortOrder: 1 })
         .lean();
 
-      workoutDays = days.map(day => ({
+      const mappedDays = days.map(day => ({
         ...day,
-        _id: day._id.toString(),
-        exercises: exercises
-          .filter(e => e.dayId.toString() === day._id.toString())
-          .map(e => ({
-            ...e,
-            _id: e._id.toString(),
-            videoId: e.videoId ? {
-              ...e.videoId,
-              _id: e.videoId._id.toString()
-            } : null,
-            videoId2: e.videoId2 ? {
-              ...e.videoId2,
-              _id: e.videoId2._id.toString()
-            } : null
-          }))
+        exercises: exercises.filter(e => e.dayId.toString() === day._id.toString())
       }));
+
+      workoutDays = JSON.parse(JSON.stringify(mappedDays));
     }
   }
 

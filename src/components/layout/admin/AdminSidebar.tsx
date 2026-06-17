@@ -17,6 +17,7 @@ import {
   LogOut,
   HelpCircle,
   MessageSquare,
+  Heart,
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import Link from "next/link";
@@ -30,7 +31,8 @@ export default function AdminSidebar({ isAdmin = false }) {
     users: 0,
     subscriptions: 0,
     articles: 0,
-    comments: 0
+    comments: 0,
+    wishlist: 0
   });
 
   useEffect(() => {
@@ -39,19 +41,38 @@ export default function AdminSidebar({ isAdmin = false }) {
         const res = await fetch("/api/admin/sidebar-stats");
         if (res.ok) {
           const data = await res.json();
-          setCounts({
+          setCounts((prev) => ({
+            ...prev,
             users: data.usersCount || 0,
             subscriptions: data.subscriptionsCount || 0,
             articles: data.articlesCount || 0,
             comments: data.pendingCommentsCount || 0
-          });
+          }));
         }
       } catch (err) {
         console.error("Failed to load sidebar stats:", err);
       }
     }
+
+    async function loadUserStats() {
+      try {
+        const res = await fetch("/api/user/wishlist-count");
+        if (res.ok) {
+          const data = await res.json();
+          setCounts((prev) => ({
+            ...prev,
+            wishlist: data.count || 0
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to load user wishlist count:", err);
+      }
+    }
+
     if (isAdmin) {
       loadStats();
+    } else {
+      loadUserStats();
     }
   }, [isAdmin, pathname]);
 
@@ -190,6 +211,13 @@ export default function AdminSidebar({ isAdmin = false }) {
           icon: UserCog,
           badge: null,
           href: "/dashboard/profile",
+        },
+        {
+          id: "wishlist",
+          label: "علاقه‌مندی‌ها",
+          icon: Heart,
+          badge: counts.wishlist > 0 ? formatNumber(counts.wishlist) : null,
+          href: "/dashboard/favorites",
         },
         {
           id: "tickets",

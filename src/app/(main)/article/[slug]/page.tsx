@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import Blog from "@/model/Blog";
+import Wish from "@/model/Wish";
 import ArticleDetail from "@/modules/article/ArticleDetail";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -21,13 +22,7 @@ export default async function page({ params }: PageProps) {
   const decodedSlug = decodeURIComponent(slug);
 
   const blog = await Blog.findOne({ slug: decodedSlug, status: "published" })
-    .populate("authorId", "username fullName email role")
-    .populate({
-      path: "comments",
-      match: { isApproved: true },
-      options: { sort: { createdAt: -1 } },
-      strictPopulate: false,
-    });
+    .populate("authorId", "username fullName email role");
 
   if (!blog) {
     notFound();
@@ -42,13 +37,13 @@ export default async function page({ params }: PageProps) {
     .limit(3)
     .lean();
 
-  // let isWished = false;
+  let isWished = false;
   let isLiked = false;
   if (userId) {
-    // const existingWish = await Wish.findOne({ userId, blogId: blog._id }).lean();
-    // if (existingWish) {
-    //   isWished = true;
-    // }
+    const existingWish = await Wish.findOne({ userId, blogId: blog._id }).lean();
+    if (existingWish) {
+      isWished = true;
+    }
     if (blog.likedUsers) {
       isLiked = blog.likedUsers.some(
         (id: any) => id.toString() === userId.toString()
@@ -65,7 +60,7 @@ export default async function page({ params }: PageProps) {
       relatedArticles={serializedRelated}
       userId={userId}
       currentUser={session?.user || null}
-      // isWished={isWished}
+      isWished={isWished}
       isLiked={isLiked}
     />
   );
