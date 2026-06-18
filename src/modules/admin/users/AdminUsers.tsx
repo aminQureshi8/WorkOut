@@ -13,7 +13,7 @@ import {
   XCircle,
   UserCheck,
 } from "lucide-react";
-import Swal from "sweetalert2";
+import { showAlert, showConfirm } from "@/utils/alert";
 import { useCallback, useEffect, useState } from "react";
 
 interface IUser {
@@ -200,28 +200,20 @@ export default function AdminUsers() {
         throw new Error(err.error || "خطا در بروزرسانی مشخصات کاربر");
       }
 
-      Swal.fire({
+      showAlert({
         title: "موفقیت",
         text: "تغییرات با موفقیت ذخیره شد!",
         icon: "success",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#f97316",
       });
 
       setShowEditModal(false);
       setEditingUser(null);
       getUsers();
     } catch (err: any) {
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: err.message || "خطا در ذخیره تغییرات",
         icon: "error",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#f97316",
       });
     }
   };
@@ -235,56 +227,43 @@ export default function AdminUsers() {
     const confirmButtonText = isBlocked ? "بله، فعال شود" : "بله، مسدود شود";
     const confirmButtonColor = isBlocked ? "#10b981" : "#ef4444";
 
-    Swal.fire({
+    const confirmed = await showConfirm({
       title,
       text,
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText,
-      cancelButtonText: "انصراف",
       confirmButtonColor,
-      cancelButtonColor: "#6b7280",
-      background: "#111827",
-      color: "#ffffff",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const newStatus = isBlocked ? "active" : "blocked";
-          const res = await fetch(`/api/admin/user/${user._id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: newStatus }),
-          });
-
-          if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || "خطا در انجام عملیات");
-          }
-
-          Swal.fire({
-            title: "موفقیت",
-            text: isBlocked ? "کاربر با موفقیت فعال شد." : "کاربر با موفقیت مسدود شد.",
-            icon: "success",
-            confirmButtonText: "باشه",
-            background: "#111827",
-            color: "#ffffff",
-            confirmButtonColor: "#f97316",
-          });
-
-          getUsers();
-        } catch (err: any) {
-          Swal.fire({
-            title: "خطا",
-            text: err.message || "انجام عملیات با خطا مواجه شد",
-            icon: "error",
-            confirmButtonText: "باشه",
-            background: "#111827",
-            color: "#ffffff",
-            confirmButtonColor: "#f97316",
-          });
-        }
-      }
+      icon: "warning",
     });
+
+    if (confirmed) {
+      try {
+        const newStatus = isBlocked ? "active" : "blocked";
+        const res = await fetch(`/api/admin/user/${user._id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "خطا در انجام عملیات");
+        }
+
+        showAlert({
+          title: "موفقیت",
+          text: isBlocked ? "کاربر با موفقیت فعال شد." : "کاربر با موفقیت مسدود شد.",
+          icon: "success",
+        });
+
+        getUsers();
+      } catch (err: any) {
+        showAlert({
+          title: "خطا",
+          text: err.message || "انجام عملیات با خطا مواجه شد",
+          icon: "error",
+        });
+      }
+    }
   };
 
   const formatNumber = (num: number) =>

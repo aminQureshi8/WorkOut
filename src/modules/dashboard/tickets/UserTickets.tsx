@@ -10,7 +10,7 @@ import {
   Shield,
   HelpCircle,
 } from "lucide-react";
-import Swal from "sweetalert2";
+import { showAlert } from "@/utils/alert";
 
 import {
   IClientUser as IUser,
@@ -35,24 +35,7 @@ export default function UserTickets() {
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const showAlert = (
-    title: string,
-    text: string,
-    icon: "success" | "error" | "warning" | "info" = "info",
-  ) => {
-    Swal.fire({
-      title,
-      text,
-      icon,
-      confirmButtonText: "باشه",
-      background: "#1e1b4b",
-      color: "#ffffff",
-      confirmButtonColor: "#a855f7",
-      customClass: {
-        popup: "border border-purple-500/20 rounded-2xl",
-      },
-    });
-  };
+
 
   const fetchTickets = useCallback(
     async (selectIdAfterFetch?: string) => {

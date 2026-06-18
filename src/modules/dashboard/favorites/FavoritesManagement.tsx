@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { BookOpen, Heart, Eye, ArrowRight, Trash2 } from "lucide-react";
 import Link from "next/link";
-import Swal from "sweetalert2";
+import { showAlert } from "@/utils/alert";
 
 interface FavoritesManagementProps {
   initialWishlist: {
@@ -31,14 +31,12 @@ export default function FavoritesManagement({
         const data = await res.json();
         if (!data.wished) {
           setWishlist((prev) => prev.filter((item) => item.id !== blogId));
-          Swal.fire({
+          showAlert({
             title: "حذف شد",
             text: "این مقاله از لیست علاقه‌مندی‌های شما حذف شد.",
             icon: "success",
             timer: 1500,
             showConfirmButton: false,
-            background: "#111827",
-            color: "#ffffff",
           });
           setTimeout(() => {
             window.location.reload();
@@ -47,13 +45,11 @@ export default function FavoritesManagement({
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "عملیات با خطا مواجه شد. لطفاً دوباره تلاش کنید.",
         icon: "error",
         confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
         confirmButtonColor: "#7c3aed",
       });
     }

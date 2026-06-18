@@ -16,7 +16,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Image from "next/image";
-import Swal from "sweetalert2";
+import { showAlert, showConfirm } from "@/utils/alert";
 import Pagination from "@/components/AdminPagination";
 
 const categories = [
@@ -51,7 +51,7 @@ export default function AdminArticles() {
     fetchArticles();
   }, [currentPage, selectedCategory, selectedStatus]);
 
-  // Debounced search fetch
+  
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (currentPage !== 1) {
@@ -101,13 +101,10 @@ export default function AdminArticles() {
       }
     } catch (error) {
       console.error(error);
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "بارگذاری اطلاعات مقالات با خطا مواجه شد.",
         icon: "error",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
         confirmButtonColor: "#7c3aed",
       });
     } finally {
@@ -132,32 +129,23 @@ export default function AdminArticles() {
   };
 
   const handleDeleteArticle = async (id: string) => {
-    const confirm = await Swal.fire({
+    const confirm = await showConfirm({
       title: "آیا مطمئن هستید؟",
       text: "این عمل غیرقابل بازگشت است و مقاله حذف خواهد شد.",
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "بله، حذف شود",
-      cancelButtonText: "انصراف",
-      background: "#111827",
-      color: "#ffffff",
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#374151",
     });
 
-    if (confirm.isConfirmed) {
+    if (confirm) {
       try {
         const res = await fetch(`/api/admin/blog?id=${id}`, {
           method: "DELETE",
         });
         if (res.ok) {
-          Swal.fire({
+          showAlert({
             title: "حذف شد",
             text: "مقاله با موفقیت حذف شد.",
             icon: "success",
-            confirmButtonText: "باشه",
-            background: "#111827",
-            color: "#ffffff",
             confirmButtonColor: "#7c3aed",
           });
           fetchArticles();
@@ -165,13 +153,10 @@ export default function AdminArticles() {
           throw new Error();
         }
       } catch (e) {
-        Swal.fire({
+        showAlert({
           title: "خطا",
           text: "حذف مقاله با خطا مواجه شد.",
           icon: "error",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
           confirmButtonColor: "#7c3aed",
         });
       }
@@ -181,20 +166,14 @@ export default function AdminArticles() {
   const handleBulkDelete = async () => {
     if (selectedArticles.length === 0) return;
 
-    const confirm = await Swal.fire({
+    const confirm = await showConfirm({
       title: "آیا مطمئن هستید؟",
       text: `آیا مایلید ${formatNumber(selectedArticles.length)} مقاله انتخاب شده را حذف کنید؟ این عمل غیرقابل بازگشت است.`,
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "بله، حذف شوند",
-      cancelButtonText: "انصراف",
-      background: "#111827",
-      color: "#ffffff",
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#374151",
     });
 
-    if (confirm.isConfirmed) {
+    if (confirm) {
       try {
         setLoading(true);
         await Promise.all(
@@ -203,26 +182,20 @@ export default function AdminArticles() {
           )
         );
 
-        Swal.fire({
+        showAlert({
           title: "حذف شد",
           text: "مقالات با موفقیت حذف شدند.",
           icon: "success",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
           confirmButtonColor: "#7c3aed",
         });
         setSelectedArticles([]);
         fetchArticles();
       } catch (e) {
         console.error(e);
-        Swal.fire({
+        showAlert({
           title: "خطا",
           text: "برخی مقالات با خطا مواجه شدند.",
           icon: "error",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
           confirmButtonColor: "#7c3aed",
         });
       } finally {
@@ -258,7 +231,7 @@ export default function AdminArticles() {
   return (
     <div className="min-h-screen bg-gradient-to-br p-4 md:p-8" dir="rtl">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1
@@ -278,7 +251,7 @@ export default function AdminArticles() {
           </Link>
         </div>
 
-        {/* Stats Cards */}
+        
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
@@ -333,10 +306,10 @@ export default function AdminArticles() {
           </div>
         </div>
 
-        {/* Filters */}
+        
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search */}
+            
             <div className="relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
               <input
@@ -348,7 +321,7 @@ export default function AdminArticles() {
               />
             </div>
 
-            {/* Category Filter */}
+            
             <div className="relative">
               <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
               <select
@@ -364,7 +337,7 @@ export default function AdminArticles() {
               </select>
             </div>
 
-            {/* Status Filter */}
+            
             <div className="relative">
               <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
               <select
@@ -382,7 +355,7 @@ export default function AdminArticles() {
           </div>
         </div>
 
-        {/* Bulk Actions Bar */}
+        
         {selectedArticles.length > 0 && (
           <div className="bg-orange-500/20 backdrop-blur-lg border border-orange-500/30 rounded-xl p-4 mb-6 flex items-center justify-between">
             <div className="text-white font-medium">
@@ -403,7 +376,7 @@ export default function AdminArticles() {
           </div>
         )}
 
-        {/* Articles Table */}
+        
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden shadow-xl">
           {loading ? (
             <div className="min-h-[350px] flex flex-col items-center justify-center text-white/60 gap-3">
@@ -535,7 +508,7 @@ export default function AdminArticles() {
             </div>
           )}
 
-          {/* Pagination Footer */}
+          
           {!loading && articles.length > 0 && (
             <div className="p-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-white/60 text-sm">

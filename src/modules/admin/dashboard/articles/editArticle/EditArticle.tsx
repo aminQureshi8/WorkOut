@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import Swal from "sweetalert2";
+import { showAlert } from "@/utils/alert";
 import { useRouter, useParams } from "next/navigation";
 
 const CKEditorWrapper = dynamic(
@@ -120,14 +120,11 @@ export default function EditArticle() {
         }
       } catch (err: any) {
         console.error("Failed to load article:", err);
-        Swal.fire({
+        showAlert({
           title: "خطا",
           text: err.message || "خطا در بارگذاری اطلاعات مقاله رخ داده است.",
           icon: "error",
           confirmButtonText: "بازگشت به لیست",
-          background: "#111827",
-          color: "#ffffff",
-          confirmButtonColor: "#7c3aed",
         }).then(() => {
           router.push("/admin/articles");
         });
@@ -197,39 +194,27 @@ export default function EditArticle() {
       const resData = await res.json();
 
       if (res.ok) {
-        Swal.fire({
+        showAlert({
           title: "موفقیت‌آمیز",
           text: `مقاله با موفقیت ویرایش شد!`,
           icon: "success",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
-          confirmButtonColor: "#7c3aed",
         }).then(() => {
           router.push("/admin/articles");
           router.refresh();
         });
       } else {
-        Swal.fire({
+        showAlert({
           title: "خطا",
           text: resData.message || "خطا در ویرایش مقاله رخ داده است.",
           icon: "error",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
-          confirmButtonColor: "#7c3aed",
         });
       }
     } catch (error) {
       console.error(error);
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "خطا در ارتباط با سرور رخ داده است.",
         icon: "error",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#7c3aed",
       });
     } finally {
       setSaving(false);

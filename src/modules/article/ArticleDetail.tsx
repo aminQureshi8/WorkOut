@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import Swal from "sweetalert2";
+import { showAlert } from "@/utils/alert";
 
 interface ArticleDetailProps {
   article: any;
@@ -111,13 +111,10 @@ export default function ArticleDetail({
 
   const handleBookmark = async () => {
     if (!userId) {
-      Swal.fire({
+      showAlert({
         title: "ورود به حساب کاربری",
         text: "برای افزودن به لیست علاقه‌مندی‌ها، ابتدا وارد حساب کاربری خود شوید.",
         icon: "warning",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
         confirmButtonColor: "#7c3aed",
       });
       return;
@@ -133,7 +130,7 @@ export default function ArticleDetail({
       if (res.ok) {
         const data = await res.json();
         setBookmarked(data.wished);
-        Swal.fire({
+        showAlert({
           title: data.wished ? "افزوده شد" : "حذف شد",
           text: data.wished
             ? "این مقاله به لیست علاقه‌مندی‌های شما اضافه شد."
@@ -141,8 +138,6 @@ export default function ArticleDetail({
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
-          background: "#111827",
-          color: "#ffffff",
         });
       }
     } catch (err) {
@@ -152,13 +147,10 @@ export default function ArticleDetail({
 
   const handleLike = async () => {
     if (!userId) {
-      Swal.fire({
+      showAlert({
         title: "ورود به حساب کاربری",
         text: "برای پسندیدن مقالات، ابتدا وارد حساب کاربری خود شوید.",
         icon: "warning",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
         confirmButtonColor: "#7c3aed",
       });
       return;
@@ -201,13 +193,10 @@ export default function ArticleDetail({
 
       if (res.ok) {
         setNewComment("");
-        Swal.fire({
+        showAlert({
           title: "ثبت شد",
           text: "نظر شما با موفقیت ثبت شد و پس از تایید مدیریت نمایش داده خواهد شد.",
           icon: "success",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
           confirmButtonColor: "#7c3aed",
         });
       } else {
@@ -215,13 +204,10 @@ export default function ArticleDetail({
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "ثبت نظر با خطا مواجه شد. لطفاً دوباره تلاش کنید.",
         icon: "error",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
         confirmButtonColor: "#7c3aed",
       });
     }
@@ -431,14 +417,12 @@ export default function ArticleDetail({
                         .catch(console.error);
                     } else {
                       navigator.clipboard.writeText(window.location.href);
-                      Swal.fire({
+                      showAlert({
                         title: "کپی شد",
                         text: "لینک مقاله در حافظه موقت کپی شد.",
                         icon: "success",
                         timer: 1500,
                         showConfirmButton: false,
-                        background: "#111827",
-                        color: "#ffffff",
                       });
                     }
                   }}

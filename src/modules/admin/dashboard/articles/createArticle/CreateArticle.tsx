@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Save, Eye, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import Swal from "sweetalert2";
+import { showAlert } from "@/utils/alert";
 import { useRouter } from "next/navigation";
 
 const CKEditorWrapper = dynamic(() => import("./CKEditorWrapper"), {
@@ -126,39 +126,27 @@ export default function CreateArticle() {
       const resData = await res.json();
 
       if (res.ok) {
-        Swal.fire({
+        showAlert({
           title: "موفقیت‌آمیز",
           text: `مقاله با موفقیت ${submitStatus === "draft" ? "به عنوان پیش‌نویس ذخیره" : "منتشر"} شد!`,
           icon: "success",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
-          confirmButtonColor: "#7c3aed",
         }).then(() => {
           router.push("/admin/articles");
           router.refresh();
         });
       } else {
-        Swal.fire({
+        showAlert({
           title: "خطا",
           text: resData.message || "خطا در ثبت مقاله رخ داده است.",
           icon: "error",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
-          confirmButtonColor: "#7c3aed",
         });
       }
     } catch (error) {
       console.error(error);
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "خطا در ارتباط با سرور رخ داده است.",
         icon: "error",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#7c3aed",
       });
     } finally {
       setSaving(false);

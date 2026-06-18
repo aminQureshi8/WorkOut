@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { User, Mail, Phone, Lock, Eye, EyeOff, Loader2, CheckCircle, Save } from "lucide-react";
-import Swal from "sweetalert2";
+import { showAlert } from "@/utils/alert";
 import { useRouter } from "next/navigation";
 
 interface UserProfile {
@@ -50,14 +50,12 @@ export default function UserProfileManagement() {
       }
     } catch (e) {
       console.error(e);
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "بارگذاری اطلاعات حساب کاربری با خطا مواجه شد.",
         icon: "error",
         confirmButtonText: "تلاش مجدد",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#7c3aed"
+        confirmButtonColor: "#7c3aed",
       });
     } finally {
       setLoading(false);
@@ -68,66 +66,51 @@ export default function UserProfileManagement() {
     e.preventDefault();
 
     if (!username) {
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "نام کاربری نمی‌تواند خالی باشد.",
         icon: "warning",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#7c3aed"
+        confirmButtonColor: "#7c3aed",
       });
       return;
     }
 
     if (username.length < 3) {
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "نام کاربری باید حداقل ۳ کاراکتر باشد.",
         icon: "warning",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#7c3aed"
+        confirmButtonColor: "#7c3aed",
       });
       return;
     }
 
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "نام کاربری فقط می‌تواند شامل حروف انگلیسی، اعداد و خط تیره (_) باشد.",
         icon: "warning",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#7c3aed"
+        confirmButtonColor: "#7c3aed",
       });
       return;
     }
 
     if (password && password !== confirmPassword) {
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "رمز عبور جدید و تکرار آن یکسان نیستند.",
         icon: "warning",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#7c3aed"
+        confirmButtonColor: "#7c3aed",
       });
       return;
     }
 
     if (password && password.length < 6) {
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "رمز عبور باید حداقل ۶ کاراکتر باشد.",
         icon: "warning",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#7c3aed"
+        confirmButtonColor: "#7c3aed",
       });
       return;
     }
@@ -153,36 +136,27 @@ export default function UserProfileManagement() {
         setPassword("");
         setConfirmPassword("");
         router.refresh();
-        Swal.fire({
+        showAlert({
           title: "موفقیت‌آمیز",
           text: "اطلاعات حساب کاربری شما با موفقیت بروزرسانی شد.",
           icon: "success",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
-          confirmButtonColor: "#7c3aed"
+          confirmButtonColor: "#7c3aed",
         });
       } else {
-        Swal.fire({
+        showAlert({
           title: "خطا",
           text: data.message || "بروزرسانی اطلاعات کاربری ناموفق بود.",
           icon: "error",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
-          confirmButtonColor: "#7c3aed"
+          confirmButtonColor: "#7c3aed",
         });
       }
     } catch (e) {
       console.error(e);
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: "خطا در ارتباط با سرور رخ داده است.",
         icon: "error",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
-        confirmButtonColor: "#7c3aed"
+        confirmButtonColor: "#7c3aed",
       });
     } finally {
       setSaving(false);

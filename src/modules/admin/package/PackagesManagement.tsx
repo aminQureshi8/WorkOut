@@ -13,8 +13,8 @@ import {
   Crown,
   Award,
 } from "lucide-react";
-import Swal from "sweetalert2";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { showAlert, showConfirm } from "@/utils/alert";
 
 const cleanNumberString = (str: string) => {
   if (!str) return "";
@@ -81,25 +81,6 @@ export default function PackagesManagement() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<PackageFormData>();
-
-  const showAlert = (
-    title: string,
-    text: string,
-    icon: "success" | "error" | "warning" | "info" = "info",
-  ) => {
-    Swal.fire({
-      title,
-      text,
-      icon,
-      confirmButtonText: "باشه",
-      background: "#111827",
-      color: "#ffffff",
-      confirmButtonColor: "#f97316",
-      customClass: {
-        popup: "border border-orange-500/20 rounded-2xl",
-      },
-    });
-  };
 
   const fetchPackages = useCallback(async () => {
     setIsLoading(true);
@@ -191,7 +172,7 @@ export default function PackagesManagement() {
       };
 
       if (editingPackage) {
-        // update package
+        
         const res = await fetch(`/api/admin/package/${editingPackage._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -203,7 +184,7 @@ export default function PackagesManagement() {
         }
         showAlert("موفقیت", "پکیج با موفقیت ویرایش شد", "success");
       } else {
-        // create package
+        
         const res = await fetch("/api/admin/package", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -223,65 +204,49 @@ export default function PackagesManagement() {
   };
 
   const handleDeletePackage = async (id: string) => {
-    Swal.fire({
-      title: "آیا مطمئن هستید؟",
-      text: "این پکیج و ویژگی‌های آن به طور کامل حذف خواهند شد!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "بله، حذف شود",
-      cancelButtonText: "انصراف",
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#6b7280",
-      background: "#111827",
-      color: "#ffffff",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const res = await fetch(`/api/admin/package/${id}`, {
-            method: "DELETE",
-          });
-          if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || "خطا در حذف پکیج");
-          }
-          showAlert("موفقیت", "پکیج با موفقیت حذف شد", "success");
-          setSelectedPackages((prev) => prev.filter((pid) => pid !== id));
-          fetchPackages();
-        } catch (err: any) {
-          showAlert("خطا", err.message || "حذف پکیج ناموفق بود", "error");
+    const confirmed = await showConfirm(
+      "آیا مطمئن هستید؟",
+      "این پکیج و ویژگی‌های آن به طور کامل حذف خواهند شد!",
+      "بله، حذف شود"
+    );
+    if (confirmed) {
+      try {
+        const res = await fetch(`/api/admin/package/${id}`, {
+          method: "DELETE",
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "خطا در حذف پکیج");
         }
+        showAlert("موفقیت", "پکیج با موفقیت حذف شد", "success");
+        setSelectedPackages((prev) => prev.filter((pid) => pid !== id));
+        fetchPackages();
+      } catch (err: any) {
+        showAlert("خطا", err.message || "حذف پکیج ناموفق بود", "error");
       }
-    });
+    }
   };
 
   const handleBulkDelete = async () => {
     if (selectedPackages.length === 0) return;
-    Swal.fire({
-      title: "آیا مطمئن هستید؟",
-      text: `تعداد ${formatNumber(selectedPackages.length)} پکیج انتخاب شده به همراه ویژگی‌هایشان حذف خواهند شد!`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "بله، حذف شوند",
-      cancelButtonText: "انصراف",
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#6b7280",
-      background: "#111827",
-      color: "#ffffff",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const deletePromises = selectedPackages.map((id) =>
-            fetch(`/api/admin/package/${id}`, { method: "DELETE" })
-          );
-          await Promise.all(deletePromises);
-          showAlert("موفقیت", "پکیج‌های انتخاب شده با موفقیت حذف شدند", "success");
-          setSelectedPackages([]);
-          fetchPackages();
-        } catch (err: any) {
-          showAlert("خطا", "برخی از پکیج‌ها با خطا مواجه شدند", "error");
-        }
+    const confirmed = await showConfirm(
+      "آیا مطمئن هستید؟",
+      `تعداد ${formatNumber(selectedPackages.length)} پکیج انتخاب شده به همراه ویژگی‌هایشان حذف خواهند شد!`,
+      "بله، حذف شوند"
+    );
+    if (confirmed) {
+      try {
+        const deletePromises = selectedPackages.map((id) =>
+          fetch(`/api/admin/package/${id}`, { method: "DELETE" })
+        );
+        await Promise.all(deletePromises);
+        showAlert("موفقیت", "پکیج‌های انتخاب شده با موفقیت حذف شدند", "success");
+        setSelectedPackages([]);
+        fetchPackages();
+      } catch (err: any) {
+        showAlert("خطا", "برخی از پکیج‌ها با خطا مواجه شدند", "error");
       }
-    });
+    }
   };
 
   const handleSelectPackage = (id: string) => {
@@ -359,7 +324,7 @@ export default function PackagesManagement() {
       dir="rtl"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1
@@ -379,7 +344,7 @@ export default function PackagesManagement() {
           </button>
         </div>
 
-        {/* Stats Cards */}
+        
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
@@ -445,7 +410,7 @@ export default function PackagesManagement() {
           </div>
         </div>
 
-        {/* Search Bar */}
+        
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 mb-6">
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
@@ -459,7 +424,7 @@ export default function PackagesManagement() {
           </div>
         </div>
 
-        {/* Bulk Actions Bar */}
+        
         {selectedPackages.length > 0 && (
           <div className="bg-orange-500/20 backdrop-blur-lg border border-orange-500/30 rounded-xl p-4 mb-6 flex items-center justify-between">
             <div className="text-white text-sm">
@@ -480,7 +445,7 @@ export default function PackagesManagement() {
           </div>
         )}
 
-        {/* Packages Grid */}
+        
         {isLoading ? (
           <div className="p-12 text-center text-white/50 bg-white/5 border border-white/10 rounded-2xl">
             در حال بارگذاری اطلاعات پکیج‌ها...
@@ -622,7 +587,7 @@ export default function PackagesManagement() {
           </div>
         )}
 
-        {/* Create Package Modal */}
+        
         {showCreateModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -642,7 +607,7 @@ export default function PackagesManagement() {
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
-                {/* Name */}
+                
                 <div>
                   <label className="block text-white mb-2 text-xs">نام پکیج</label>
                   <input
@@ -661,7 +626,7 @@ export default function PackagesManagement() {
                   )}
                 </div>
 
-                {/* Slug */}
+                
                 <div>
                   <label className="block text-white mb-2 text-xs">اسلاگ (URL)</label>
                   <input
@@ -683,7 +648,7 @@ export default function PackagesManagement() {
                   )}
                 </div>
 
-                {/* Tagline */}
+                
                 <div>
                   <label className="block text-white mb-2 text-xs">تاگلاین (معرفی کوتاه)</label>
                   <input
@@ -702,7 +667,7 @@ export default function PackagesManagement() {
                   )}
                 </div>
 
-                {/* Description */}
+                
                 <div>
                   <label className="block text-white mb-2 text-xs">توضیحات</label>
                   <textarea
@@ -721,7 +686,7 @@ export default function PackagesManagement() {
                   )}
                 </div>
 
-                {/* Prices */}
+                
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-white mb-2 text-xs">
@@ -791,7 +756,7 @@ export default function PackagesManagement() {
                   </div>
                 </div>
 
-                {/* Original Prices */}
+                
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-white mb-2 text-xs">
@@ -861,7 +826,7 @@ export default function PackagesManagement() {
                   </div>
                 </div>
 
-                {/* Icon & Color */}
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-white mb-2 text-xs">
@@ -885,7 +850,7 @@ export default function PackagesManagement() {
                   </div>
                 </div>
 
-                {/* Tier */}
+                
                 <div>
                   <label className="block text-white mb-2 text-xs">دسته‌بندی پکیج</label>
                   <select
@@ -899,7 +864,7 @@ export default function PackagesManagement() {
                   </select>
                 </div>
 
-                {/* Toggles */}
+                
                 <div className="flex items-center gap-6 py-2">
                   <label className="flex items-center gap-2 text-white cursor-pointer text-sm">
                     <input
@@ -919,7 +884,7 @@ export default function PackagesManagement() {
                   </label>
                 </div>
 
-                {/* Features */}
+                
                 <div>
                   <label className="block text-white mb-2 text-xs">
                     امکانات پکیج (هر ویژگی در یک خط)

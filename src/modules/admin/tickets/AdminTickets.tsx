@@ -17,7 +17,7 @@ import {
   AlertCircle,
   MessageCircle,
 } from "lucide-react";
-import Swal from "sweetalert2";
+import { showAlert, showConfirm } from "@/utils/alert";
 
 import {
   IClientUser as IUser,
@@ -51,34 +51,6 @@ export default function AdminTickets() {
 
   const messageEndRef = useRef<HTMLDivElement>(null);
 
-  const showAlert = (title: string, text: string, icon: "success" | "error" | "warning" | "info" = "info") => {
-    Swal.fire({
-      title,
-      text,
-      icon,
-      confirmButtonText: "باشه",
-      background: "#111827",
-      color: "#ffffff",
-      confirmButtonColor: "#7c3aed",
-    });
-  };
-
-  const showConfirm = async (title: string, text: string, confirmButtonText = "بله، حذف شود") => {
-    const result = await Swal.fire({
-      title,
-      text,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText,
-      cancelButtonText: "انصراف",
-      background: "#111827",
-      color: "#ffffff",
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#374151",
-    });
-    return result.isConfirmed;
-  };
-
   const fetchTickets = useCallback(async (selectIdAfterFetch?: string) => {
     setIsLoading(true);
     setError(null);
@@ -105,12 +77,12 @@ export default function AdminTickets() {
         setStats(data.stats);
       }
 
-      // If we need to refresh the currently open ticket detail
+      
       if (selectIdAfterFetch) {
         const updated = data.tickets.find((t: ITicket) => t._id === selectIdAfterFetch);
         if (updated) setSelectedTicket(updated);
       } else if (selectedTicket) {
-        // Just refresh the active one if it exists in the list
+        
         const updated = data.tickets.find((t: ITicket) => t._id === selectedTicket._id);
         if (updated) setSelectedTicket(updated);
       }
@@ -158,7 +130,7 @@ export default function AdminTickets() {
       if (res.ok) {
         const data = await res.json();
         setReplyText("");
-        // Instantly update local chat view
+        
         setSelectedTicket(data.ticket);
         fetchTickets(selectedTicket._id);
       } else {
@@ -300,7 +272,7 @@ export default function AdminTickets() {
   return (
     <div className="overflow-hidden font-danaMed" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "Marbeh, sans-serif" }}>
             مدیریت تیکت‌های پشتیبانی
@@ -310,7 +282,7 @@ export default function AdminTickets() {
           </p>
         </div>
 
-        {/* Stats Grid */}
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4 flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -361,7 +333,7 @@ export default function AdminTickets() {
           </div>
         </div>
 
-        {/* Filters and Controls */}
+        
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -408,9 +380,9 @@ export default function AdminTickets() {
           </div>
         </div>
 
-        {/* Split Dashboard Content */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* TICKETS LIST (5/12 Width) */}
+          
           <div className="lg:col-span-5 space-y-4">
             <h2 className="text-white font-bold text-lg mb-2">لیست تیکت‌ها</h2>
             {isLoading && tickets.length === 0 ? (
@@ -540,9 +512,9 @@ export default function AdminTickets() {
                   </div>
                 </div>
 
-                {/* Conversation Chat Body */}
+                
                 <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-black/20">
-                  {/* Initial description from user */}
+                  
                   <div className="flex gap-3 justify-start max-w-[85%]">
                     <div className="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 text-xs font-bold flex-shrink-0">
                       {selectedTicket.userId?.username?.charAt(0) || "👤"}
@@ -553,11 +525,11 @@ export default function AdminTickets() {
                     </div>
                   </div>
 
-                  {/* Messages Loop */}
+                  
                   {selectedTicket.messages && selectedTicket.messages.map((msg) => {
                     const isSupport = (msg.senderId as any)?._id 
                       ? (msg.senderId as any).role === "admin" || (msg.senderId as any).role === "coach"
-                      : true; // fallback to support if not populated properly
+                      : true; 
 
                     return (
                       <div
@@ -592,7 +564,7 @@ export default function AdminTickets() {
                   <div ref={messageEndRef} />
                 </div>
 
-                {/* Reply Footer Input */}
+                
                 <div className="p-4 border-t border-white/10 bg-black/40">
                   {selectedTicket.status === "closed" ? (
                     <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-center text-red-400 text-xs flex items-center justify-center gap-2">

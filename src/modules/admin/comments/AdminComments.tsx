@@ -14,7 +14,7 @@ import {
   ExternalLink,
   MessageCircle,
 } from "lucide-react";
-import Swal from "sweetalert2";
+import { showAlert, showConfirm } from "@/utils/alert";
 
 interface IComment {
   _id: string;
@@ -53,14 +53,14 @@ export default function AdminComments() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters & Pagination
+  
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterApproved, setFilterApproved] = useState<string>("all"); // "all", "true", "false"
+  const [filterApproved, setFilterApproved] = useState<string>("all"); 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalComments, setTotalComments] = useState(0);
 
-  // Edit Modal State
+  
   const [editingComment, setEditingComment] = useState<IComment | null>(null);
   const [editText, setEditText] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
@@ -97,7 +97,7 @@ export default function AdminComments() {
     fetchComments();
   }, [fetchComments]);
 
-  // Handle Search Debounce
+  
   useEffect(() => {
     if (!searchQuery.trim()) return;
 
@@ -111,22 +111,17 @@ export default function AdminComments() {
 
   const handleToggleApproval = async (id: string, currentStatus: boolean) => {
     const nextStatus = !currentStatus;
-    const confirm = await Swal.fire({
+    const confirm = await showConfirm({
       title: nextStatus ? "آیا از تایید این کامنت مطمئن هستید؟" : "آیا از عدم تایید این کامنت مطمئن هستید؟",
       text: nextStatus 
         ? "پس از تایید، این کامنت در سایت برای عموم نمایش داده خواهد شد." 
         : "پس از عدم تایید، این کامنت از سایت مخفی خواهد شد.",
       icon: "question",
-      showCancelButton: true,
       confirmButtonText: nextStatus ? "بله، تایید شود" : "بله، لغو تایید شود",
-      cancelButtonText: "انصراف",
-      background: "#111827",
-      color: "#ffffff",
       confirmButtonColor: nextStatus ? "#10b981" : "#eab308",
-      cancelButtonColor: "#374151",
     });
 
-    if (confirm.isConfirmed) {
+    if (confirm) {
       try {
         const res = await fetch("/api/admin/comment", {
           method: "PUT",
@@ -135,13 +130,10 @@ export default function AdminComments() {
         });
 
         if (res.ok) {
-          Swal.fire({
+          showAlert({
             title: nextStatus ? "تایید شد" : "لغو تایید شد",
             text: nextStatus ? "دیدگاه با موفقیت تایید شد." : "تایید دیدگاه با موفقیت لغو شد.",
             icon: "success",
-            confirmButtonText: "باشه",
-            background: "#111827",
-            color: "#ffffff",
             confirmButtonColor: "#7c3aed",
           });
           fetchComments();
@@ -149,13 +141,10 @@ export default function AdminComments() {
           throw new Error("خطا در بروزرسانی وضعیت");
         }
       } catch (err: any) {
-        Swal.fire({
+        showAlert({
           title: "خطا",
           text: err.message || "بروزرسانی با خطا مواجه شد.",
           icon: "error",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
           confirmButtonColor: "#7c3aed",
         });
       }
@@ -179,13 +168,10 @@ export default function AdminComments() {
       });
 
       if (res.ok) {
-        Swal.fire({
+        showAlert({
           title: "ذخیره شد",
           text: "متن دیدگاه با موفقیت ویرایش شد.",
           icon: "success",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
           confirmButtonColor: "#7c3aed",
         });
         setShowEditModal(false);
@@ -195,46 +181,34 @@ export default function AdminComments() {
         throw new Error("خطا در ذخیره متن دیدگاه");
       }
     } catch (err: any) {
-      Swal.fire({
+      showAlert({
         title: "خطا",
         text: err.message || "خطایی رخ داد.",
         icon: "error",
-        confirmButtonText: "باشه",
-        background: "#111827",
-        color: "#ffffff",
         confirmButtonColor: "#7c3aed",
       });
     }
   };
 
   const handleDelete = async (id: string) => {
-    const confirm = await Swal.fire({
+    const confirm = await showConfirm({
       title: "آیا مطمئن هستید؟",
       text: "این عمل غیرقابل بازگشت است و کامنت حذف خواهد شد.",
       icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "بله، حذف شود",
-      cancelButtonText: "انصراف",
-      background: "#111827",
-      color: "#ffffff",
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#374151",
     });
 
-    if (confirm.isConfirmed) {
+    if (confirm) {
       try {
         const res = await fetch(`/api/admin/comment?id=${id}`, {
           method: "DELETE",
         });
 
         if (res.ok) {
-          Swal.fire({
+          showAlert({
             title: "حذف شد",
             text: "دیدگاه با موفقیت حذف شد.",
             icon: "success",
-            confirmButtonText: "باشه",
-            background: "#111827",
-            color: "#ffffff",
             confirmButtonColor: "#7c3aed",
           });
           fetchComments();
@@ -242,13 +216,10 @@ export default function AdminComments() {
           throw new Error("خطا در حذف دیدگاه");
         }
       } catch (err: any) {
-        Swal.fire({
+        showAlert({
           title: "خطا",
           text: err.message || "حذف با خطا مواجه شد.",
           icon: "error",
-          confirmButtonText: "باشه",
-          background: "#111827",
-          color: "#ffffff",
           confirmButtonColor: "#7c3aed",
         });
       }
@@ -269,7 +240,7 @@ export default function AdminComments() {
   return (
     <div className="overflow-hidden font-danaMed" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Title */}
+        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "Marbeh, sans-serif" }}>
@@ -281,7 +252,7 @@ export default function AdminComments() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4 flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -320,7 +291,7 @@ export default function AdminComments() {
           </div>
         </div>
 
-        {/* Search and Filter */}
+        
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -353,7 +324,7 @@ export default function AdminComments() {
           </div>
         </div>
 
-        {/* Comments Table */}
+        
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -488,7 +459,7 @@ export default function AdminComments() {
             </table>
           </div>
 
-          {/* Pagination Footer */}
+          
           <div className="p-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-white/60 text-sm">
               نمایش {(currentPage - 1) * 10 + 1} تا{" "}
@@ -506,11 +477,11 @@ export default function AdminComments() {
         </div>
       </div>
 
-      {/* Edit Modal */}
+      
       {showEditModal && editingComment && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-2xl w-full">
-            {/* Header */}
+            
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-2xl text-white font-bold" style={{ fontFamily: "Marbeh, sans-serif" }}>
                 ویرایش دیدگاه
@@ -525,7 +496,7 @@ export default function AdminComments() {
                 ✕
               </button>
             </div>
-            {/* Body */}
+            
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center text-white text-lg font-bold">
@@ -549,7 +520,7 @@ export default function AdminComments() {
                 />
               </div>
             </div>
-            {/* Footer */}
+            
             <div className="p-6 border-t border-white/10 flex gap-3">
               <button
                 onClick={handleSaveEdit}

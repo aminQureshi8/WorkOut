@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
 import {
   Search,
   Plus,
@@ -35,41 +34,9 @@ import {
   WorkoutExercise,
 } from "@/types/workout";
 
+import { showAlert, showConfirm } from "@/utils/alert";
+
 export default function SubscriptionsManagement() {
-
-  const showAlert = (title: string, text: string, icon: "success" | "error" | "warning" | "info" = "info") => {
-    Swal.fire({
-      title,
-      text,
-      icon,
-      confirmButtonText: "باشه",
-      background: "#111827",
-      color: "#ffffff",
-      confirmButtonColor: "#f97316",
-      customClass: {
-        popup: "border border-white/10 rounded-2xl"
-      }
-    });
-  };
-
-  const showConfirm = async (title: string, text: string, confirmButtonText = "بله، حذف شود") => {
-    const result = await Swal.fire({
-      title,
-      text,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText,
-      cancelButtonText: "انصراف",
-      background: "#111827",
-      color: "#ffffff",
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#374151",
-      customClass: {
-        popup: "border border-white/10 rounded-2xl"
-      }
-    });
-    return result.isConfirmed;
-  };
 
   
   const [activeTab, setActiveTab] = useState<"subscriptions" | "videos">("subscriptions");
