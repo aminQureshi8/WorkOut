@@ -18,6 +18,7 @@ import {
   HelpCircle,
   MessageSquare,
   Heart,
+  Activity,
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import Link from "next/link";
@@ -218,6 +219,13 @@ export default function AdminSidebar({ isAdmin = false }) {
           icon: Heart,
           badge: counts.wishlist > 0 ? formatNumber(counts.wishlist) : null,
           href: "/dashboard/favorites",
+        },
+        {
+          id: "bmi",
+          label: "شاخص توده بدنی (BMI)",
+          icon: Activity,
+          badge: null,
+          href: "/dashboard/bmi",
         },
         {
           id: "tickets",
