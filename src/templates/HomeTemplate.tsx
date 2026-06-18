@@ -8,9 +8,13 @@ import LatestArticles from "@/modules/home/LatestArticles";
 
 interface HomeTemplateProps {
   articles: any[];
+  stats: {
+    todayUsersCount: string;
+    trendText: string;
+  };
 }
 
-export default function HomeTemplate({ articles }: HomeTemplateProps) {
+export default function HomeTemplate({ articles, stats }: HomeTemplateProps) {
   return (
     <>
       <HeroSection />
@@ -18,7 +22,7 @@ export default function HomeTemplate({ articles }: HomeTemplateProps) {
       <WorkoutPlans />
       <Testimonials />
       <LatestArticles articles={articles} />
-      <LiveStats />
+      <LiveStats stats={stats} />
       <FAQ />
     </>
   );
