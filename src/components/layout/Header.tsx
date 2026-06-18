@@ -33,7 +33,7 @@ export default function Header({ session }: { session: any }) {
               <Link href="/articles" className={getLinkClass("/articles")}>
                 مقالات
               </Link>
-              <Link href="/tickets" className={getLinkClass("/tickets")}>
+              <Link href="/dashboard/tickets" className={getLinkClass("/tickets")}>
                 پشتیبانی
               </Link>
             </div>
