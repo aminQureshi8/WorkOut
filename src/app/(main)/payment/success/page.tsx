@@ -96,18 +96,18 @@ export default async function PaymentSuccessPage({
 
         <div className="flex flex-col gap-3">
           <Link
-            href="/dashboard"
+            href="/onboarding"
             className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-3.5 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-emerald-500/20 text-center"
           >
-            ورود به پنل کاربری
+            ورود به پنل کاربری و شروع دوره
           </Link>
           
           <Link
-            href="/dashboard/subscription"
+            href="/onboarding"
             className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white font-medium py-3.5 rounded-xl transition-all duration-300 text-center flex items-center justify-center gap-2"
           >
             <Calendar className="w-4 h-4 text-orange-400" />
-            مشاهده برنامه تمرینی
+            تکمیل مشخصات و برنامه تمرینی
           </Link>
         </div>
 
