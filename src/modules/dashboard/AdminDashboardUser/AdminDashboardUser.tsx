@@ -1,34 +1,26 @@
-"use client"
+"use client";
 import {
   Dumbbell,
-  LayoutDashboard,
-  CreditCard,
   MessageSquare,
   BookOpen,
-  User,
-  Bell,
-  LogOut,
-  Menu,
-  X,
-  TrendingUp,
-  Calendar,
   Clock,
   Award,
   ChevronLeft,
-  ChevronRight,
   Flame,
   Target,
   Activity,
   CheckCircle,
   AlertCircle,
   Play,
-  Download,
   Star,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { UserDashboardProps } from "@/types/user-dashboard";
+import DashboardBanner from "./DashboardBanner";
+import WeeklyWorkouts from "./WeeklyWorkouts";
 
 const stats = [
   {
@@ -79,56 +71,13 @@ const upcomingSessions = [
   { title: "تجدید اشتراک", time: "۱ تیر ۱۴۰۳", type: "مالی", icon: "💳" },
 ];
 
-
-
-interface DashboardProps {
-  initialUser: {
-    name: string;
-    avatar: string;
-    email: string;
-    level: string;
-    joinDate: string;
-    coachName: string;
-  };
-  initialSubscription: {
-    packageName: string;
-    status: string;
-    daysRemaining: number;
-    totalDays: number;
-    endDate: string;
-    nextPayment: string;
-  } | null;
-  initialWorkouts: {
-    day: string;
-    type: string;
-    duration: string;
-    done: boolean;
-    sets: number;
-  }[];
-  initialTickets: {
-    id: string;
-    subject: string;
-    status: string;
-    rawStatus: string;
-    time: string;
-  }[];
-  initialWishlist?: {
-    id: string;
-    title: string;
-    slug: string;
-    image: string;
-    category: string;
-    views: number;
-  }[];
-}
-
 export default function UserDashboard({
   initialUser,
   initialSubscription,
   initialWorkouts,
   initialTickets,
   initialWishlist = [],
-}: DashboardProps) {
+}: UserDashboardProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const user = initialUser;
   const subscription = initialSubscription;
@@ -144,9 +93,18 @@ export default function UserDashboard({
       )
     : 0;
 
-  const weekDaysFa = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"];
+  const weekDaysFa = [
+    "یکشنبه",
+    "دوشنبه",
+    "سه‌شنبه",
+    "چهارشنبه",
+    "پنج‌شنبه",
+    "جمعه",
+    "شنبه",
+  ];
   const todayNameFa = weekDaysFa[new Date().getDay()];
-  const todayWorkout = recentWorkouts.find((w) => w.day.includes(todayNameFa)) || null;
+  const todayWorkout =
+    recentWorkouts.find((w) => w.day.includes(todayNameFa)) || null;
 
   return (
     <div
@@ -162,46 +120,7 @@ export default function UserDashboard({
 
       <div className="transition-all duration-300">
         <main className="p-4 md:p-6 space-y-6">
-          <div
-            className="relative rounded-2xl p-6 overflow-hidden"
-            style={{
-              background: "linear-gradient(135deg, #4c1d95, #1e1b4b)",
-              border: "1px solid rgba(139,92,246,0.3)",
-            }}
-          >
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 left-0 w-48 h-48 rounded-full bg-purple-500 blur-3xl"></div>
-              <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full bg-pink-500 blur-2xl"></div>
-            </div>
-            <div className="relative flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <p className="text-purple-300 text-sm mb-1">
-                  سلام، {user.name} 👋
-                </p>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  بریم تمرین کنیم!
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  تمرین امروز:{" "}
-                  <span className="text-white font-semibold">
-                    {todayWorkout
-                      ? `${todayWorkout.type} (${todayWorkout.duration})`
-                      : "روز استراحت و ریکاوری"}
-                  </span>
-                </p>
-              </div>
-              <Link
-                href="/dashboard/subscription"
-                className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90"
-                style={{
-                  background: "linear-gradient(135deg, #7c3aed, #ec4899)",
-                }}
-              >
-                <Play size={16} />
-                شروع تمرین
-              </Link>
-            </div>
-          </div>
+          <DashboardBanner userName={user.name} todayWorkout={todayWorkout} />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, i) => {
@@ -286,7 +205,8 @@ export default function UserDashboard({
                         className="h-2 rounded-full transition-all"
                         style={{
                           width: `${progressPercent}%`,
-                          background: "linear-gradient(90deg, #7c3aed, #ec4899)",
+                          background:
+                            "linear-gradient(90deg, #7c3aed, #ec4899)",
                         }}
                       ></div>
                     </div>
@@ -323,57 +243,7 @@ export default function UserDashboard({
               </Link>
             </div>
 
-            <div
-              className="lg:col-span-2 rounded-2xl p-5"
-              style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-white">برنامه هفتگی</h3>
-                <span className="text-xs text-gray-500">هفته جاری</span>
-              </div>
-              {recentWorkouts.length > 0 ? (
-                <div className="space-y-2">
-                  {recentWorkouts.map((w, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 p-3 rounded-xl transition-all"
-                      style={{
-                        background: "rgba(124,58,237,0.1)",
-                        border: "1px solid rgba(124,58,237,0.3)",
-                      }}
-                    >
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-white/10">
-                        <Clock size={14} className="text-gray-500" />
-                      </div>
-                      <span className="text-gray-400 text-xs w-16 flex-shrink-0">
-                        {w.day}
-                      </span>
-                      <span className="flex-1 text-sm text-white">
-                        {w.type}
-                      </span>
-                      {w.duration !== "—" && (
-                        <span className="text-xs text-gray-500 flex items-center gap-1">
-                          <Clock size={11} /> {w.duration}
-                        </span>
-                      )}
-                      {w.sets > 0 && (
-                        <span className="text-xs text-purple-400">
-                          {w.sets} ست
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-white/40 text-xs">
-                  <Dumbbell className="w-8 h-8 mx-auto mb-2 text-white/20" />
-                  <p>برنامه تمرینی برای این هفته تعریف نشده است</p>
-                </div>
-              )}
-            </div>
+            <WeeklyWorkouts recentWorkouts={recentWorkouts} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -450,8 +320,8 @@ export default function UserDashboard({
                           t.rawStatus === "answered"
                             ? "bg-green-500/20"
                             : t.rawStatus === "closed"
-                            ? "bg-gray-500/20"
-                            : "bg-yellow-500/20"
+                              ? "bg-gray-500/20"
+                              : "bg-yellow-500/20"
                         }`}
                       >
                         {t.rawStatus === "answered" ? (
@@ -463,7 +333,9 @@ export default function UserDashboard({
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm truncate">{t.subject}</p>
+                        <p className="text-white text-sm truncate">
+                          {t.subject}
+                        </p>
                         <p className="text-gray-500 text-xs mt-0.5">{t.time}</p>
                       </div>
                       <span
@@ -471,8 +343,8 @@ export default function UserDashboard({
                           t.rawStatus === "answered"
                             ? "bg-green-500/20 text-green-400"
                             : t.rawStatus === "closed"
-                            ? "bg-gray-500/20 text-gray-400"
-                            : "bg-yellow-500/20 text-yellow-400"
+                              ? "bg-gray-500/20 text-gray-400"
+                              : "bg-yellow-500/20 text-yellow-400"
                         }`}
                       >
                         {t.status}
@@ -533,9 +405,7 @@ export default function UserDashboard({
                         📚
                       </div>
                     )}
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full mb-2 inline-block bg-purple-500/20 text-purple-300"
-                    >
+                    <span className="text-xs px-2 py-0.5 rounded-full mb-2 inline-block bg-purple-500/20 text-purple-300">
                       {a.category}
                     </span>
                     <p className="text-white text-sm font-medium group-hover:text-purple-300 transition-colors line-clamp-2 leading-relaxed">
