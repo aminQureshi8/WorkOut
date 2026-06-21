@@ -13,6 +13,7 @@ import {
   UserCog,
   Heart,
   Activity,
+  Salad,
 } from "lucide-react";
 import React from "react";
 
@@ -198,6 +199,13 @@ export function getUserMenuItems(
           icon: Activity,
           badge: null,
           href: "/dashboard/bmi",
+        },
+        {
+          id: "nutrition",
+          label: "تغذیه و کالری‌شمار",
+          icon: Salad,
+          badge: null,
+          href: "/dashboard/nutrition",
         },
         {
           id: "tickets",
