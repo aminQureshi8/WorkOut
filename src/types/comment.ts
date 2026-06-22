@@ -49,3 +49,22 @@ export interface AdminCommentStats {
   approvedCount: number;
   pendingCount: number;
 }
+
+// CommentList Component Props Type
+export interface CommentListProps {
+  comments: AdminComment[];
+  isLoading: boolean;
+  error: string | null;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  filterApproved: string;
+  setFilterApproved: (filter: string) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
+  totalComments: number;
+  onToggleApproval: (id: string, currentStatus: boolean) => void;
+  onEdit: (comment: AdminComment) => void;
+  onDelete: (id: string) => void;
+  formatNumber: (num: number) => string;
+}

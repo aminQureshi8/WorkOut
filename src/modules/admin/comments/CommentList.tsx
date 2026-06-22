@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import Pagination from "@/components/AdminPagination";
 import {
   Search,
@@ -11,25 +10,7 @@ import {
   ExternalLink,
   MessageCircle,
 } from "lucide-react";
-import { AdminComment } from "@/types/comment";
-
-interface CommentListProps {
-  comments: AdminComment[];
-  isLoading: boolean;
-  error: string | null;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  filterApproved: string;
-  setFilterApproved: (filter: string) => void;
-  currentPage: number;
-  setCurrentPage: (page: number) => void;
-  totalPages: number;
-  totalComments: number;
-  onToggleApproval: (id: string, currentStatus: boolean) => void;
-  onEdit: (comment: AdminComment) => void;
-  onDelete: (id: string) => void;
-  formatNumber: (num: number) => string;
-}
+import { CommentListProps } from "@/types/comment";
 
 export default function CommentList({
   comments,
@@ -48,7 +29,6 @@ export default function CommentList({
   onDelete,
   formatNumber,
 }: CommentListProps) {
-  
   const getStatusBadge = (isApproved: boolean) => {
     if (isApproved) {
       return "bg-green-500/20 text-green-400 border-green-500/50";
@@ -58,7 +38,6 @@ export default function CommentList({
 
   return (
     <>
-      {/* Search & Filter Bar */}
       <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
@@ -91,12 +70,24 @@ export default function CommentList({
           <table className="w-full">
             <thead className="bg-white/5 border-b border-white/10">
               <tr>
-                <th className="p-4 text-right text-white/80 text-sm font-medium">نویسنده</th>
-                <th className="p-4 text-right text-white/80 text-sm font-medium">دیدگاه</th>
-                <th className="p-4 text-right text-white/80 text-sm font-medium">مطلب مربوطه</th>
-                <th className="p-4 text-right text-white/80 text-sm font-medium">وضعیت</th>
-                <th className="p-4 text-right text-white/80 text-sm font-medium">تاریخ ثبت</th>
-                <th className="p-4 text-right text-white/80 text-sm font-medium">عملیات</th>
+                <th className="p-4 text-right text-white/80 text-sm font-medium">
+                  نویسنده
+                </th>
+                <th className="p-4 text-right text-white/80 text-sm font-medium">
+                  دیدگاه
+                </th>
+                <th className="p-4 text-right text-white/80 text-sm font-medium">
+                  مطلب مربوطه
+                </th>
+                <th className="p-4 text-right text-white/80 text-sm font-medium">
+                  وضعیت
+                </th>
+                <th className="p-4 text-right text-white/80 text-sm font-medium">
+                  تاریخ ثبت
+                </th>
+                <th className="p-4 text-right text-white/80 text-sm font-medium">
+                  عملیات
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
@@ -128,14 +119,20 @@ export default function CommentList({
                 </tr>
               ) : (
                 comments.map((comment) => (
-                  <tr key={comment._id} className="hover:bg-white/5 transition-colors">
+                  <tr
+                    key={comment._id}
+                    className="hover:bg-white/5 transition-colors"
+                  >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center text-white text-lg">
-                          {comment.avatar || (comment.name ? comment.name.charAt(0) : "👤")}
+                          {comment.avatar ||
+                            (comment.name ? comment.name.charAt(0) : "👤")}
                         </div>
                         <div>
-                          <div className="text-white font-medium">{comment.name || "کاربر ناشناس"}</div>
+                          <div className="text-white font-medium">
+                            {comment.name || "کاربر ناشناس"}
+                          </div>
                           <div className="text-white/60 text-xs">
                             {comment.userId ? comment.userId.email : "مهمان"}
                           </div>
@@ -155,7 +152,9 @@ export default function CommentList({
                           rel="noopener noreferrer"
                           className="flex items-center gap-1.5 text-orange-400 hover:text-orange-300 transition-colors"
                         >
-                          <span className="line-clamp-1">{comment.blogId.title}</span>
+                          <span className="line-clamp-1">
+                            {comment.blogId.title}
+                          </span>
                           <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
                         </a>
                       ) : (
@@ -163,7 +162,9 @@ export default function CommentList({
                       )}
                     </td>
                     <td className="p-4">
-                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs border ${getStatusBadge(comment.isApproved)}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs border ${getStatusBadge(comment.isApproved)}`}
+                      >
                         {comment.isApproved ? (
                           <>
                             <CheckCircle className="w-3 h-3" />
@@ -183,13 +184,17 @@ export default function CommentList({
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => onToggleApproval(comment._id, comment.isApproved)}
+                          onClick={() =>
+                            onToggleApproval(comment._id, comment.isApproved)
+                          }
                           className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
                             comment.isApproved
                               ? "bg-white/5 hover:bg-yellow-500/20 text-yellow-400"
                               : "bg-white/5 hover:bg-green-500/20 text-green-400"
                           }`}
-                          title={comment.isApproved ? "لغو تایید" : "تایید کامنت"}
+                          title={
+                            comment.isApproved ? "لغو تایید" : "تایید کامنت"
+                          }
                         >
                           {comment.isApproved ? (
                             <XCircle className="w-4 h-4" />
