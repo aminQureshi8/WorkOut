@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { BookOpen, Heart, Eye, ArrowRight, Trash2 } from "lucide-react";
+import { BookOpen, Eye, ArrowRight, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { showAlert } from "@/utils/alert";
 
@@ -140,7 +140,9 @@ export default function FavoritesManagement({
 
                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
                     <Eye size={12} />
-                    <span>{new Intl.NumberFormat("fa-IR").format(a.views)} بازدید</span>
+                    <span>
+                      {new Intl.NumberFormat("fa-IR").format(a.views)} بازدید
+                    </span>
                   </div>
                 </div>
               ))}

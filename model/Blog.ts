@@ -1,25 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-export interface IBlog extends Document {
-  title: string;
-  slug: string;
-  content: string;
-  excerpt?: string;
-  image?: string;
-  category: string;
-  status: "published" | "draft" | "scheduled";
-  publishDate?: Date;
-  seoTitle?: string;
-  seoDescription?: string;
-  tags?: string[];
-  authorId: mongoose.Types.ObjectId;
-  views: number;
-  viewedUsers?: mongoose.Types.ObjectId[];
-  likes?: number;
-  likedUsers?: mongoose.Types.ObjectId[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { IBlog } from "@/types/blog";
 
 const BlogSchema = new Schema<IBlog>(
   {

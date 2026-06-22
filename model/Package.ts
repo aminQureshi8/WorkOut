@@ -1,30 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-export interface IPackage extends Document {
-  name: string;
-  slug: string;
-  tagline: string;
-  description: string;
-  price: {
-    monthly: number;
-    quarterly: number;
-    biannual: number;
-  };
-  originalPrice: {
-    monthly: number;
-    quarterly: number;
-    biannual: number;
-  };
-  icon: string;
-  colorClass: string;
-  rating: number;
-  reviewCount: number;
-  studentCount: number;
-  isPopular: boolean;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { IPackage } from "@/types/package";
 
 const PackageSchema = new Schema<IPackage>(
   {

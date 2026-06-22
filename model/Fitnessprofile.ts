@@ -1,24 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-export interface IFitnessProfile extends Document {
-  userId: mongoose.Types.ObjectId;
-  goal:
-    | "weight_loss"
-    | "muscle_gain"
-    | "endurance"
-    | "general_fitness"
-    | "rehabilitation";
-  sessionsPerWeek: number;
-  equipment: "none" | "home_basic" | "gym_full";
-  trainingExperience: "beginner" | "intermediate" | "advanced";
-  ageYears: number;
-  heightCm: number;
-  weightKg: number;
-  bodyPhotos: string[];
-  notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { IFitnessProfile } from "@/types/fitness-profile";
 
 const FitnessProfileSchema = new Schema<IFitnessProfile>(
   {

@@ -1,17 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-export interface ICoach extends Document {
-  userId: mongoose.Types.ObjectId;
-  name: string;
-  bio?: string;
-  avatarUrl?: string;
-  specialties: string[];
-  rating: number;
-  sessionCount: number;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { ICoach } from "@/types/coach";
 
 const CoachSchema = new Schema<ICoach>(
   {

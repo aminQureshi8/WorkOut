@@ -1,17 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-export interface IOrder extends Document {
-  userId: mongoose.Types.ObjectId;
-  packageId: mongoose.Types.ObjectId;
-  billingCycle: "monthly" | "quarterly" | "biannual";
-  amountPaid: number;
-  originalAmount: number;
-  discountPercent: number;
-  status: "pending" | "paid" | "failed" | "refunded";
-  paymentRef?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { IOrder } from "@/types/order";
 
 const OrderSchema = new Schema<IOrder>(
   {
