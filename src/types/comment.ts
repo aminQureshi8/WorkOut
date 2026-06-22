@@ -21,3 +21,31 @@ export interface IComment extends Omit<Comment, "_id" | "blogId" | "userId" | "c
   createdAt: Date;
   updatedAt: Date;
 }
+
+// Admin Dashboard Populated Types
+export interface AdminComment {
+  _id: string;
+  name: string;
+  avatar?: string;
+  text: string;
+  likes: number;
+  isApproved: boolean;
+  createdAt: string;
+  blogId?: {
+    _id: string;
+    title: string;
+    slug: string;
+  };
+  userId?: {
+    _id: string;
+    username: string;
+    fullName: string;
+    email: string;
+  };
+}
+
+export interface AdminCommentStats {
+  totalCount: number;
+  approvedCount: number;
+  pendingCount: number;
+}
