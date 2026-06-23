@@ -31,7 +31,6 @@ const NutritionLogSchema = new Schema<INutritionLog>(
   { timestamps: true }
 );
 
-// Compound index to ensure a user only has one log per date
 NutritionLogSchema.index({ userId: 1, date: 1 }, { unique: true });
 
 export default mongoose.models.NutritionLog ||
