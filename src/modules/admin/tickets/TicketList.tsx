@@ -1,0 +1,169 @@
+import React from "react";
+import Pagination from "@/components/AdminPagination";
+import { Search, MessageCircle } from "lucide-react";
+import type { TicketListProps } from "@/types/ticket";
+import {
+  getStatusBadge,
+  getStatusLabel,
+  getPriorityBadge,
+  getPriorityLabel,
+} from "./ticketHelpers";
+
+const TicketList: React.FC<TicketListProps> = ({
+  children,
+  tickets,
+  selectedTicket,
+  setSelectedTicket,
+  setReplyText,
+  searchQuery,
+  setSearchQuery,
+  statusFilter,
+  setStatusFilter,
+  priorityFilter,
+  setPriorityFilter,
+  currentPage,
+  setCurrentPage,
+  totalPages,
+  isLoading,
+  error,
+}) => {
+  return (
+    <>
+      <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+            <input
+              type="text"
+              placeholder="جستجو در موضوع، متن تیکت یا نام کاربر..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full bg-white/5 border border-white/10 rounded-lg pr-12 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500 text-sm"
+            />
+          </div>
+          <div className="flex gap-3">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-white/5 *:bg-gray-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 text-sm"
+            >
+              <option value="all">همه وضعیت‌ها</option>
+              <option value="pending">در انتظار پاسخ</option>
+              <option value="answered">پاسخ داده شده</option>
+              <option value="closed">بسته شده</option>
+            </select>
+            <select
+              value={priorityFilter}
+              onChange={(e) => {
+                setPriorityFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-white/5 *:bg-gray-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 text-sm"
+            >
+              <option value="all">همه اولویت‌ها</option>
+              <option value="high">فوری</option>
+              <option value="medium">متوسط</option>
+              <option value="low">کم اهمیت</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-5 space-y-4">
+          <h2 className="text-white font-bold text-lg mb-2">لیست تیکت‌ها</h2>
+          {isLoading && tickets.length === 0 ? (
+            <div className="p-12 text-center text-white/50 bg-white/5 border border-white/10 rounded-xl">
+              در حال بارگذاری تیکت‌ها...
+            </div>
+          ) : error ? (
+            <div className="p-12 text-center text-red-400 bg-white/5 border border-white/10 rounded-xl">
+              {error}
+            </div>
+          ) : tickets.length === 0 ? (
+            <div className="p-12 text-center text-white/40 bg-white/5 border border-white/10 rounded-xl">
+              <MessageCircle className="w-12 h-12 mx-auto opacity-20 mb-3" />
+              تیکتی یافت نشد.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {tickets.map((t) => {
+                const isSelected = selectedTicket?._id === t._id;
+                return (
+                  <div
+                    key={t._id}
+                    onClick={() => {
+                      setSelectedTicket(t);
+                      setReplyText("");
+                    }}
+                    className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col gap-3 ${
+                      isSelected
+                        ? "bg-gradient-to-br from-orange-500/20 to-pink-500/20 border-orange-500/80 text-white shadow-lg shadow-orange-500/10"
+                        : "bg-white/5 border-white/10 text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="font-bold text-sm line-clamp-1">
+                        {t.subject}
+                      </div>
+                      <span
+                        className={`px-2 py-0.5 rounded border text-[10px] ${getPriorityBadge(t.priority)}`}
+                      >
+                        {getPriorityLabel(t.priority)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/60 line-clamp-2 leading-relaxed">
+                      {t.description}
+                    </p>
+                    <div className="flex justify-between items-center text-[10px] text-white/50 pt-2 border-t border-white/5">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-5 h-5 bg-orange-500/20 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                          {t.userId?.username?.charAt(0) || "👤"}
+                        </div>
+                        <span>
+                          {t.userId?.fullName ||
+                            t.userId?.username ||
+                            "کاربر ناشناس"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2 py-0.5 rounded-full border text-[9px] ${getStatusBadge(t.status)}`}
+                        >
+                          {getStatusLabel(t.status)}
+                        </span>
+                        <span className="ss02">
+                          {new Date(t.createdAt).toLocaleDateString("fa-IR")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {totalPages > 1 && (
+                <div className="pt-2 flex justify-center">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    setCurrentPage={setCurrentPage}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {children}
+      </div>
+    </>
+  );
+};
+
+export default React.memo(TicketList);

@@ -1,4 +1,5 @@
 import mongoose, { Document } from "mongoose";
+import type { ReactNode, FormEvent } from "react";
 
 // Mongoose / DB Schema Types
 export interface IMessage {
@@ -54,4 +55,39 @@ export interface ITicketStats {
   pendingCount: number;
   answeredCount: number;
   closedCount: number;
+}
+
+export interface TicketStatsProps {
+  stats: ITicketStats;
+  formatNumber: (num: number) => string;
+}
+
+export interface TicketListProps {
+  children?: ReactNode;
+  tickets: IClientTicket[];
+  selectedTicket: IClientTicket | null;
+  setSelectedTicket: (ticket: IClientTicket | null) => void;
+  setReplyText: (text: string) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
+  priorityFilter: string;
+  setPriorityFilter: (priority: string) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export interface TicketDetailsProps {
+  selectedTicket: IClientTicket | null;
+  replyText: string;
+  setReplyText: (text: string) => void;
+  sendingReply: boolean;
+  onSendReply: (e: FormEvent) => void;
+  onCloseTicket: (id: string) => void;
+  onReopenTicket: (id: string) => void;
+  onDeleteTicket: (id: string) => void;
 }

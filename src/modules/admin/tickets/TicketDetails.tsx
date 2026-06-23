@@ -1,0 +1,212 @@
+import React, { useRef, useEffect } from "react";
+import {
+  MessageSquare,
+  Lock,
+  CheckCircle,
+  Trash2,
+  AlertCircle,
+  Send,
+} from "lucide-react";
+import type { TicketDetailsProps } from "@/types/ticket";
+import {
+  getStatusBadge,
+  getStatusLabel,
+  getPriorityBadge,
+  getPriorityLabel,
+} from "./ticketHelpers";
+
+const TicketDetails: React.FC<TicketDetailsProps> = ({
+  selectedTicket,
+  replyText,
+  setReplyText,
+  sendingReply,
+  onSendReply,
+  onCloseTicket,
+  onReopenTicket,
+  onDeleteTicket,
+}) => {
+  const messageEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedTicket?.messages) {
+      messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selectedTicket?.messages]);
+
+  if (!selectedTicket) {
+    return (
+      <div className="lg:col-span-7 h-[500px] border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-white/40 p-8 text-center bg-white/5">
+        <MessageSquare className="w-16 h-16 mb-4 opacity-20 text-orange-500" />
+        <h4 className="font-bold text-lg text-white mb-2">
+          تیکتی انتخاب نشده است
+        </h4>
+        <p className="text-sm">
+          برای مشاهده گفتگو و پاسخ به کاربر، یکی از تیکت‌های ستون راست را انتخاب
+          کنید.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="lg:col-span-7 bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col h-[650px] shadow-2xl">
+      <div className="p-4 border-b border-white/10 bg-black/30 flex justify-between items-start gap-4">
+        <div>
+          <div className="flex flex-wrap gap-2 mb-2 items-center">
+            <span
+              className={`px-2.5 py-0.5 rounded-full border text-[10px] font-semibold ${getStatusBadge(selectedTicket.status)}`}
+            >
+              {getStatusLabel(selectedTicket.status)}
+            </span>
+            <span
+              className={`px-2 py-0.5 rounded border text-[10px] ${getPriorityBadge(selectedTicket.priority)}`}
+            >
+              اولویت: {getPriorityLabel(selectedTicket.priority)}
+            </span>
+            <span className="text-[10px] text-white/40 ss02">
+              ثبت:{" "}
+              {new Date(selectedTicket.createdAt).toLocaleDateString("fa-IR")}
+            </span>
+          </div>
+          <h3 className="text-lg font-bold text-white line-clamp-1">
+            {selectedTicket.subject}
+          </h3>
+          <div className="text-xs text-white/60 mt-1 flex items-center gap-1">
+            <span>
+              ارسال کننده: {selectedTicket.userId?.fullName} (
+              {selectedTicket.userId?.email})
+            </span>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {selectedTicket.status !== "closed" ? (
+            <button
+              onClick={() => onCloseTicket(selectedTicket._id)}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 p-2 rounded-lg transition-all text-xs flex items-center gap-1"
+              title="بستن تیکت"
+            >
+              <Lock className="w-4 h-4 text-red-400" />
+              بستن تیکت
+            </button>
+          ) : (
+            <button
+              onClick={() => onReopenTicket(selectedTicket._id)}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 p-2 rounded-lg transition-all text-xs flex items-center gap-1"
+              title="بازگشایی تیکت"
+            >
+              <CheckCircle className="w-4 h-4 text-green-400" />
+              بازگشایی تیکت
+            </button>
+          )}
+          <button
+            onClick={() => onDeleteTicket(selectedTicket._id)}
+            className="bg-white/5 hover:bg-red-500/20 border border-white/10 text-red-400 p-2 rounded-lg transition-all"
+            title="حذف تیکت"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-black/20">
+        <div className="flex gap-3 justify-start max-w-[85%]">
+          <div className="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 text-xs font-bold flex-shrink-0">
+            {selectedTicket.userId?.username?.charAt(0) || "👤"}
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tr-none p-4 text-white text-sm">
+            <div className="text-white/40 text-[10px] mb-1.5">
+              {selectedTicket.userId?.fullName ||
+                selectedTicket.userId?.username}
+            </div>
+            <p className="leading-relaxed whitespace-pre-line">
+              {selectedTicket.description}
+            </p>
+          </div>
+        </div>
+
+        {selectedTicket.messages &&
+          selectedTicket.messages.map((msg) => {
+            const isSupport = (msg.senderId as any)?._id
+              ? (msg.senderId as any).role === "admin" ||
+                (msg.senderId as any).role === "coach"
+              : true;
+
+            return (
+              <div
+                key={msg._id}
+                className={`flex gap-3 max-w-[85%] ${isSupport ? "mr-auto justify-end flex-row-reverse" : "justify-start"}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border ${
+                    isSupport
+                      ? "bg-purple-500/20 border-purple-500/30 text-purple-400"
+                      : "bg-orange-500/20 border-orange-500/30 text-orange-400"
+                  }`}
+                >
+                  {isSupport
+                    ? "🛡️"
+                    : selectedTicket.userId?.username?.charAt(0) || "👤"}
+                </div>
+                <div
+                  className={`rounded-2xl p-4 text-white text-sm border ${
+                    isSupport
+                      ? "bg-purple-500/10 border-purple-500/20 rounded-tl-none"
+                      : "bg-white/5 border-white/10 rounded-tr-none"
+                  }`}
+                >
+                  <div className="flex justify-between items-center gap-6 text-white/40 text-[10px] mb-1.5">
+                    <span>{msg.senderName}</span>
+                    <span className="ss02">
+                      {new Date(msg.createdAt).toLocaleTimeString("fa-IR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                  <p className="leading-relaxed whitespace-pre-line">
+                    {msg.text}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        <div ref={messageEndRef} />
+      </div>
+
+      <div className="p-4 border-t border-white/10 bg-black/40">
+        {selectedTicket.status === "closed" ? (
+          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-center text-red-400 text-xs flex items-center justify-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            این تیکت پشتیبانی بسته شده است. در صورت تمایل ابتدا دکمه بازگشایی
+            تیکت در بالای پنل را کلیک کنید.
+          </div>
+        ) : (
+          <form onSubmit={onSendReply} className="flex gap-2">
+            <textarea
+              rows={1}
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder="پاسخ خود را در اینجا بنویسید..."
+              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-white/45 focus:outline-none focus:border-orange-500/50 resize-none leading-relaxed h-11 min-h-[44px] max-h-24 overflow-y-auto"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  onSendReply(e);
+                }
+              }}
+            />
+            <button
+              type="submit"
+              disabled={!replyText.trim() || sendingReply}
+              className="bg-gradient-to-r from-orange-500 to-pink-500 hover:shadow-lg hover:shadow-orange-500/20 text-white w-12 h-11 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Send className="w-4 h-4 rotate-180" />
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default React.memo(TicketDetails);
