@@ -67,3 +67,37 @@ export interface INutritionLog extends Omit<NutritionLog, "_id" | "userId" | "me
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface FoodItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface MealData {
+  breakfast: FoodItem[];
+  lunch: FoodItem[];
+  dinner: FoodItem[];
+  snack: FoodItem[];
+}
+
+export interface WaterTrackerProps {
+  currentWater: number;
+  targetWater: number;
+  waterPercent: number;
+  onAddWater: (amount: number) => void;
+  onResetWater: () => void;
+}
+
+export interface AddFoodModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  activeMealType: keyof MealData;
+  dbFoods: Food[];
+  onSaveFood: (newItem: FoodItem) => void;
+}
