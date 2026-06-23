@@ -10,6 +10,11 @@ const FoodSchema = new Schema<IFood>(
     fat: { type: Number, required: true, default: 0, min: 0 },
     unit: { type: String, required: true, default: "گرم" },
     isActive: { type: Boolean, default: true },
+    type: {
+      type: String,
+      default: "all",
+      enum: ["breakfast", "lunch", "dinner", "snack", "all"],
+    },
   },
   { timestamps: true }
 );

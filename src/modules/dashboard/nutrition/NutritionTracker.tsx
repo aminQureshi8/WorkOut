@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useMemo } from "react";
+
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Salad,
   Activity,
@@ -9,27 +10,12 @@ import {
   Utensils,
   Plus,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
   X,
   Search,
   Sparkles,
   Zap,
 } from "lucide-react";
-
-// Predefined foods list for autocomplete/search
-const PRESET_FOODS = [
-  { name: "سینه مرغ پخته", calories: 165, protein: 31, carbs: 0, fat: 3.6, unit: "۱۰۰ گرم" },
-  { name: "برنج کته پخته", calories: 130, protein: 2.7, carbs: 28, fat: 0.3, unit: "۱۰۰ گرم" },
-  { name: "نان سنگک", calories: 260, protein: 9, carbs: 48, fat: 2.5, unit: "۱۰۰ گرم" },
-  { name: "تخم‌مرغ آب‌پز", calories: 77, protein: 6.3, carbs: 0.6, fat: 5.3, unit: "یک عدد" },
-  { name: "تخم‌مرغ نیمرو", calories: 95, protein: 6.3, carbs: 0.6, fat: 7.5, unit: "یک عدد" },
-  { name: "موز", calories: 89, protein: 1.1, carbs: 23, fat: 0.3, unit: "یک عدد (متوسط)" },
-  { name: "سیب", calories: 52, protein: 0.3, carbs: 14, fat: 0.2, unit: "یک عدد (متوسط)" },
-  { name: "ماست کم‌چرب", calories: 60, protein: 3.5, carbs: 4.7, fat: 1.5, unit: "۱۰۰ گرم" },
-  { name: "شیک پروتئین (وی)", calories: 120, protein: 24, carbs: 3, fat: 1.5, unit: "یک پیمانه" },
-  { name: "بادام درختى", calories: 7, protein: 0.25, carbs: 0.25, fat: 0.6, unit: "یک عدد" },
-];
+import type { Food } from "@/types/nutrition";
 
 interface FoodItem {
   id: string;
@@ -52,78 +38,47 @@ interface MealData {
 export default function NutritionTracker() {
   const [selectedDate, setSelectedDate] = useState<"today" | "yesterday" | "prev">("today");
   
-  // Dynamic states for each date
   const [mealsData, setMealsData] = useState<Record<string, MealData>>({
     today: {
-      breakfast: [
-        { id: "1", name: "تخم‌مرغ نیمرو", quantity: 2, unit: "عدد", calories: 190, protein: 12.6, carbs: 1.2, fat: 15 },
-        { id: "2", name: "نان سنگک", quantity: 80, unit: "گرم", calories: 208, protein: 7.2, carbs: 38.4, fat: 2 },
-        { id: "3", name: "چای با یک حبه قند", quantity: 1, unit: "لیوان", calories: 20, protein: 0, carbs: 5, fat: 0 },
-      ],
-      lunch: [
-        { id: "4", name: "برنج کته پخته", quantity: 150, unit: "گرم", calories: 195, protein: 4, carbs: 42, fat: 0.5 },
-        { id: "5", name: "سینه مرغ پخته", quantity: 150, unit: "گرم", calories: 248, protein: 46.5, carbs: 0, fat: 5.4 },
-        { id: "6", name: "ماست کم‌چرب", quantity: 100, unit: "گرم", calories: 60, protein: 3.5, carbs: 4.7, fat: 1.5 },
-      ],
+      breakfast: [],
+      lunch: [],
       dinner: [],
-      snack: [
-        { id: "7", name: "موز", quantity: 1, unit: "عدد", calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
-      ],
+      snack: [],
     },
     yesterday: {
-      breakfast: [
-        { id: "y1", name: "نان سنگک", quantity: 100, unit: "گرم", calories: 260, protein: 9, carbs: 48, fat: 2.5 },
-        { id: "y2", name: "پنیر سفید", quantity: 30, unit: "گرم", calories: 75, protein: 4.2, carbs: 0.5, fat: 6.2 },
-        { id: "y3", name: "گردو", quantity: 2, unit: "عدد", calories: 52, protein: 1.2, carbs: 1.1, fat: 5.2 },
-      ],
-      lunch: [
-        { id: "y4", name: "برنج کته پخته", quantity: 200, unit: "گرم", calories: 260, protein: 5.4, carbs: 56, fat: 0.6 },
-        { id: "y5", name: "خورشت قیمه", quantity: 150, unit: "گرم", calories: 285, protein: 12, carbs: 18, fat: 17.5 },
-      ],
-      dinner: [
-        { id: "y6", name: "عدسی", quantity: 200, unit: "گرم", calories: 185, protein: 14.2, carbs: 32, fat: 1 },
-      ],
-      snack: [
-        { id: "y7", name: "سیب", quantity: 1, unit: "عدد", calories: 52, protein: 0.3, carbs: 14, fat: 0.2 },
-        { id: "y8", name: "بادام درختى", quantity: 10, unit: "عدد", calories: 70, protein: 2.5, carbs: 2.5, fat: 6 },
-      ],
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snack: [],
     },
     prev: {
-      breakfast: [
-        { id: "p1", name: "شیک پروتئین (وی)", quantity: 1, unit: "پیمانه", calories: 120, protein: 24, carbs: 3, fat: 1.5 },
-        { id: "p2", name: "تخم‌مرغ آب‌پز", quantity: 2, unit: "عدد", calories: 154, protein: 12.6, carbs: 1.2, fat: 10.6 },
-      ],
-      lunch: [
-        { id: "p3", name: "فیله مرغ گریل شده", quantity: 200, unit: "گرم", calories: 330, protein: 62, carbs: 0, fat: 7.2 },
-        { id: "p4", name: "سیب‌زمینی آب‌پز", quantity: 150, unit: "گرم", calories: 130, protein: 3, carbs: 30, fat: 0.2 },
-      ],
-      dinner: [
-        { id: "p5", name: "سینه مرغ پخته", quantity: 100, unit: "گرم", calories: 165, protein: 31, carbs: 0, fat: 3.6 },
-        { id: "p6", name: "کاهو و خیار", quantity: 150, unit: "گرم", calories: 25, protein: 1.5, carbs: 4.5, fat: 0.2 },
-      ],
+      breakfast: [],
+      lunch: [],
+      dinner: [],
       snack: [],
     },
   });
 
   const [waterData, setWaterData] = useState<Record<string, number>>({
-    today: 1250,
-    yesterday: 2250,
-    prev: 2000,
+    today: 0,
+    yesterday: 0,
+    prev: 0,
   });
 
-  const targetWater = 2500; // 2.5 Liters
+  const [dbFoods, setDbFoods] = useState<Food[]>([]);
+  const [isFetchingFoods, setIsFetchingFoods] = useState(false);
+
+  const targetWater = 2500;
   const targetCalories = 2200;
   const targetMacros = { protein: 140, carbs: 240, fat: 70 };
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeMealType, setActiveMealType] = useState<keyof MealData>("breakfast");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPresetFood, setSelectedPresetFood] = useState<typeof PRESET_FOODS[0] | null>(null);
+  const [selectedPresetFood, setSelectedPresetFood] = useState<Food | null>(null);
   const [foodQuantity, setFoodQuantity] = useState("100");
   const [isManualInput, setIsManualInput] = useState(false);
   
-  // Manual Input fields
   const [manualName, setManualName] = useState("");
   const [manualCalories, setManualCalories] = useState("");
   const [manualProtein, setManualProtein] = useState("");
@@ -133,7 +88,24 @@ export default function NutritionTracker() {
   const currentMeals = mealsData[selectedDate];
   const currentWater = waterData[selectedDate];
 
-  // Calculate totals
+  useEffect(() => {
+    const fetchDbFoods = async () => {
+      setIsFetchingFoods(true);
+      try {
+        const res = await fetch("/api/food");
+        if (res.ok) {
+          const data = await res.json();
+          setDbFoods(data || []);
+        }
+      } catch (err) {
+        console.error("Error fetching foods:", err);
+      } finally {
+        setIsFetchingFoods(false);
+      }
+    };
+    fetchDbFoods();
+  }, []);
+
   const dailyTotals = useMemo(() => {
     let calories = 0;
     let protein = 0;
@@ -161,13 +133,16 @@ export default function NutritionTracker() {
   const calPercent = Math.min(100, Math.round((dailyTotals.calories / targetCalories) * 100));
   const waterPercent = Math.min(100, Math.round((currentWater / targetWater) * 100));
 
-  // Predefined food filtering
   const filteredPresetFoods = useMemo(() => {
     if (!searchQuery) return [];
-    return PRESET_FOODS.filter((f) =>
+    return dbFoods.filter((f) =>
       f.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, dbFoods]);
+
+  const popularFoods = useMemo(() => {
+    return dbFoods.filter((f) => f.type === activeMealType || f.type === "all");
+  }, [dbFoods, activeMealType]);
 
   const handleAddWater = (amount: number) => {
     setWaterData((prev) => ({
@@ -196,11 +171,10 @@ export default function NutritionTracker() {
     });
   };
 
-  const handleSelectPreset = (food: typeof PRESET_FOODS[0]) => {
+  const handleSelectPreset = (food: Food) => {
     setSelectedPresetFood(food);
     setSearchQuery(food.name);
-    // Autofill units
-    if (food.unit.includes("عدد") || food.unit.includes("پیمانه")) {
+    if (food.unit.includes("عدد") || food.unit.includes("پیمانه") || food.unit.includes("سیخ")) {
       setFoodQuantity("1");
     } else {
       setFoodQuantity("100");
@@ -241,8 +215,10 @@ export default function NutritionTracker() {
       } else if (selectedPresetFood.unit.includes("پیمانه")) {
         multiplier = qty;
         unitStr = "پیمانه";
+      } else if (selectedPresetFood.unit.includes("سیخ")) {
+        multiplier = qty;
+        unitStr = "سیخ";
       } else {
-        // Grams based on 100g base
         multiplier = qty / 100;
         unitStr = "گرم";
       }
@@ -253,9 +229,9 @@ export default function NutritionTracker() {
         quantity: qty,
         unit: unitStr,
         calories: Math.round(selectedPresetFood.calories * multiplier),
-        protein: Math.round(selectedPresetFood.protein * multiplier * 10) / 10,
-        carbs: Math.round(selectedPresetFood.carbs * multiplier * 10) / 10,
-        fat: Math.round(selectedPresetFood.fat * multiplier * 10) / 10,
+        protein: Math.round((selectedPresetFood.protein || 0) * multiplier * 10) / 10,
+        carbs: Math.round((selectedPresetFood.carbs || 0) * multiplier * 10) / 10,
+        fat: Math.round((selectedPresetFood.fat || 0) * multiplier * 10) / 10,
       };
     }
 
@@ -267,7 +243,6 @@ export default function NutritionTracker() {
       },
     }));
 
-    // Reset Modal Form
     setIsModalOpen(false);
     setSearchQuery("");
     setSelectedPresetFood(null);
@@ -301,7 +276,6 @@ export default function NutritionTracker() {
     <div className="min-h-screen bg-gray-950 p-4 md:p-8" dir="rtl">
       <div className="max-w-6xl mx-auto">
         
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
@@ -315,7 +289,6 @@ export default function NutritionTracker() {
             </div>
           </div>
 
-          {/* Date Navigator */}
           <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
             <button
               onClick={() => setSelectedDate("prev")}
@@ -350,7 +323,6 @@ export default function NutritionTracker() {
           </div>
         </div>
 
-        {/* Date Display Bar */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 flex justify-between items-center text-sm">
           <div className="flex items-center gap-2 text-white/80 font-medium">
             <Activity className="w-4 h-4 text-emerald-400" />
@@ -361,10 +333,8 @@ export default function NutritionTracker() {
           </div>
         </div>
 
-        {/* Grid Stats & Water */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
           
-          {/* Calorie Stats Card (Large) */}
           <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
             <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl -z-10" />
             
@@ -384,14 +354,13 @@ export default function NutritionTracker() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               
-              {/* Radial Progress Circle */}
               <div className="flex flex-col items-center justify-center">
                 <div className="relative w-36 h-36 flex items-center justify-center rounded-full bg-emerald-500/5 border-4 border-emerald-500/20">
                   <div 
                     className="absolute inset-0 rounded-full border-4 border-emerald-400 transition-all duration-500" 
                     style={{
-                      clipPath: `polygon(50% 50%, 50% 0%, ${calPercent >= 25 ? '100% 0%' : '50% 0%'}, ${calPercent >= 50 ? '100% 100%' : '50% 0%'}, ${calPercent >= 75 ? '0% 100%' : '50% 0%'}, ${calPercent >= 100 ? '0% 0%' : '50% 0%'}, 50% 0%)`,
-                      transform: 'rotate(-90deg)'
+                      clipPath: `polygon(50% 50%, 50% 0%, ${calPercent >= 25 ? "100% 0%" : "50% 0%"}, ${calPercent >= 50 ? "100% 100%" : "50% 0%"}, ${calPercent >= 75 ? "0% 100%" : "50% 0%"}, ${calPercent >= 100 ? "0% 0%" : "50% 0%"}, 50% 0%)`,
+                      transform: "rotate(-90deg)",
                     }}
                   />
                   <div className="text-center z-10">
@@ -403,7 +372,6 @@ export default function NutritionTracker() {
                 </div>
               </div>
 
-              {/* Summary Numbers */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-white/5 pb-2">
                   <span className="text-white/60 text-sm">باقی‌مانده:</span>
@@ -427,11 +395,9 @@ export default function NutritionTracker() {
                 </div>
               </div>
 
-              {/* Progress Bars for Macros */}
               <div className="space-y-3 bg-white/5 border border-white/5 rounded-2xl p-4">
                 <h4 className="text-white/80 text-xs font-semibold mb-2">درشت‌مغذی‌ها (Macros)</h4>
                 
-                {/* Protein */}
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-purple-300">پروتئین (عضله‌ساز)</span>
@@ -445,7 +411,6 @@ export default function NutritionTracker() {
                   </div>
                 </div>
 
-                {/* Carbs */}
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-orange-300">کربوهیدرات (انرژی)</span>
@@ -459,7 +424,6 @@ export default function NutritionTracker() {
                   </div>
                 </div>
 
-                {/* Fat */}
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="text-yellow-300">چربی (هورمون‌ساز)</span>
@@ -478,7 +442,6 @@ export default function NutritionTracker() {
             </div>
           </div>
 
-          {/* Water Intake Card (Small) */}
           <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
             <div className="absolute top-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-2xl -z-10" />
             
@@ -503,7 +466,6 @@ export default function NutritionTracker() {
               <span className="text-white/40 text-xs mr-1">/ {targetWater} میلی‌لیتر</span>
             </div>
 
-            {/* Blue Progress Bar */}
             <div className="h-4 w-full bg-white/10 rounded-full overflow-hidden mb-4">
               <div 
                 className="h-full bg-blue-500 rounded-full transition-all duration-500 bg-gradient-to-l from-blue-600 to-teal-400"
@@ -511,7 +473,6 @@ export default function NutritionTracker() {
               />
             </div>
 
-            {/* Quick Add Buttons */}
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleAddWater(250)}
@@ -532,7 +493,6 @@ export default function NutritionTracker() {
           </div>
         </div>
 
-        {/* Meals Cards Section */}
         <h3 className="text-xl text-white font-bold mb-6 flex items-center gap-2">
           <Utensils className="w-5 h-5 text-emerald-400" />
           وعده‌های غذایی امروز
@@ -564,7 +524,6 @@ export default function NutritionTracker() {
                   </span>
                 </div>
 
-                {/* Food list for this meal */}
                 <div className="space-y-2 mb-4 flex-1">
                   {mealItems.length > 0 ? (
                     mealItems.map((item) => (
@@ -615,7 +574,6 @@ export default function NutritionTracker() {
 
       </div>
 
-      {/* Add Food Modal (Client Simulated) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm" dir="rtl">
           <div className="bg-gray-900 border border-white/10 rounded-3xl w-full max-w-lg p-6 shadow-2xl relative">
@@ -632,7 +590,6 @@ export default function NutritionTracker() {
               ثبت غذا در وعده {translateMealName(activeMealType)}
             </h3>
 
-            {/* Mode Switcher */}
             <div className="grid grid-cols-2 gap-2 mb-4 p-1 bg-white/5 rounded-xl border border-white/5">
               <button
                 type="button"
@@ -658,7 +615,6 @@ export default function NutritionTracker() {
               </button>
             </div>
 
-            {/* Predefined Food Search */}
             {!isManualInput ? (
               <div className="space-y-4">
                 <div className="relative">
@@ -675,13 +631,12 @@ export default function NutritionTracker() {
                   <Search className="w-4 h-4 text-white/40 absolute top-3.5 right-3.5" />
                 </div>
 
-                {/* Preset List / Autocomplete Results */}
                 <div className="max-h-40 overflow-y-auto space-y-1">
                   {searchQuery && filteredPresetFoods.length > 0 ? (
                     filteredPresetFoods.map((food) => (
                       <button
                         type="button"
-                        key={food.name}
+                        key={food._id}
                         onClick={() => handleSelectPreset(food)}
                         className="w-full text-right text-xs text-white/80 hover:text-white bg-white/5 hover:bg-emerald-500/20 border border-white/5 hover:border-emerald-500/30 px-3 py-2 rounded-xl transition-all flex justify-between items-center"
                       >
@@ -696,24 +651,29 @@ export default function NutritionTracker() {
                   ) : !selectedPresetFood ? (
                     <div className="space-y-2">
                       <p className="text-white/40 text-[10px] font-semibold uppercase tracking-wider mb-2">غذاهای پر مصرف:</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {PRESET_FOODS.slice(0, 6).map((food) => (
-                          <button
-                            type="button"
-                            key={food.name}
-                            onClick={() => handleSelectPreset(food)}
-                            className="text-right text-xs bg-white/5 hover:bg-white/10 hover:text-white text-white/70 border border-white/5 px-3 py-2.5 rounded-xl transition-all"
-                          >
-                            <span className="block font-medium">{food.name}</span>
-                            <span className="block text-[9px] text-white/40 mt-0.5">{food.calories} kcal / {food.unit}</span>
-                          </button>
-                        ))}
-                      </div>
+                      {popularFoods.length === 0 ? (
+                        <div className="text-center py-4 text-white/30 text-xs">
+                          غذایی برای این وعده یافت نشد.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          {popularFoods.slice(0, 6).map((food) => (
+                            <button
+                              type="button"
+                              key={food._id}
+                              onClick={() => handleSelectPreset(food)}
+                              className="text-right text-xs bg-white/5 hover:bg-white/10 hover:text-white text-white/70 border border-white/5 px-3 py-2.5 rounded-xl transition-all"
+                            >
+                              <span className="block font-medium">{food.name}</span>
+                              <span className="block text-[9px] text-white/40 mt-0.5">{food.calories} kcal / {food.unit}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ) : null}
                 </div>
 
-                {/* Quantity input for Preset Food */}
                 {selectedPresetFood && (
                   <div className="bg-white/5 border border-white/5 rounded-2xl p-4 space-y-4">
                     <div className="flex justify-between items-center">
@@ -725,7 +685,7 @@ export default function NutritionTracker() {
 
                     <div>
                       <label className="block text-white/80 mb-2 text-xs">
-                        مقدار مصرفی ({selectedPresetFood.unit.includes("عدد") ? "عدد" : selectedPresetFood.unit.includes("پیمانه") ? "پیمانه" : "گرم"}):
+                        مقدار مصرفی ({selectedPresetFood.unit.includes("عدد") ? "عدد" : selectedPresetFood.unit.includes("پیمانه") ? "پیمانه" : selectedPresetFood.unit.includes("سیخ") ? "سیخ" : "گرم"}):
                       </label>
                       <input
                         type="number"
@@ -738,7 +698,6 @@ export default function NutritionTracker() {
                 )}
               </div>
             ) : (
-              // Manual Food Input Form
               <div className="space-y-4">
                 <div>
                   <label className="block text-white/80 mb-2 text-xs">نام غذا / مکمل:</label>
@@ -812,7 +771,6 @@ export default function NutritionTracker() {
               </div>
             )}
 
-            {/* Actions */}
             <div className="flex gap-4 mt-6 pt-4 border-t border-white/5">
               <button
                 type="button"

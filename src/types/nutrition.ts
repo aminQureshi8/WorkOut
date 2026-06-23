@@ -10,6 +10,7 @@ export interface Food {
   fat: number;
   unit: string;
   isActive: boolean;
+  type?: "breakfast" | "lunch" | "dinner" | "snack" | "all";
   createdAt?: string;
   updatedAt?: string;
 }
