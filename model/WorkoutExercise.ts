@@ -1,17 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-export interface IWorkoutExercise extends Document {
-  dayId: mongoose.Types.ObjectId;
-  videoId?: mongoose.Types.ObjectId;
-  videoId2?: mongoose.Types.ObjectId;
-  name: string;
-  sets: number;
-  reps: string;
-  restSec: number;
-  sortOrder: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { IWorkoutExercise } from "@/types/workout";
 
 const WorkoutExerciseSchema = new Schema<IWorkoutExercise>(
   {

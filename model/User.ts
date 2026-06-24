@@ -1,17 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-
-export interface IUser extends Document {
-  email: string;
-  username: string;
-  password: string;
-  role: "user" | "admin" | "coach";
-  fullName: string;
-  phone: string;
-  status: "active" | "expired" | "blocked";
-  wishlist?: mongoose.Types.ObjectId[];
-  lastLogin?: Date;
-  createdAt: Date;
-}
+import { IUser } from "@/types/user";
 
 const UserSchema = new Schema<IUser>(
   {
