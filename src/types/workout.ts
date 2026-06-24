@@ -1,3 +1,5 @@
+import mongoose, { Document } from "mongoose";
+
 export interface UserInfo {
   _id: string;
   username: string;
@@ -90,4 +92,35 @@ export interface WorkoutPlanProps {
     description?: string;
   } | null;
   days: DayItem[];
+}
+
+export interface IWorkoutPlan extends Document {
+  packageId: mongoose.Types.ObjectId;
+  title: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IWorkoutDay extends Document {
+  planId: mongoose.Types.ObjectId;
+  dayName: string;
+  muscleGroup: string;
+  sortOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IWorkoutExercise extends Document {
+  dayId: mongoose.Types.ObjectId;
+  videoId?: mongoose.Types.ObjectId;
+  videoId2?: mongoose.Types.ObjectId;
+  name: string;
+  sets: number;
+  reps: string;
+  restSec: number;
+  sortOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
