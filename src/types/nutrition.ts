@@ -101,3 +101,28 @@ export interface AddFoodModalProps {
   dbFoods: Food[];
   onSaveFood: (newItem: FoodItem) => void;
 }
+
+export interface MealPlanItem {
+  foodId: string | mongoose.Types.ObjectId;
+  quantity: number;
+  unit: string;
+}
+
+export interface MealPlan {
+  _id: string;
+  packageId: string | mongoose.Types.ObjectId;
+  title: string;
+  description?: string;
+  breakfast: MealPlanItem[];
+  lunch: MealPlanItem[];
+  dinner: MealPlanItem[];
+  snack: MealPlanItem[];
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IMealPlan extends Omit<MealPlan, "_id" | "createdAt" | "updatedAt">, Document {
+  createdAt: Date;
+  updatedAt: Date;
+}
