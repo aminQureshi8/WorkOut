@@ -101,6 +101,13 @@ export function getAdminMenuItems(
           href: "/admin/workouts",
         },
         {
+          id: "foods",
+          label: "مدیریت غذاها",
+          icon: Salad,
+          badge: null,
+          href: "/admin/foods",
+        },
+        {
           id: "tickets",
           label: "تیکت‌ها",
           icon: Ticket,

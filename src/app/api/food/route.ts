@@ -7,7 +7,12 @@ export async function GET(req: NextRequest) {
     await dbConnect();
 
     const search = req.nextUrl.searchParams.get("search") || "";
-    const query: any = { isActive: true };
+    const all = req.nextUrl.searchParams.get("all") === "true";
+    const query: any = {};
+
+    if (!all) {
+      query.isActive = true;
+    }
 
     if (search.trim()) {
       query.name = { $regex: search, $options: "i" };
