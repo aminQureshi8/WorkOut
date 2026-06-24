@@ -24,6 +24,7 @@ export interface Package {
   studentCount: number;
   isPopular: boolean;
   isActive: boolean;
+  hasMealPlan: boolean;
   tier?: string;
   features?: string[] | { name: string }[];
   createdAt?: string;

@@ -24,6 +24,7 @@ const PackageSchema = new Schema<IPackage>(
     studentCount: { type: Number, default: 0 },
     isPopular: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    hasMealPlan: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

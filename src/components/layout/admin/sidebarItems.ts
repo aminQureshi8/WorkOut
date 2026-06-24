@@ -14,6 +14,7 @@ import {
   Heart,
   Activity,
   Salad,
+  Utensils,
 } from "lucide-react";
 import React from "react";
 
@@ -106,6 +107,13 @@ export function getAdminMenuItems(
           icon: Salad,
           badge: null,
           href: "/admin/foods",
+        },
+        {
+          id: "meal-plans",
+          label: "برنامه غذایی",
+          icon: Utensils,
+          badge: null,
+          href: "/admin/meal-plans",
         },
         {
           id: "tickets",
