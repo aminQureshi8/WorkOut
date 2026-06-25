@@ -22,7 +22,8 @@
       "@/*": ["./src/*"],
       "@/model/*": ["./model/*"],
       "@/lib/*": ["./lib/*"],
-      "@/src/modules": ["./src/modules/*"]
+      "@/src/modules": ["./src/modules/*"],
+      "@/validator/*": ["./validator/*"]
     }
   },
   "include": [

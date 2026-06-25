@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import MealPlan from "@/model/MealPlan";
 import { NextRequest, NextResponse } from "next/server";
+import { validateMealPlanUpdate } from "@/validator/meal-plan";
 
 export async function PUT(
   req: NextRequest,
@@ -12,6 +13,14 @@ export async function PUT(
     const planId = resolvedParams.planId;
 
     const data = await req.json();
+
+    const validationResult = validateMealPlanUpdate(data);
+    if (validationResult !== true) {
+      return NextResponse.json(
+        { error: "داده‌های ارسالی معتبر نیستند.", details: validationResult },
+        { status: 400 }
+      );
+    }
 
     const updatedPlan = await MealPlan.findByIdAndUpdate(
       planId,

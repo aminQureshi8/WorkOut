@@ -6,20 +6,19 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextRequest, NextResponse } from "next/server";
 import { arvanClient } from "@/lib/arvan";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { validateBlog, validateBlogUpdate } from "@/validator/blog";
 
-// Helper to generate a unique, URL-safe slug from Persian or English titles
 async function generateUniqueSlug(title: string): Promise<string> {
   const baseSlug = title
     .trim()
     .toLowerCase()
-    .replace(/[^a-zA-Z0-9\u0600-\u06FF\s-]/g, "") // Keep alphanumeric and Persian characters
+    .replace(/[^a-zA-Z0-9\u0600-\u06FF\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 
   let slug = baseSlug;
   let count = 1;
 
-  // Check uniqueness and append counter if not unique
   while (await Blog.findOne({ slug })) {
     slug = `${baseSlug}-${count}`;
     count++;
@@ -28,7 +27,6 @@ async function generateUniqueSlug(title: string): Promise<string> {
   return slug;
 }
 
-// Helper to upload File object to Arvan Cloud S3
 async function uploadFileToS3(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());
   const ext = file.name.split(".").pop() || "jpg";
@@ -40,7 +38,7 @@ async function uploadFileToS3(file: File): Promise<string> {
       Key: imageKey,
       Body: buffer,
       ContentType: file.type,
-    })
+    }),
   );
 
   return `${process.env.S3_PUBLIC_URL}/${imageKey}`;
@@ -52,9 +50,14 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (id) {
-      const blog = await Blog.findById(id).populate("authorId", "username fullName email role").lean();
+      const blog = await Blog.findById(id)
+        .populate("authorId", "username fullName email role")
+        .lean();
       if (!blog) {
-        return NextResponse.json({ message: "مقاله مورد نظر پیدا نشد" }, { status: 404 });
+        return NextResponse.json(
+          { message: "مقاله مورد نظر پیدا نشد" },
+          { status: 404 },
+        );
       }
       return NextResponse.json({ blog });
     }
@@ -62,9 +65,14 @@ export async function GET(req: NextRequest) {
     const slug = searchParams.get("slug");
     if (slug) {
       const decodedSlug = decodeURIComponent(slug);
-      const blog = await Blog.findOne({ slug: decodedSlug }).populate("authorId", "username fullName email role").lean();
+      const blog = await Blog.findOne({ slug: decodedSlug })
+        .populate("authorId", "username fullName email role")
+        .lean();
       if (!blog) {
-        return NextResponse.json({ message: "مقاله مورد نظر پیدا نشد" }, { status: 404 });
+        return NextResponse.json(
+          { message: "مقاله مورد نظر پیدا نشد" },
+          { status: 404 },
+        );
       }
       return NextResponse.json({ blog });
     }
@@ -105,9 +113,8 @@ export async function GET(req: NextRequest) {
     const total = await Blog.countDocuments(query);
     const totalPages = Math.ceil(total / Number(limit));
 
-    // Aggregate stats
     const totalViewsResult = await Blog.aggregate([
-      { $group: { _id: null, total: { $sum: "$views" } } }
+      { $group: { _id: null, total: { $sum: "$views" } } },
     ]);
     const totalViews = totalViewsResult[0]?.total || 0;
     const publishedCount = await Blog.countDocuments({ status: "published" });
@@ -134,15 +141,17 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     let authorId = session?.user?.id;
 
-    // Fallback for local development testing if no active session is found
     if (!authorId) {
       const adminUser = await User.findOne({ role: "admin" });
       if (adminUser) {
         authorId = adminUser._id;
       } else {
         return NextResponse.json(
-          { message: "کاربر ادمین برای انتساب نویسنده یافت نشد. لطفاً وارد سیستم شوید." },
-          { status: 401 }
+          {
+            message:
+              "کاربر ادمین برای انتساب نویسنده یافت نشد. لطفاً وارد سیستم شوید.",
+          },
+          { status: 401 },
         );
       }
     }
@@ -157,12 +166,36 @@ export async function POST(req: NextRequest) {
     const seoTitle = formData.get("seoTitle") as string;
     const seoDescription = formData.get("seoDescription") as string;
     const tagsStr = formData.get("tags") as string;
-    const tags = tagsStr ? JSON.parse(tagsStr) : [];
     const imageFile = formData.get("image") as File;
 
-    if (!title || !content) {
+    let tags: any = undefined;
+    if (tagsStr) {
+      try {
+        tags = JSON.parse(tagsStr);
+      } catch (err) {
+        return NextResponse.json(
+          { message: "فرمت تگ‌ها معتبر نیست" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const validationData = {
+      title: title || undefined,
+      content: content || undefined,
+      excerpt: excerpt || undefined,
+      category: category || undefined,
+      status: status || undefined,
+      publishDate: publishDate || undefined,
+      seoTitle: seoTitle || undefined,
+      seoDescription: seoDescription || undefined,
+      tags,
+    };
+
+    const validationResult = validateBlog(validationData);
+    if (validationResult !== true) {
       return NextResponse.json(
-        { message: "وارد کردن عنوان و محتوای مقاله الزامی است" },
+        { message: "داده‌های ارسالی معتبر نیستند", details: validationResult },
         { status: 400 }
       );
     }
@@ -210,22 +243,49 @@ export async function PUT(req: NextRequest) {
     const seoTitle = formData.get("seoTitle") as string;
     const seoDescription = formData.get("seoDescription") as string;
     const tagsStr = formData.get("tags") as string;
-    const tags = tagsStr ? JSON.parse(tagsStr) : undefined;
-    const imageInput = formData.get("image"); // Can be File, or string (existing url), or null
+    const imageInput = formData.get("image");
 
-    if (!id) {
+    let tags: any = undefined;
+    if (tagsStr) {
+      try {
+        tags = JSON.parse(tagsStr);
+      } catch (err) {
+        return NextResponse.json(
+          { message: "فرمت تگ‌ها معتبر نیست" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const validationData = {
+      id: id || undefined,
+      title: title || undefined,
+      content: content || undefined,
+      excerpt: excerpt || undefined,
+      category: category || undefined,
+      status: status || undefined,
+      publishDate: publishDate || undefined,
+      seoTitle: seoTitle || undefined,
+      seoDescription: seoDescription || undefined,
+      tags,
+    };
+
+    const validationResult = validateBlogUpdate(validationData);
+    if (validationResult !== true) {
       return NextResponse.json(
-        { message: "شناسه مقاله برای بروزرسانی الزامی است" },
+        { message: "داده‌های ارسالی معتبر نیستند", details: validationResult },
         { status: 400 }
       );
     }
 
     const blog = await Blog.findById(id);
     if (!blog) {
-      return NextResponse.json({ message: "مقاله مورد نظر پیدا نشد" }, { status: 404 });
+      return NextResponse.json(
+        { message: "مقاله مورد نظر پیدا نشد" },
+        { status: 404 },
+      );
     }
 
-    // Update slug if title is changed
     if (title && title !== blog.title) {
       blog.slug = await generateUniqueSlug(title);
       blog.title = title;
@@ -233,18 +293,21 @@ export async function PUT(req: NextRequest) {
 
     if (content !== undefined) blog.content = content;
     if (excerpt !== undefined) blog.excerpt = excerpt;
-    
-    // If a new file is uploaded
+
     if (imageInput && imageInput instanceof File && imageInput.size > 0) {
       blog.image = await uploadFileToS3(imageInput);
-    } else if (imageInput === "null" || imageInput === "deleted" || !imageInput) {
-      // If the image was explicitly deleted or empty
+    } else if (
+      imageInput === "null" ||
+      imageInput === "deleted" ||
+      !imageInput
+    ) {
       blog.image = "";
-    } // If it's a string, it means existing image URL was kept, so we do nothing.
+    }
 
     if (category !== undefined) blog.category = category;
     if (status !== undefined) blog.status = status;
-    if (publishDate !== undefined) blog.publishDate = publishDate ? new Date(publishDate) : null;
+    if (publishDate !== undefined)
+      blog.publishDate = publishDate ? new Date(publishDate) : null;
     if (seoTitle !== undefined) blog.seoTitle = seoTitle;
     if (seoDescription !== undefined) blog.seoDescription = seoDescription;
     if (tags !== undefined) blog.tags = tags;
@@ -266,17 +329,23 @@ export async function DELETE(req: NextRequest) {
     if (!id) {
       return NextResponse.json(
         { message: "شناسه مقاله الزامی است" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const blog = await Blog.findByIdAndDelete(id);
 
     if (!blog) {
-      return NextResponse.json({ message: "مقاله مورد نظر پیدا نشد" }, { status: 404 });
+      return NextResponse.json(
+        { message: "مقاله مورد نظر پیدا نشد" },
+        { status: 404 },
+      );
     }
 
-    return NextResponse.json({ success: true, message: "مقاله با موفقیت حذف شد" });
+    return NextResponse.json({
+      success: true,
+      message: "مقاله با موفقیت حذف شد",
+    });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }

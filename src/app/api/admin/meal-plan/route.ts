@@ -1,8 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import MealPlan from "@/model/MealPlan";
-import Food from "@/model/Food";
-import Package from "@/model/Package";
 import { NextRequest, NextResponse } from "next/server";
+import { validateMealPlan } from "@/validator/meal-plan";
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,14 +28,15 @@ export async function POST(req: NextRequest) {
     await dbConnect();
     const body = await req.json();
 
-    const { packageId, title, description, breakfast, lunch, dinner, snack, isActive } = body;
-
-    if (!packageId || !title) {
+    const validationResult = validateMealPlan(body);
+    if (validationResult !== true) {
       return NextResponse.json(
-        { error: "پکیج و عنوان برنامه غذایی الزامی هستند." },
+        { error: "داده‌های ارسالی معتبر نیستند.", details: validationResult },
         { status: 400 }
       );
     }
+
+    const { packageId, title, description, breakfast, lunch, dinner, snack, isActive } = body;
 
     const newPlan = await MealPlan.create({
       packageId,
