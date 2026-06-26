@@ -1,4 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
+import registerModels from "@/lib/registerModels";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
@@ -16,27 +17,15 @@ import BlogModel from "@/model/Blog";
 import WishModel from "@/model/Wish";
 import AdminDashboardUser from "@/modules/dashboard/AdminDashboardUser/AdminDashboardUser";
 
-const registerModels = () => {
-  return [
-    SubscriptionModel,
-    UserModel,
-    WorkoutPlanModel,
-    WorkoutDayModel,
-    WorkoutExerciseModel,
-    PackageModel,
-    CoachModel,
-    VideoModel,
-    OrderModel,
-    TicketModel,
-    BlogModel,
-    WishModel
-  ];
+const registerPageModels = () => {
+  return [TicketModel, BlogModel, WishModel];
 };
 
 export const dynamic = "force-dynamic";
 
 export default async function page() {
   registerModels();
+  registerPageModels();
   await dbConnect();
   
   const session = await getServerSession(authOptions);
