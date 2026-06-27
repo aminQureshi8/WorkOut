@@ -10,10 +10,12 @@ import {
   Plus,
   Trash2,
   Sparkles,
+  Edit2,
 } from "lucide-react";
 import type { Food, FoodItem, MealData } from "@/types/nutrition";
 import WaterTracker from "./WaterTracker";
 import AddFoodModal from "./AddFoodModal";
+import EditTargetModal from "./EditTargetModal";
 
 export default function NutritionTracker() {
   const [selectedDate, setSelectedDate] = useState<"today" | "yesterday" | "prev">("today");
@@ -49,11 +51,13 @@ export default function NutritionTracker() {
   const [isFetchingFoods, setIsFetchingFoods] = useState(false);
 
   const targetWater = 2500;
-  const targetCalories = 2200;
-  const targetMacros = { protein: 140, carbs: 240, fat: 70 };
+  const [targetCalories, setTargetCalories] = useState<number>(2200);
+  const [targetMacros, setTargetMacros] = useState({ protein: 140, carbs: 240, fat: 70 });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeMealType, setActiveMealType] = useState<keyof MealData>("breakfast");
+
+  const [isEditingTarget, setIsEditingTarget] = useState(false);
 
   const currentMeals = mealsData[selectedDate];
   const currentWater = waterData[selectedDate];
@@ -74,6 +78,25 @@ export default function NutritionTracker() {
       }
     };
     fetchDbFoods();
+
+    const savedTarget = localStorage.getItem("targetCalories");
+    if (savedTarget) {
+      const val = parseInt(savedTarget);
+      if (val) {
+        setTargetCalories(val);
+      }
+    }
+    const savedMacros = localStorage.getItem("targetMacros");
+    if (savedMacros) {
+      try {
+        const macros = JSON.parse(savedMacros);
+        if (macros) {
+          setTargetMacros(macros);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }, []);
 
   const dailyTotals = useMemo(() => {
@@ -230,10 +253,18 @@ export default function NutritionTracker() {
                 </h3>
                 <p className="text-white/50 text-[10px] sm:text-xs mt-1">ترازو و تحلیل کالری‌های وارد شده</p>
               </div>
-              <div className="text-left">
-                <span className="text-xl sm:text-2xl font-extrabold text-white font-sans">{targetCalories}</span>
-                <span className="text-white/40 text-[10px] sm:text-xs mr-1">کالری هدف</span>
-              </div>
+              <button
+                onClick={() => {
+                  setIsEditingTarget(true);
+                }}
+                className="text-left flex flex-col items-end group hover:opacity-85 transition-all cursor-pointer border-none bg-transparent p-0"
+              >
+                <div className="flex items-center gap-1">
+                  <span className="text-xl sm:text-2xl font-extrabold text-white font-sans">{targetCalories}</span>
+                  <Edit2 className="w-3.5 h-3.5 text-white/40 group-hover:text-emerald-400 transition-colors" />
+                </div>
+                <span className="text-white/40 text-[10px] sm:text-xs">کالری هدف (کلیک برای ویرایش)</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
@@ -415,6 +446,20 @@ export default function NutritionTracker() {
         activeMealType={activeMealType}
         dbFoods={dbFoods}
         onSaveFood={handleSaveFood}
+      />
+
+      <EditTargetModal
+        isOpen={isEditingTarget}
+        onClose={() => setIsEditingTarget(false)}
+        targetCalories={targetCalories}
+        targetMacros={targetMacros}
+        onSaveTargets={(calories, protein, carbs, fat) => {
+          setTargetCalories(calories);
+          setTargetMacros({ protein, carbs, fat });
+          localStorage.setItem("targetCalories", calories.toString());
+          localStorage.setItem("targetMacros", JSON.stringify({ protein, carbs, fat }));
+          setIsEditingTarget(false);
+        }}
       />
     </div>
   );
