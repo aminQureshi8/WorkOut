@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverExternalPackages: ["fastest-validator"],
 };
 
 export default nextConfig;

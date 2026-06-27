@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mongodb:
@@ -12,12 +12,12 @@ services:
   nextapp:
     build:
       context: .
-      dockerfile: Dockerfile  # اشاره به همین داکرفایلی که فرستادید
+      dockerfile: Dockerfile
     container_name: starfit_web
     ports:
       - "3000:3000"
     env_file:
-      - .env                  # متغیرهای .env را به داکر معرفی می‌کند
+      - .env
     depends_on:
       - mongodb
 

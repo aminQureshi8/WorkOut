@@ -26,7 +26,6 @@ export async function PUT(
     }
 
     if (Array.isArray(features)) {
-      // Clean up old features and write new ones
       await PackageFeature.deleteMany({ packageId });
       if (features.length > 0) {
         await PackageFeature.insertMany(
@@ -71,7 +70,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Package not found" }, { status: 404 });
     }
 
-    // Delete associated features
     await PackageFeature.deleteMany({ packageId });
 
     return NextResponse.json({ success: true, message: "Package deleted successfully" });

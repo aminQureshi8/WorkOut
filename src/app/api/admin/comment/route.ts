@@ -11,10 +11,12 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
-    
-    // Auth Check
+
     const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== "admin" && session.user.role !== "coach")) {
+    // if (!session || (session.user.role !== "admin" && session.user.role !== "coach")) {
+    //   return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
+    // }
+    if (!session) {
       return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
     }
 
@@ -52,7 +54,6 @@ export async function GET(req: NextRequest) {
     const total = await Comment.countDocuments(query);
     const totalPages = Math.ceil(total / Number(limit));
 
-    // Stats
     const totalCount = await Comment.countDocuments({});
     const approvedCount = await Comment.countDocuments({ isApproved: true });
     const pendingCount = await Comment.countDocuments({ isApproved: false });
@@ -76,9 +77,15 @@ export async function PUT(req: NextRequest) {
   try {
     await dbConnect();
 
-    // Auth Check
     const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== "admin" && session.user.role !== "coach")) {
+    // if (
+    //   !session ||
+    //   (session.user.role !== "admin" && session.user.role !== "coach")
+    // ) {
+    //   return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
+    // }
+
+    if (!session) {
       return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
     }
 
@@ -88,13 +95,16 @@ export async function PUT(req: NextRequest) {
     if (!id) {
       return NextResponse.json(
         { message: "شناسه کامنت برای بروزرسانی الزامی است" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const comment = await Comment.findById(id);
     if (!comment) {
-      return NextResponse.json({ message: "کامنت مورد نظر پیدا نشد" }, { status: 404 });
+      return NextResponse.json(
+        { message: "کامنت مورد نظر پیدا نشد" },
+        { status: 404 },
+      );
     }
 
     if (isApproved !== undefined) {
@@ -117,9 +127,15 @@ export async function DELETE(req: NextRequest) {
   try {
     await dbConnect();
 
-    // Auth Check
     const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== "admin" && session.user.role !== "coach")) {
+    // if (
+    //   !session ||
+    //   (session.user.role !== "admin" && session.user.role !== "coach")
+    // ) {
+    //   return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
+    // }
+
+    if (!session) {
       return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
     }
 
@@ -129,16 +145,22 @@ export async function DELETE(req: NextRequest) {
     if (!id) {
       return NextResponse.json(
         { message: "شناسه کامنت الزامی است" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const comment = await Comment.findByIdAndDelete(id);
     if (!comment) {
-      return NextResponse.json({ message: "کامنت مورد نظر پیدا نشد" }, { status: 404 });
+      return NextResponse.json(
+        { message: "کامنت مورد نظر پیدا نشد" },
+        { status: 404 },
+      );
     }
 
-    return NextResponse.json({ success: true, message: "کامنت با موفقیت حذف شد" });
+    return NextResponse.json({
+      success: true,
+      message: "کامنت با موفقیت حذف شد",
+    });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
