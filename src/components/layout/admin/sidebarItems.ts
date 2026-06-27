@@ -220,7 +220,7 @@ export function getUserMenuItems(
           label: "تغذیه و کالری‌شمار",
           icon: Salad,
           badge: null,
-          href: "/dashboard/nutrition",
+          href: "/nutrition",
         },
         {
           id: "tickets",

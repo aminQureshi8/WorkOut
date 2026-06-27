@@ -159,18 +159,18 @@ export default function NutritionTracker() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-4 md:p-8" dir="rtl">
-      <div className="max-w-6xl mx-auto">
+    <div className=" pt-4 md:pt-8" dir="rtl">
+      <div className="container mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
               <Salad className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-3xl text-white font-bold" style={{ fontFamily: "Marbeh, sans-serif" }}>
+              <h1 className="text-xl sm:text-3xl text-white font-bold">
                 تغذیه و کالری‌شمار روزانه
               </h1>
-              <p className="text-white/60 text-sm mt-0.5">رهگیری دقیق کالری، درشت‌مغذی‌ها و آب مصرفی</p>
+              <p className="text-white/60 text-xs sm:text-sm mt-0.5">رهگیری دقیق کالری، درشت‌مغذی‌ها و آب مصرفی</p>
             </div>
           </div>
 
@@ -208,12 +208,12 @@ export default function NutritionTracker() {
           </div>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 flex justify-between items-center text-sm">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-3 justify-between sm:items-center text-xs sm:text-sm">
           <div className="flex items-center gap-2 text-white/80 font-medium">
             <Activity className="w-4 h-4 text-emerald-400" />
             تاریخ فعال: {getPersianDateLabel()}
           </div>
-          <div className="text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-xs">
+          <div className="text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] sm:text-xs self-start sm:self-auto">
             پکیج فعال: کاهش وزن سریع
           </div>
         </div>
@@ -224,21 +224,21 @@ export default function NutritionTracker() {
 
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="text-lg text-white font-bold flex items-center gap-2">
+                <h3 className="text-base sm:text-lg text-white font-bold flex items-center gap-2">
                   <Flame className="w-5 h-5 text-orange-400" />
                   وضعیت کالری روزانه
                 </h3>
-                <p className="text-white/50 text-xs mt-1">ترازو و تحلیل کالری‌های وارد شده</p>
+                <p className="text-white/50 text-[10px] sm:text-xs mt-1">ترازو و تحلیل کالری‌های وارد شده</p>
               </div>
               <div className="text-left">
-                <span className="text-2xl font-extrabold text-white font-sans">{targetCalories}</span>
-                <span className="text-white/40 text-xs mr-1">کالری هدف</span>
+                <span className="text-xl sm:text-2xl font-extrabold text-white font-sans">{targetCalories}</span>
+                <span className="text-white/40 text-[10px] sm:text-xs mr-1">کالری هدف</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               <div className="flex flex-col items-center justify-center">
-                <div className="relative w-36 h-36 flex items-center justify-center rounded-full bg-emerald-500/5 border-4 border-emerald-500/20">
+                <div className="relative w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center rounded-full bg-emerald-500/5 border-4 border-emerald-500/20">
                   <div
                     className="absolute inset-0 rounded-full border-4 border-emerald-400 transition-all duration-500"
                     style={{
@@ -247,26 +247,26 @@ export default function NutritionTracker() {
                     }}
                   />
                   <div className="text-center z-10">
-                    <span className="block text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 font-sans">
+                    <span className="block text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 font-sans">
                       {dailyTotals.calories}
                     </span>
-                    <span className="text-white/40 text-xs mt-0.5 block">مصرف شده</span>
+                    <span className="text-white/40 text-[10px] sm:text-xs mt-0.5 block">مصرف شده</span>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <span className="text-white/60 text-sm">باقی‌مانده:</span>
-                  <span className="text-white font-bold font-sans text-lg">{caloriesRemaining} kcal</span>
+                  <span className="text-white/60 text-xs sm:text-sm">باقی‌مانده:</span>
+                  <span className="text-white font-bold font-sans text-sm sm:text-lg">{caloriesRemaining} kcal</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <span className="text-white/60 text-sm">درصد تکمیل:</span>
-                  <span className="text-emerald-400 font-bold font-sans">{calPercent}%</span>
+                  <span className="text-white/60 text-xs sm:text-sm">درصد تکمیل:</span>
+                  <span className="text-emerald-400 font-bold font-sans text-xs sm:text-base">{calPercent}%</span>
                 </div>
                 <div className="flex justify-between items-center pb-2">
-                  <span className="text-white/60 text-sm">رعایت رژیم:</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-md font-semibold ${
+                  <span className="text-white/60 text-xs sm:text-sm">رعایت رژیم:</span>
+                  <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-md font-semibold ${
                     calPercent > 105 ? "bg-red-500/20 text-red-400" :
                     calPercent >= 90 ? "bg-emerald-500/20 text-emerald-400" :
                     "bg-orange-500/20 text-orange-400"
@@ -279,10 +279,10 @@ export default function NutritionTracker() {
               </div>
 
               <div className="space-y-3 bg-white/5 border border-white/5 rounded-2xl p-4">
-                <h4 className="text-white/80 text-xs font-semibold mb-2">درشت‌مغذی‌ها (Macros)</h4>
+                <h4 className="text-white/80 text-[10px] sm:text-xs font-semibold mb-2">درشت‌مغذی‌ها (Macros)</h4>
 
                 <div>
-                  <div className="flex justify-between text-xs mb-1">
+                  <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span className="text-purple-300">پروتئین (عضله‌ساز)</span>
                     <span className="text-white/60 font-sans">{dailyTotals.protein} / {targetMacros.protein}g</span>
                   </div>
@@ -295,7 +295,7 @@ export default function NutritionTracker() {
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs mb-1">
+                  <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span className="text-orange-300">کربوهیدرات (انرژی)</span>
                     <span className="text-white/60 font-sans">{dailyTotals.carbs} / {targetMacros.carbs}g</span>
                   </div>
@@ -308,7 +308,7 @@ export default function NutritionTracker() {
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs mb-1">
+                  <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span className="text-yellow-300">چربی (هورمون‌ساز)</span>
                     <span className="text-white/60 font-sans">{dailyTotals.fat} / {targetMacros.fat}g</span>
                   </div>
@@ -332,7 +332,7 @@ export default function NutritionTracker() {
           />
         </div>
 
-        <h3 className="text-xl text-white font-bold mb-6 flex items-center gap-2">
+        <h3 className="text-lg sm:text-xl text-white font-bold mb-6 flex items-center gap-2">
           <Utensils className="w-5 h-5 text-emerald-400" />
           وعده‌های غذایی امروز
         </h3>
@@ -355,9 +355,9 @@ export default function NutritionTracker() {
                 <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/5">
                   <div className="flex items-center gap-2">
                     {mealIcon}
-                    <h4 className="text-white font-bold">{translateMealName(mealType)}</h4>
+                    <h4 className="text-white font-bold text-sm sm:text-base">{translateMealName(mealType)}</h4>
                   </div>
-                  <span className="text-white/60 font-sans text-xs bg-white/5 border border-white/5 px-2 py-1 rounded-md">
+                  <span className="text-white/60 font-sans text-[10px] sm:text-xs bg-white/5 border border-white/5 px-2 py-1 rounded-md">
                     {mealCalories} کالری
                   </span>
                 </div>
@@ -367,16 +367,16 @@ export default function NutritionTracker() {
                     mealItems.map((item) => (
                       <div
                         key={item.id}
-                        className="flex justify-between items-center bg-white/5 border border-white/5 hover:border-white/10 px-3 py-2 rounded-xl text-xs transition-colors"
+                        className="flex justify-between items-center bg-white/5 border border-white/5 hover:border-white/10 px-3 py-2 rounded-xl text-[11px] sm:text-xs transition-colors"
                       >
                         <div>
-                          <span className="text-white/90 font-medium block">{item.name}</span>
-                          <span className="text-white/40 text-[10px] block mt-0.5">
+                          <span className="text-white/90 font-medium block text-xs sm:text-sm">{item.name}</span>
+                          <span className="text-white/40 text-[9px] sm:text-[10px] block mt-0.5">
                             {item.quantity} {item.unit} | پ: {item.protein}g، ک: {item.carbs}g، چ: {item.fat}g
                           </span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-white/80 font-sans font-semibold">{item.calories} kcal</span>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <span className="text-white/80 font-sans font-semibold text-xs sm:text-sm">{item.calories} kcal</span>
                           <button
                             onClick={() => handleDeleteFood(mealType, item.id)}
                             className="text-white/30 hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-white/5"
@@ -387,7 +387,7 @@ export default function NutritionTracker() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-6 text-white/30 text-xs">
+                    <div className="text-center py-6 text-white/30 text-[11px] sm:text-xs">
                       هیچ غذایی ثبت نشده است
                     </div>
                   )}
@@ -398,7 +398,7 @@ export default function NutritionTracker() {
                     setActiveMealType(mealType);
                     setIsModalOpen(true);
                   }}
-                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white py-2 rounded-xl text-[11px] sm:text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   افزودن غذا

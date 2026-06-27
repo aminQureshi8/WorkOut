@@ -30,7 +30,10 @@ export default function Header({ session }: { session: any }) {
               <Link href="/packages" className={getLinkClass("/packages")}>
                 پکیج‌ها
               </Link>
-              <Link href="/articles" className={getLinkClass("/articles")}>
+              <Link href="/nutrition" className={getLinkClass("/nutrition")}>
+                کالری شمار
+              </Link>
+                <Link href="/articles" className={getLinkClass("/articles")}>
                 مقالات
               </Link>
               <Link href="/dashboard/tickets" className={getLinkClass("/tickets")}>
