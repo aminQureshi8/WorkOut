@@ -1,14 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import { Droplet, Plus } from "lucide-react";
-import type { WaterTrackerProps } from "@/types/nutrition";
 
-const WaterTracker: React.FC<WaterTrackerProps> = ({
-  currentWater,
-  targetWater,
-  waterPercent,
-  onAddWater,
-  onResetWater,
-}) => {
+interface WaterTrackerProps {
+  selectedDate: "today" | "yesterday" | "prev";
+}
+
+const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate }) => {
+  const [waterData, setWaterData] = useState<Record<string, number>>({
+    today: 0,
+    yesterday: 0,
+    prev: 0,
+  });
+
+  const targetWater = 2500;
+  const currentWater = waterData[selectedDate] || 0;
+  const waterPercent = Math.min(100, Math.round((currentWater / targetWater) * 100));
+
+  const handleAddWater = (amount: number) => {
+    setWaterData((prev) => ({
+      ...prev,
+      [selectedDate]: Math.min(4000, (prev[selectedDate] || 0) + amount),
+    }));
+  };
+
+  const handleResetWater = () => {
+    setWaterData((prev) => ({
+      ...prev,
+      [selectedDate]: 0,
+    }));
+  };
+
   return (
     <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
       <div className="absolute top-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-2xl -z-10" />
@@ -22,7 +43,7 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({
           <p className="text-white/50 text-[10px] sm:text-xs mt-1">پیشرفت تا هیدراتاسیون کامل بدن</p>
         </div>
         <button
-          onClick={onResetWater}
+          onClick={handleResetWater}
           className="text-[10px] text-red-400 hover:bg-red-500/10 px-2 py-1 rounded transition-colors"
         >
           صفر کردن
@@ -43,7 +64,7 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({
 
       <div className="grid grid-cols-2 gap-2 sm:gap-3">
         <button
-          onClick={() => onAddWater(250)}
+          onClick={() => handleAddWater(250)}
           className="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-300 font-medium py-2 px-1 rounded-xl transition-all flex items-center justify-center gap-1 text-[10px] sm:text-xs cursor-pointer"
         >
           <Plus className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -51,7 +72,7 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({
           <span className="sm:hidden">۲۵۰ میلی‌لیتر</span>
         </button>
         <button
-          onClick={() => onAddWater(500)}
+          onClick={() => handleAddWater(500)}
           className="bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90 text-white font-medium py-2 px-1 rounded-xl transition-all flex items-center justify-center gap-1 text-[10px] sm:text-xs cursor-pointer"
         >
           <Plus className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />

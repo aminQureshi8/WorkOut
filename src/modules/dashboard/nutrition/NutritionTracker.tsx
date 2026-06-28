@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Salad,
   Activity,
@@ -44,16 +44,8 @@ export default function NutritionTracker() {
     },
   });
 
-  const [waterData, setWaterData] = useState<Record<string, number>>({
-    today: 0,
-    yesterday: 0,
-    prev: 0,
-  });
-
   const [dbFoods, setDbFoods] = useState<Food[]>([]);
   const [isFetchingFoods, setIsFetchingFoods] = useState(false);
-
-  const targetWater = 2500;
   const [targetCalories, setTargetCalories] = useState<number>(2200);
   const [targetMacros, setTargetMacros] = useState({
     protein: 140,
@@ -69,7 +61,6 @@ export default function NutritionTracker() {
   const [targetsLoaded, setTargetsLoaded] = useState(false);
 
   const currentMeals = mealsData[selectedDate];
-  const currentWater = waterData[selectedDate];
 
   useEffect(() => {
     const fetchDbFoods = async () => {
@@ -137,24 +128,7 @@ export default function NutritionTracker() {
     100,
     Math.round((dailyTotals.calories / targetCalories) * 100),
   );
-  const waterPercent = Math.min(
-    100,
-    Math.round((currentWater / targetWater) * 100),
-  );
 
-  const handleAddWater = (amount: number) => {
-    setWaterData((prev) => ({
-      ...prev,
-      [selectedDate]: Math.min(4000, (prev[selectedDate] || 0) + amount),
-    }));
-  };
-
-  const handleResetWater = () => {
-    setWaterData((prev) => ({
-      ...prev,
-      [selectedDate]: 0,
-    }));
-  };
 
   const handleDeleteFood = (mealType: keyof MealData, itemId: string) => {
     setMealsData((prev) => {
@@ -451,13 +425,7 @@ export default function NutritionTracker() {
             </div>
           </div>
 
-          <WaterTracker
-            currentWater={currentWater}
-            targetWater={targetWater}
-            waterPercent={waterPercent}
-            onAddWater={handleAddWater}
-            onResetWater={handleResetWater}
-          />
+          <WaterTracker selectedDate={selectedDate} />
         </div>
 
         <h3 className="text-lg sm:text-xl text-white font-bold mb-6 flex items-center gap-2">
