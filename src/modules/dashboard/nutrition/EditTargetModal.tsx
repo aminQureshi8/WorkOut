@@ -6,7 +6,12 @@ interface EditTargetModalProps {
   onClose: () => void;
   targetCalories: number;
   targetMacros: { protein: number; carbs: number; fat: number };
-  onSaveTargets: (calories: number, protein: number, carbs: number, fat: number) => void;
+  onSaveTargets: (
+    calories: number,
+    protein: number,
+    carbs: number,
+    fat: number,
+  ) => void;
 }
 
 const EditTargetModal: React.FC<EditTargetModalProps> = ({
@@ -16,10 +21,18 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
   targetMacros,
   onSaveTargets,
 }) => {
-  const [tempTargetCalories, setTempTargetCalories] = useState(targetCalories.toString());
-  const [tempTargetProtein, setTempTargetProtein] = useState(targetMacros.protein.toString());
-  const [tempTargetCarbs, setTempTargetCarbs] = useState(targetMacros.carbs.toString());
-  const [tempTargetFat, setTempTargetFat] = useState(targetMacros.fat.toString());
+  const [tempTargetCalories, setTempTargetCalories] = useState(
+    targetCalories.toString(),
+  );
+  const [tempTargetProtein, setTempTargetProtein] = useState(
+    targetMacros.protein.toString(),
+  );
+  const [tempTargetCarbs, setTempTargetCarbs] = useState(
+    targetMacros.carbs.toString(),
+  );
+  const [tempTargetFat, setTempTargetFat] = useState(
+    targetMacros.fat.toString(),
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -41,8 +54,12 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm" dir="rtl">
-      <div className="bg-gray-900 border border-white/10 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      dir="rtl"
+    >
+      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/75"></div>
+      <div className="bg-gray-900 border z-50 border-white/10 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
         <button
           onClick={onClose}
           className="absolute top-4 left-4 p-1 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
@@ -57,7 +74,9 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-white/80 mb-2 text-xs">کالری هدف روزانه:</label>
+            <label className="block text-white/80 mb-2 text-xs">
+              کالری هدف روزانه:
+            </label>
             <input
               type="number"
               value={tempTargetCalories}
@@ -68,10 +87,14 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
           </div>
 
           <div className="border-t border-white/5 pt-4">
-            <p className="text-white/40 text-[10px] font-semibold uppercase tracking-wider mb-3">اهداف درشت‌مغذی‌ها:</p>
+            <p className="text-white/40 text-[10px] font-semibold uppercase tracking-wider mb-3">
+              اهداف درشت‌مغذی‌ها:
+            </p>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-purple-300 mb-1 text-[10px]">پروتئین (g):</label>
+                <label className="block text-purple-300 mb-1 text-[10px]">
+                  پروتئین (g):
+                </label>
                 <input
                   type="number"
                   value={tempTargetProtein}
@@ -81,7 +104,9 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-orange-300 mb-1 text-[10px]">کربوهیدرات (g):</label>
+                <label className="block text-orange-300 mb-1 text-[10px]">
+                  کربوهیدرات (g):
+                </label>
                 <input
                   type="number"
                   value={tempTargetCarbs}
@@ -91,7 +116,9 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-yellow-300 mb-1 text-[10px]">چربی (g):</label>
+                <label className="block text-yellow-300 mb-1 text-[10px]">
+                  چربی (g):
+                </label>
                 <input
                   type="number"
                   value={tempTargetFat}

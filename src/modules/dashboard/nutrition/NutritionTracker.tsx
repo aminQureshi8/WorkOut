@@ -63,6 +63,10 @@ export default function NutritionTracker() {
   const currentMeals = mealsData[selectedDate];
 
   useEffect(() => {
+    console.log(isEditingTarget)
+  } , [isEditingTarget])
+
+  useEffect(() => {
     const fetchDbFoods = async () => {
       setIsFetchingFoods(true);
       try {

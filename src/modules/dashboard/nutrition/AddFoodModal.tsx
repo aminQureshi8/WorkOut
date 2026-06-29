@@ -10,7 +10,9 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
   onSaveFood,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPresetFood, setSelectedPresetFood] = useState<Food | null>(null);
+  const [selectedPresetFood, setSelectedPresetFood] = useState<Food | null>(
+    null,
+  );
   const [foodQuantity, setFoodQuantity] = useState("100");
   const [isManualInput, setIsManualInput] = useState(false);
 
@@ -37,7 +39,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
   const filteredPresetFoods = useMemo(() => {
     if (!searchQuery) return [];
     return dbFoods.filter((f) =>
-      f.name.toLowerCase().includes(searchQuery.toLowerCase())
+      f.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [searchQuery, dbFoods]);
 
@@ -48,7 +50,11 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
   const handleSelectPreset = (food: Food) => {
     setSelectedPresetFood(food);
     setSearchQuery(food.name);
-    if (food.unit.includes("عدد") || food.unit.includes("پیمانه") || food.unit.includes("سیخ")) {
+    if (
+      food.unit.includes("عدد") ||
+      food.unit.includes("پیمانه") ||
+      food.unit.includes("سیخ")
+    ) {
       setFoodQuantity("1");
     } else {
       setFoodQuantity("100");
@@ -103,8 +109,10 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
         quantity: qty,
         unit: unitStr,
         calories: Math.round(selectedPresetFood.calories * multiplier),
-        protein: Math.round((selectedPresetFood.protein || 0) * multiplier * 10) / 10,
-        carbs: Math.round((selectedPresetFood.carbs || 0) * multiplier * 10) / 10,
+        protein:
+          Math.round((selectedPresetFood.protein || 0) * multiplier * 10) / 10,
+        carbs:
+          Math.round((selectedPresetFood.carbs || 0) * multiplier * 10) / 10,
         fat: Math.round((selectedPresetFood.fat || 0) * multiplier * 10) / 10,
       };
     }
@@ -114,19 +122,28 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
 
   const translateMealName = (type: string) => {
     switch (type) {
-      case "breakfast": return "صبحانه";
-      case "lunch": return "ناهار";
-      case "dinner": return "شام";
-      case "snack": return "میان‌وعده";
-      default: return type;
+      case "breakfast":
+        return "صبحانه";
+      case "lunch":
+        return "ناهار";
+      case "dinner":
+        return "شام";
+      case "snack":
+        return "میان‌وعده";
+      default:
+        return type;
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm" dir="rtl">
-      <div className="bg-gray-900 border border-white/10 rounded-3xl w-full max-w-lg p-6 shadow-2xl relative">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      dir="rtl"
+    >
+      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/75"></div>
+      <div className="bg-gray-900 border z-50 border-white/10 rounded-3xl w-full max-w-lg p-6 shadow-2xl relative">
         <button
           onClick={onClose}
           className="absolute top-4 left-4 p-1 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
@@ -190,16 +207,21 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                     className="w-full text-right text-xs text-white/80 hover:text-white bg-white/5 hover:bg-emerald-500/20 border border-white/5 hover:border-emerald-500/30 px-3 py-2 rounded-xl transition-all flex justify-between items-center"
                   >
                     <span>{food.name}</span>
-                    <span className="text-white/40 font-sans">{food.calories} کالری در {food.unit}</span>
+                    <span className="text-white/40 font-sans">
+                      {food.calories} کالری در {food.unit}
+                    </span>
                   </button>
                 ))
               ) : searchQuery && !selectedPresetFood ? (
                 <div className="text-center py-4 text-white/40 text-xs">
-                  غذایی پیدا نشد. می‌توانید از تب «ثبت به صورت دستی» استفاده کنید.
+                  غذایی پیدا نشد. می‌توانید از تب «ثبت به صورت دستی» استفاده
+                  کنید.
                 </div>
               ) : !selectedPresetFood ? (
                 <div className="space-y-2">
-                  <p className="text-white/40 text-[10px] font-semibold uppercase tracking-wider mb-2">غذاهای پر مصرف:</p>
+                  <p className="text-white/40 text-[10px] font-semibold uppercase tracking-wider mb-2">
+                    غذاهای پر مصرف:
+                  </p>
                   {popularFoods.length === 0 ? (
                     <div className="text-center py-4 text-white/30 text-xs">
                       غذایی برای این وعده یافت نشد.
@@ -214,7 +236,9 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                           className="text-right text-xs bg-white/5 hover:bg-white/10 hover:text-white text-white/70 border border-white/5 px-3 py-2.5 rounded-xl transition-all"
                         >
                           <span className="block font-medium">{food.name}</span>
-                          <span className="block text-[9px] text-white/40 mt-0.5">{food.calories} kcal / {food.unit}</span>
+                          <span className="block text-[9px] text-white/40 mt-0.5">
+                            {food.calories} kcal / {food.unit}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -226,7 +250,9 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
             {selectedPresetFood && (
               <div className="bg-white/5 border border-white/5 rounded-2xl p-4 space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-white text-xs font-semibold">{selectedPresetFood.name}</span>
+                  <span className="text-white text-xs font-semibold">
+                    {selectedPresetFood.name}
+                  </span>
                   <span className="text-emerald-400 font-sans text-xs bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                     {selectedPresetFood.calories} کالری پایه
                   </span>
@@ -234,7 +260,15 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
 
                 <div>
                   <label className="block text-white/80 mb-2 text-xs">
-                    مقدار مصرفی ({selectedPresetFood.unit.includes("عدد") ? "عدد" : selectedPresetFood.unit.includes("پیمانه") ? "پیمانه" : selectedPresetFood.unit.includes("سیخ") ? "سیخ" : "گرم"}):
+                    مقدار مصرفی (
+                    {selectedPresetFood.unit.includes("عدد")
+                      ? "عدد"
+                      : selectedPresetFood.unit.includes("پیمانه")
+                        ? "پیمانه"
+                        : selectedPresetFood.unit.includes("سیخ")
+                          ? "سیخ"
+                          : "گرم"}
+                    ):
                   </label>
                   <input
                     type="number"
@@ -249,7 +283,9 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
         ) : (
           <div className="space-y-4">
             <div>
-              <label className="block text-white/80 mb-2 text-xs">نام غذا / مکمل:</label>
+              <label className="block text-white/80 mb-2 text-xs">
+                نام غذا / مکمل:
+              </label>
               <input
                 type="text"
                 value={manualName}
@@ -261,7 +297,9 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-white/80 mb-2 text-xs">کالری (هر واحد):</label>
+                <label className="block text-white/80 mb-2 text-xs">
+                  کالری (هر واحد):
+                </label>
                 <input
                   type="number"
                   value={manualCalories}
@@ -271,7 +309,9 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-white/80 mb-2 text-xs">تعداد / مقدار:</label>
+                <label className="block text-white/80 mb-2 text-xs">
+                  تعداد / مقدار:
+                </label>
                 <input
                   type="number"
                   value={foodQuantity}
@@ -283,10 +323,14 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
             </div>
 
             <div className="border-t border-white/5 pt-4">
-              <p className="text-white/40 text-[10px] font-semibold uppercase tracking-wider mb-3">درشت‌مغذی‌ها به ازای هر واحد (اختیاری):</p>
+              <p className="text-white/40 text-[10px] font-semibold uppercase tracking-wider mb-3">
+                درشت‌مغذی‌ها به ازای هر واحد (اختیاری):
+              </p>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-purple-300 mb-1 text-[10px]">پروتئین (g):</label>
+                  <label className="block text-purple-300 mb-1 text-[10px]">
+                    پروتئین (g):
+                  </label>
                   <input
                     type="number"
                     value={manualProtein}
@@ -296,7 +340,9 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-orange-300 mb-1 text-[10px]">کربوهیدرات (g):</label>
+                  <label className="block text-orange-300 mb-1 text-[10px]">
+                    کربوهیدرات (g):
+                  </label>
                   <input
                     type="number"
                     value={manualCarbs}
@@ -306,7 +352,9 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-yellow-300 mb-1 text-[10px]">چربی (g):</label>
+                  <label className="block text-yellow-300 mb-1 text-[10px]">
+                    چربی (g):
+                  </label>
                   <input
                     type="number"
                     value={manualFat}
@@ -324,7 +372,11 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
           <button
             type="button"
             onClick={handleSave}
-            disabled={isManualInput ? (!manualName || !manualCalories) : !selectedPresetFood}
+            disabled={
+              isManualInput
+                ? !manualName || !manualCalories
+                : !selectedPresetFood
+            }
             className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl shadow-lg transition-all cursor-pointer text-xs"
           >
             ثبت وعده غذایی
