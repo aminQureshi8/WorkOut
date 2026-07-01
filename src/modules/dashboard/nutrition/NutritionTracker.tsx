@@ -18,7 +18,7 @@ import AddFoodModal from "./AddFoodModal";
 import EditTargetModal from "./EditTargetModal";
 import { BeatLoader } from "react-spinners";
 
-export default function NutritionTracker() {
+export default function NutritionTracker({ userId }: { userId: string }) {
   const [selectedDate, setSelectedDate] = useState<
     "today" | "yesterday" | "prev"
   >("today");
@@ -532,6 +532,9 @@ export default function NutritionTracker() {
         activeMealType={activeMealType}
         dbFoods={dbFoods}
         onSaveFood={handleSaveFood}
+        userId={userId}
+        selectedDate={selectedDate}
+        currentMeals={currentMeals}
       />
 
       <EditTargetModal

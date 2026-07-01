@@ -35,16 +35,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const updateFields: any = {};
+    if (meals !== undefined) updateFields.meals = meals;
+    if (waterIntake !== undefined) updateFields.waterIntake = waterIntake;
+    if (targetCalories !== undefined) updateFields.targetCalories = targetCalories;
+    if (targetProtein !== undefined) updateFields.targetProtein = targetProtein;
+    if (targetCarbs !== undefined) updateFields.targetCarbs = targetCarbs;
+    if (targetFat !== undefined) updateFields.targetFat = targetFat;
+
     const log = await NutritionLog.findOneAndUpdate(
       { userId, date },
-      {
-        meals,
-        waterIntake,
-        targetCalories,
-        targetProtein,
-        targetCarbs,
-        targetFat,
-      },
+      updateFields,
       { upsert: true, new: true, runValidators: true }
     );
 

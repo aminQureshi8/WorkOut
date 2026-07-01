@@ -100,6 +100,9 @@ export interface AddFoodModalProps {
   activeMealType: keyof MealData;
   dbFoods: Food[];
   onSaveFood: (newItem: FoodItem) => void;
+  userId: string;
+  selectedDate: "today" | "yesterday" | "prev";
+  currentMeals: MealData;
 }
 
 export interface MealPlanItem {

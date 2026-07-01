@@ -30,5 +30,5 @@ export default async function NutritionPage() {
     return <NutritionLock />;
   }
 
-  return <NutritionTracker />;
+  return <NutritionTracker userId={session.user.id} />;
 }

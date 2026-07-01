@@ -2,12 +2,25 @@ import React, { useState, useMemo, useEffect } from "react";
 import { X, Search, Zap } from "lucide-react";
 import type { AddFoodModalProps, FoodItem, Food } from "@/types/nutrition";
 
+const getLocalDateString = (dateKey: "today" | "yesterday" | "prev") => {
+  const offset = dateKey === "today" ? 0 : dateKey === "yesterday" ? 1 : 2;
+  const d = new Date();
+  d.setDate(d.getDate() - offset);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const AddFoodModal: React.FC<AddFoodModalProps> = ({
   isOpen,
   onClose,
   activeMealType,
   dbFoods,
   onSaveFood,
+  userId,
+  selectedDate,
+  currentMeals,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPresetFood, setSelectedPresetFood] = useState<Food | null>(
@@ -61,7 +74,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     let newItem: FoodItem;
 
     if (isManualInput) {
@@ -118,6 +131,28 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
     }
 
     onSaveFood(newItem);
+
+    const dateStr = getLocalDateString(selectedDate);
+    const updatedMeals = { ...currentMeals };
+    updatedMeals[activeMealType] = [...(updatedMeals[activeMealType] || []), newItem];
+
+    try {
+      const response = await fetch(`/api/nutrition?userId=${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: dateStr,
+          meals: updatedMeals,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to save food log to server");
+      }
+    } catch (error) {
+      console.error("Error saving food log:", error);
+    }
   };
 
   const translateMealName = (type: string) => {
