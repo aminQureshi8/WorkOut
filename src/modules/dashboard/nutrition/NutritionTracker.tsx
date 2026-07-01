@@ -18,38 +18,10 @@ import type { Food, FoodItem, MealData } from "@/types/nutrition";
 import WaterTracker from "./WaterTracker";
 import AddFoodModal from "./AddFoodModal";
 import EditTargetModal from "./EditTargetModal";
+import MealSkeleton from "./MealSkeleton";
+import MealsGrid from "./MealsGrid";
 import { BeatLoader } from "react-spinners";
-
-const getLocalDateString = (offsetDays = 0) => {
-  const d = new Date();
-  d.setDate(d.getDate() - offsetDays);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
-
-const getPersianDateLabel = (dateStr: string) => {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
-
-  const todayStr = getLocalDateString(0);
-  const yesterdayStr = getLocalDateString(1);
-  const tomorrowStr = getLocalDateString(-1);
-
-  let relativeLabel = "";
-  if (dateStr === todayStr) relativeLabel = "امروز - ";
-  else if (dateStr === yesterdayStr) relativeLabel = "دیروز - ";
-  else if (dateStr === tomorrowStr) relativeLabel = "فردا - ";
-
-  const formatter = new Intl.DateTimeFormat("fa-IR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-
-  return `${relativeLabel}${formatter.format(date)}`;
-};
+import { getLocalDateString, getPersianDateLabel } from "@/utils/date";
 
 export default function NutritionTracker({ userId }: { userId: string }) {
   const [selectedDate, setSelectedDate] = useState<string>(
@@ -73,6 +45,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
 
   const [isEditingTarget, setIsEditingTarget] = useState(false);
   const [targetsLoaded, setTargetsLoaded] = useState(false);
+  const [isLoadingMeals, setIsLoadingMeals] = useState(true);
 
   const currentMeals = mealsData[selectedDate] || {
     breakfast: [],
@@ -113,6 +86,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
 
   useEffect(() => {
     const fetchDailyLog = async () => {
+      setIsLoadingMeals(true);
       try {
         const res = await fetch(
           `/api/nutrition?userId=${userId}&date=${selectedDate}`,
@@ -140,6 +114,8 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         }
       } catch (err) {
         console.error("Error fetching daily log:", err);
+      } finally {
+        setIsLoadingMeals(false);
       }
     };
     fetchDailyLog();
@@ -242,18 +218,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
     setIsModalOpen(false);
   };
 
-  const translateMealName = (type: keyof MealData) => {
-    switch (type) {
-      case "breakfast":
-        return "صبحانه";
-      case "lunch":
-        return "ناهار";
-      case "dinner":
-        return "شام";
-      case "snack":
-        return "میان‌وعده";
-    }
-  };
+
 
   return (
     <div className=" pt-4 md:pt-8" dir="rtl">
@@ -505,93 +470,15 @@ export default function NutritionTracker({ userId }: { userId: string }) {
           وعده‌های غذایی امروز
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {(["breakfast", "lunch", "dinner", "snack"] as const).map(
-            (mealType) => {
-              const mealItems = currentMeals[mealType] || [];
-              const mealCalories = mealItems.reduce(
-                (sum, item) => sum + item.calories,
-                0,
-              );
-
-              let mealIcon = <Coffee className="w-5 h-5 text-yellow-400" />;
-              if (mealType === "lunch")
-                mealIcon = <Utensils className="w-5 h-5 text-orange-400" />;
-              if (mealType === "dinner")
-                mealIcon = <Salad className="w-5 h-5 text-emerald-400" />;
-              if (mealType === "snack")
-                mealIcon = <Sparkles className="w-5 h-5 text-pink-400" />;
-
-              return (
-                <div
-                  key={mealType}
-                  className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col justify-between"
-                >
-                  <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/5">
-                    <div className="flex items-center gap-2">
-                      {mealIcon}
-                      <h4 className="text-white font-bold text-sm sm:text-base">
-                        {translateMealName(mealType)}
-                      </h4>
-                    </div>
-                    <span className="text-white/60 font-sans text-[10px] sm:text-xs bg-white/5 border border-white/5 px-2 py-1 rounded-md">
-                      {mealCalories} کالری
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 mb-4 flex-1">
-                    {mealItems.length > 0 ? (
-                      mealItems.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex justify-between items-center bg-white/5 border border-white/5 hover:border-white/10 px-3 py-2 rounded-xl text-[11px] sm:text-xs transition-colors"
-                        >
-                          <div>
-                            <span className="text-white/90 font-medium block text-xs sm:text-sm">
-                              {item.name}
-                            </span>
-                            <span className="text-white/40 text-[9px] sm:text-[10px] block mt-0.5">
-                              {item.quantity} {item.unit} | پ: {item.protein}g،
-                              ک: {item.carbs}g، چ: {item.fat}g
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            <span className="text-white/80 font-sans font-semibold text-xs sm:text-sm">
-                              {item.calories} kcal
-                            </span>
-                            <button
-                              onClick={() =>
-                                handleDeleteFood(mealType, item.id)
-                              }
-                              className="text-white/30 hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-white/5"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-6 text-white/30 text-[11px] sm:text-xs">
-                        هیچ غذایی ثبت نشده است
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setActiveMealType(mealType);
-                      setIsModalOpen(true);
-                    }}
-                    className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white py-2 rounded-xl text-[11px] sm:text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" />
-                    افزودن غذا
-                  </button>
-                </div>
-              );
-            },
-          )}
-        </div>
+        <MealsGrid
+          currentMeals={currentMeals}
+          isLoadingMeals={isLoadingMeals}
+          onDeleteFood={handleDeleteFood}
+          onAddFoodClick={(mealType) => {
+            setActiveMealType(mealType);
+            setIsModalOpen(true);
+          }}
+        />
       </div>
 
       <AddFoodModal
