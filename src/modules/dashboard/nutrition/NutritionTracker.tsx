@@ -11,6 +11,8 @@ import {
   Trash2,
   Sparkles,
   Edit2,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import type { Food, FoodItem, MealData } from "@/types/nutrition";
 import WaterTracker from "./WaterTracker";
@@ -18,31 +20,43 @@ import AddFoodModal from "./AddFoodModal";
 import EditTargetModal from "./EditTargetModal";
 import { BeatLoader } from "react-spinners";
 
-export default function NutritionTracker({ userId }: { userId: string }) {
-  const [selectedDate, setSelectedDate] = useState<
-    "today" | "yesterday" | "prev"
-  >("today");
+const getLocalDateString = (offsetDays = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() - offsetDays);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
-  const [mealsData, setMealsData] = useState<Record<string, MealData>>({
-    today: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snack: [],
-    },
-    yesterday: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snack: [],
-    },
-    prev: {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snack: [],
-    },
+const getPersianDateLabel = (dateStr: string) => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+
+  const todayStr = getLocalDateString(0);
+  const yesterdayStr = getLocalDateString(1);
+  const tomorrowStr = getLocalDateString(-1);
+
+  let relativeLabel = "";
+  if (dateStr === todayStr) relativeLabel = "امروز - ";
+  else if (dateStr === yesterdayStr) relativeLabel = "دیروز - ";
+  else if (dateStr === tomorrowStr) relativeLabel = "فردا - ";
+
+  const formatter = new Intl.DateTimeFormat("fa-IR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   });
+
+  return `${relativeLabel}${formatter.format(date)}`;
+};
+
+export default function NutritionTracker({ userId }: { userId: string }) {
+  const [selectedDate, setSelectedDate] = useState<string>(
+    getLocalDateString(0),
+  );
+
+  const [mealsData, setMealsData] = useState<Record<string, MealData>>({});
 
   const [dbFoods, setDbFoods] = useState<Food[]>([]);
   const [isFetchingFoods, setIsFetchingFoods] = useState(false);
@@ -60,11 +74,12 @@ export default function NutritionTracker({ userId }: { userId: string }) {
   const [isEditingTarget, setIsEditingTarget] = useState(false);
   const [targetsLoaded, setTargetsLoaded] = useState(false);
 
-  const currentMeals = mealsData[selectedDate];
-
-  useEffect(() => {
-    console.log(isEditingTarget)
-  } , [isEditingTarget])
+  const currentMeals = mealsData[selectedDate] || {
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+    snack: [],
+  };
 
   useEffect(() => {
     const fetchDbFoods = async () => {
@@ -82,14 +97,6 @@ export default function NutritionTracker({ userId }: { userId: string }) {
       }
     };
     fetchDbFoods();
-
-    const savedTarget = localStorage.getItem("targetCalories");
-    if (savedTarget) {
-      const val = parseInt(savedTarget);
-      if (val) {
-        setTargetCalories(val);
-      }
-    }
     const savedMacros = localStorage.getItem("targetMacros");
     if (savedMacros) {
       try {
@@ -103,6 +110,51 @@ export default function NutritionTracker({ userId }: { userId: string }) {
     }
     setTargetsLoaded(true);
   }, []);
+
+  useEffect(() => {
+    const fetchDailyLog = async () => {
+      try {
+        const res = await fetch(
+          `/api/nutrition?userId=${userId}&date=${selectedDate}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          console.log(data);
+
+          if (data) {
+            if (data.targetCalories) setTargetCalories(data.targetCalories);
+            if (data.targetProtein || data.targetCarbs || data.targetFat) {
+              setTargetMacros({
+                protein: data.targetProtein || 140,
+                carbs: data.targetCarbs || 240,
+                fat: data.targetFat || 70,
+              });
+            }
+            if (data.meals) {
+              setMealsData((prev) => ({
+                ...prev,
+                [selectedDate]: data.meals,
+              }));
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching daily log:", err);
+      }
+    };
+    fetchDailyLog();
+  }, [selectedDate, userId]);
+
+  const changeDate = (direction: "next" | "prev") => {
+    const [year, month, day] = selectedDate.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() + (direction === "next" ? 1 : -1));
+
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    setSelectedDate(`${y}-${m}-${d}`);
+  };
 
   const dailyTotals = useMemo(() => {
     let calories = 0;
@@ -133,30 +185,60 @@ export default function NutritionTracker({ userId }: { userId: string }) {
     Math.round((dailyTotals.calories / targetCalories) * 100),
   );
 
+  const handleDeleteFood = async (mealType: keyof MealData, itemId: string) => {
+    const dayMeals = mealsData[selectedDate] || {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snack: [],
+    };
+    const updatedMeal = dayMeals[mealType].filter((item) => item.id !== itemId);
 
-  const handleDeleteFood = (mealType: keyof MealData, itemId: string) => {
-    setMealsData((prev) => {
-      const updatedMeal = prev[selectedDate][mealType].filter(
-        (item) => item.id !== itemId,
-      );
-      return {
-        ...prev,
-        [selectedDate]: {
-          ...prev[selectedDate],
-          [mealType]: updatedMeal,
+    const updatedMealsForDate = {
+      ...dayMeals,
+      [mealType]: updatedMeal,
+    };
+
+    setMealsData((prev) => ({
+      ...prev,
+      [selectedDate]: updatedMealsForDate,
+    }));
+
+    try {
+      const response = await fetch(`/api/nutrition?userId=${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      };
-    });
+        body: JSON.stringify({
+          date: selectedDate,
+          meals: updatedMealsForDate,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete food log from server");
+      }
+    } catch (error) {
+      console.error("Error deleting food log:", error);
+    }
   };
 
   const handleSaveFood = (newItem: FoodItem) => {
-    setMealsData((prev) => ({
-      ...prev,
-      [selectedDate]: {
-        ...prev[selectedDate],
-        [activeMealType]: [...prev[selectedDate][activeMealType], newItem],
-      },
-    }));
+    setMealsData((prev) => {
+      const dayMeals = prev[selectedDate] || {
+        breakfast: [],
+        lunch: [],
+        dinner: [],
+        snack: [],
+      };
+      return {
+        ...prev,
+        [selectedDate]: {
+          ...dayMeals,
+          [activeMealType]: [...dayMeals[activeMealType], newItem],
+        },
+      };
+    });
     setIsModalOpen(false);
   };
 
@@ -170,17 +252,6 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         return "شام";
       case "snack":
         return "میان‌وعده";
-    }
-  };
-
-  const getPersianDateLabel = () => {
-    switch (selectedDate) {
-      case "today":
-        return "امروز (یکشنبه، ۳۱ خرداد)";
-      case "yesterday":
-        return "دیروز (شنبه، ۳۰ خرداد)";
-      case "prev":
-        return "پریروز (جمعه، ۲۹ خرداد)";
     }
   };
 
@@ -202,44 +273,41 @@ export default function NutritionTracker({ userId }: { userId: string }) {
             </div>
           </div>
 
-          <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 gap-1">
+          <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl p-1 gap-1">
             <button
-              onClick={() => setSelectedDate("prev")}
-              className={`px-3 py-2 text-xs rounded-lg transition-all ${
-                selectedDate === "prev"
-                  ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/10"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
+              onClick={() => {
+                const todayStr = getLocalDateString(0);
+                if (selectedDate !== todayStr) {
+                  setSelectedDate(todayStr);
+                }
+              }}
+              className="px-4 py-2 text-xs sm:text-sm font-semibold text-white/80 hover:text-white rounded-xl hover:bg-white/5 transition-all cursor-pointer select-none"
             >
-              پریروز
+              {getPersianDateLabel(selectedDate)}
             </button>
-            <button
-              onClick={() => setSelectedDate("yesterday")}
-              className={`px-3 py-2 text-xs rounded-lg transition-all ${
-                selectedDate === "yesterday"
-                  ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/10"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              دیروز
-            </button>
-            <button
-              onClick={() => setSelectedDate("today")}
-              className={`px-3 py-2 text-xs rounded-lg transition-all ${
-                selectedDate === "today"
-                  ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/10"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              امروز
-            </button>
+            <div className="flex flex-col border-r border-white/10 pr-1 mr-1">
+              <button
+                onClick={() => changeDate("next")}
+                className="p-1 rounded-lg text-white/60 hover:text-emerald-400 hover:bg-white/5 transition-all cursor-pointer"
+                title="فردا"
+              >
+                <ChevronUp className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => changeDate("prev")}
+                className="p-1 rounded-lg text-white/60 hover:text-emerald-400 hover:bg-white/5 transition-all cursor-pointer"
+                title="دیروز"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-3 justify-between sm:items-center text-xs sm:text-sm">
           <div className="flex items-center gap-2 text-white/80 font-medium">
             <Activity className="w-4 h-4 text-emerald-400" />
-            تاریخ فعال: {getPersianDateLabel()}
+            تاریخ فعال: {getPersianDateLabel(selectedDate)}
           </div>
           <div className="text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] sm:text-xs self-start sm:self-auto">
             پکیج فعال: کاهش وزن سریع

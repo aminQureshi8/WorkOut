@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Droplet, Plus } from "lucide-react";
 
 interface WaterTrackerProps {
-  selectedDate: "today" | "yesterday" | "prev";
+  selectedDate: string;
 }
 
 const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate }) => {

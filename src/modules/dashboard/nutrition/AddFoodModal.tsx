@@ -2,15 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { X, Search, Zap } from "lucide-react";
 import type { AddFoodModalProps, FoodItem, Food } from "@/types/nutrition";
 
-const getLocalDateString = (dateKey: "today" | "yesterday" | "prev") => {
-  const offset = dateKey === "today" ? 0 : dateKey === "yesterday" ? 1 : 2;
-  const d = new Date();
-  d.setDate(d.getDate() - offset);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
+
 
 const AddFoodModal: React.FC<AddFoodModalProps> = ({
   isOpen,
@@ -132,7 +124,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
 
     onSaveFood(newItem);
 
-    const dateStr = getLocalDateString(selectedDate);
+    const dateStr = selectedDate;
     const updatedMeals = { ...currentMeals };
     updatedMeals[activeMealType] = [...(updatedMeals[activeMealType] || []), newItem];
 

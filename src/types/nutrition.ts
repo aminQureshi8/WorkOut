@@ -101,7 +101,7 @@ export interface AddFoodModalProps {
   dbFoods: Food[];
   onSaveFood: (newItem: FoodItem) => void;
   userId: string;
-  selectedDate: "today" | "yesterday" | "prev";
+  selectedDate: string;
   currentMeals: MealData;
 }
 
