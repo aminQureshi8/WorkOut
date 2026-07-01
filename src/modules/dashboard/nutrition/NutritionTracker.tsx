@@ -1,15 +1,11 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Salad,
   Activity,
   Flame,
-  Coffee,
   Utensils,
-  Plus,
-  Trash2,
-  Sparkles,
   Edit2,
   ChevronUp,
   ChevronDown,
@@ -18,7 +14,6 @@ import type { Food, FoodItem, MealData } from "@/types/nutrition";
 import WaterTracker from "./WaterTracker";
 import AddFoodModal from "./AddFoodModal";
 import EditTargetModal from "./EditTargetModal";
-import MealSkeleton from "./MealSkeleton";
 import MealsGrid from "./MealsGrid";
 import { BeatLoader } from "react-spinners";
 import { getLocalDateString, getPersianDateLabel } from "@/utils/date";
@@ -86,6 +81,10 @@ export default function NutritionTracker({ userId }: { userId: string }) {
 
   useEffect(() => {
     const fetchDailyLog = async () => {
+      if (mealsData[selectedDate]) {
+        return;
+      }
+      console.log("🌐 در حال فچ کردن اطلاعات از سرور برای تاریخ:", selectedDate);
       setIsLoadingMeals(true);
       try {
         const res = await fetch(
@@ -218,8 +217,6 @@ export default function NutritionTracker({ userId }: { userId: string }) {
     setIsModalOpen(false);
   };
 
-
-
   return (
     <div className="font-danaMed pt-4 md:pt-8" dir="rtl">
       <div className="container mx-auto">
@@ -272,7 +269,8 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-3 justify-between sm:items-center text-xs sm:text-sm">
           <div className="flex items-center gap-2 text-white/80 font-medium">
             <Activity className="w-4 h-4 text-emerald-400" />
-            تاریخ فعال: <span className="ss02">{getPersianDateLabel(selectedDate)}</span>
+            تاریخ فعال:{" "}
+            <span className="ss02">{getPersianDateLabel(selectedDate)}</span>
           </div>
           <div className="text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] sm:text-xs self-start sm:self-auto">
             پکیج فعال: کاهش وزن سریع
