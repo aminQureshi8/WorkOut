@@ -82,7 +82,7 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
               value={tempTargetCalories}
               onChange={(e) => setTempTargetCalories(e.target.value)}
               placeholder="مثال: ۲۲۰۰"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500/50 text-sm font-sans"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500/50 text-sm font-sans ss02"
             />
           </div>
 
@@ -100,7 +100,7 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
                   value={tempTargetProtein}
                   onChange={(e) => setTempTargetProtein(e.target.value)}
                   placeholder="140"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500/50 text-xs font-sans"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500/50 text-xs font-sans ss02"
                 />
               </div>
               <div>
@@ -112,7 +112,7 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
                   value={tempTargetCarbs}
                   onChange={(e) => setTempTargetCarbs(e.target.value)}
                   placeholder="240"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500/50 text-xs font-sans"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500/50 text-xs font-sans ss02"
                 />
               </div>
               <div>
@@ -124,7 +124,7 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
                   value={tempTargetFat}
                   onChange={(e) => setTempTargetFat(e.target.value)}
                   placeholder="70"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-500/50 text-xs font-sans"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-500/50 text-xs font-sans ss02"
                 />
               </div>
             </div>

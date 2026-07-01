@@ -60,7 +60,7 @@ const MealsGrid: React.FC<MealsGridProps> = ({
                   {translateMealName(mealType)}
                 </h4>
               </div>
-              <span className="text-white/60 font-sans text-[10px] sm:text-xs bg-white/5 border border-white/5 px-2 py-1 rounded-md">
+              <span className="text-white/60 font-sans text-[10px] sm:text-xs bg-white/5 border border-white/5 px-2 py-1 rounded-md ss02">
                 {mealCalories}  کالری
               </span>
             </div>
@@ -78,13 +78,13 @@ const MealsGrid: React.FC<MealsGridProps> = ({
                       <span className="text-white/90 font-medium block text-xs sm:text-sm">
                         {item.name}
                       </span>
-                      <span className="text-white/40 text-[9px] sm:text-[10px] block mt-0.5">
+                      <span className="text-white/40 text-[9px] sm:text-[10px] block mt-0.5 ss02">
                         {item.quantity} {item.unit} | پ: {item.protein}g، ک:{" "}
                         {item.carbs}g، چ: {item.fat}g
                       </span>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <span className="text-white/80 font-sans font-semibold text-xs sm:text-sm">
+                      <span className="text-white/80 font-semibold text-xs sm:text-sm ss02">
                         {item.calories} kcal
                       </span>
                       <button

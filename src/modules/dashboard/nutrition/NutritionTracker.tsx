@@ -221,7 +221,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
 
 
   return (
-    <div className=" pt-4 md:pt-8" dir="rtl">
+    <div className="font-danaMed pt-4 md:pt-8" dir="rtl">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
@@ -248,7 +248,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
               }}
               className="px-4 py-2 text-xs sm:text-sm font-semibold text-white/80 hover:text-white rounded-xl hover:bg-white/5 transition-all cursor-pointer select-none"
             >
-              {getPersianDateLabel(selectedDate)}
+              <span className="ss02">{getPersianDateLabel(selectedDate)}</span>
             </button>
             <div className="flex flex-col border-r border-white/10 pr-1 mr-1">
               <button
@@ -272,7 +272,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-3 justify-between sm:items-center text-xs sm:text-sm">
           <div className="flex items-center gap-2 text-white/80 font-medium">
             <Activity className="w-4 h-4 text-emerald-400" />
-            تاریخ فعال: {getPersianDateLabel(selectedDate)}
+            تاریخ فعال: <span className="ss02">{getPersianDateLabel(selectedDate)}</span>
           </div>
           <div className="text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] sm:text-xs self-start sm:self-auto">
             پکیج فعال: کاهش وزن سریع
@@ -302,7 +302,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
               >
                 <div className="flex items-center gap-1">
                   {targetsLoaded ? (
-                    <span className="text-xl sm:text-2xl font-extrabold text-white font-sans">
+                    <span className="text-xl sm:text-2xl font-extrabold text-white  ss02">
                       {targetCalories}
                     </span>
                   ) : (
@@ -327,7 +327,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                     }}
                   />
                   <div className="text-center z-10">
-                    <span className="block text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 font-sans">
+                    <span className="block text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400  ss02">
                       {dailyTotals.calories}
                     </span>
                     <span className="text-white/40 text-[10px] sm:text-xs mt-0.5 block">
@@ -343,7 +343,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                     باقی‌مانده:
                   </span>
                   {targetsLoaded ? (
-                    <span className="text-white font-bold font-sans text-sm sm:text-lg">
+                    <span className="text-white font-bold  text-sm sm:text-lg ss02">
                       {caloriesRemaining} kcal
                     </span>
                   ) : (
@@ -355,7 +355,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                     درصد تکمیل:
                   </span>
                   {targetsLoaded ? (
-                    <span className="text-emerald-400 font-bold font-sans text-xs sm:text-base">
+                    <span className="text-emerald-400 font-bold  text-xs sm:text-base ss02">
                       {calPercent}%
                     </span>
                   ) : (
@@ -396,7 +396,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                 <div>
                   <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span className="text-purple-300">پروتئین (عضله‌ساز)</span>
-                    <span className="text-white/60 font-sans flex items-center gap-1">
+                    <span className="text-white/60  flex items-center gap-1 ss02">
                       {dailyTotals.protein} /{" "}
                       {targetsLoaded ? (
                         `${targetMacros.protein}g`
@@ -418,7 +418,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                 <div>
                   <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span className="text-orange-300">کربوهیدرات (انرژی)</span>
-                    <span className="text-white/60 font-sans flex items-center gap-1">
+                    <span className="text-white/60  flex items-center gap-1 ss02">
                       {dailyTotals.carbs} /{" "}
                       {targetsLoaded ? (
                         `${targetMacros.carbs}g`
@@ -440,7 +440,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                 <div>
                   <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span className="text-yellow-300">چربی (هورمون‌ساز)</span>
-                    <span className="text-white/60 font-sans flex items-center gap-1">
+                    <span className="text-white/60  flex items-center gap-1 ss02">
                       {dailyTotals.fat} /{" "}
                       {targetsLoaded ? (
                         `${targetMacros.fat}g`
