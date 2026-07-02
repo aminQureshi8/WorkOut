@@ -151,6 +151,10 @@ export interface MealsGridProps {
 export interface WaterTrackerProps {
   selectedDate: string;
   targetWater: number;
+  userId: string;
+  waterIntake: number;
+  onWaterChange: (newAmount: number) => void;
+  isLoading: boolean;
 }
 
 export interface FoodFormValues {

@@ -24,6 +24,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
   );
 
   const [mealsData, setMealsData] = useState<Record<string, MealData>>({});
+  const [waterData, setWaterData] = useState<Record<string, number>>({});
 
   const [dbFoods, setDbFoods] = useState<Food[]>([]);
   const [isFetchingFoods, setIsFetchingFoods] = useState(false);
@@ -89,7 +90,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
 
   useEffect(() => {
     const fetchDailyLog = async () => {
-      if (mealsData[selectedDate]) {
+      if (mealsData[selectedDate] !== undefined) {
         return;
       }
       setIsLoadingMeals(true);
@@ -110,13 +111,48 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                 fat: data.targetFat || 70,
               });
             }
-            if (data.meals) {
-              setMealsData((prev) => ({
-                ...prev,
-                [selectedDate]: data.meals,
-              }));
-            }
+            setMealsData((prev) => ({
+              ...prev,
+              [selectedDate]: data.meals || {
+                breakfast: [],
+                lunch: [],
+                dinner: [],
+                snack: [],
+              },
+            }));
+            setWaterData((prev) => ({
+              ...prev,
+              [selectedDate]: data.waterIntake || 0,
+            }));
+          } else {
+            setMealsData((prev) => ({
+              ...prev,
+              [selectedDate]: {
+                breakfast: [],
+                lunch: [],
+                dinner: [],
+                snack: [],
+              },
+            }));
+            setWaterData((prev) => ({
+              ...prev,
+              [selectedDate]: 0,
+            }));
           }
+        } else {
+          setMealsData((prev) => ({
+            ...prev,
+            [selectedDate]: {
+              breakfast: [],
+              lunch: [],
+              dinner: [],
+              snack: [],
+            },
+          }));
+          setWaterData((prev) => ({
+            ...prev,
+            [selectedDate]: 0,
+          }));
         }
       } catch (err) {
         console.error("Error fetching daily log:", err);
@@ -456,7 +492,19 @@ export default function NutritionTracker({ userId }: { userId: string }) {
             </div>
           </div>
 
-          <WaterTracker selectedDate={selectedDate} targetWater={targetWater} />
+          <WaterTracker
+            userId={userId}
+            selectedDate={selectedDate}
+            targetWater={targetWater}
+            waterIntake={waterData[selectedDate] || 0}
+            onWaterChange={(newAmount) => {
+              setWaterData((prev) => ({
+                ...prev,
+                [selectedDate]: newAmount,
+              }));
+            }}
+            isLoading={isLoadingMeals}
+          />
         </div>
 
         <h3 className="text-lg sm:text-xl text-white font-bold mb-6 flex items-center gap-2">

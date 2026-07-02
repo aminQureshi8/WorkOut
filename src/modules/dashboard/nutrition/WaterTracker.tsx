@@ -1,28 +1,61 @@
-import React, { useState } from "react";
+import React from "react";
 import { Droplet, Plus } from "lucide-react";
+import { BeatLoader } from "react-spinners";
 import type { WaterTrackerProps } from "@/types/nutrition";
 
-const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate, targetWater }) => {
-  const [waterData, setWaterData] = useState<Record<string, number>>({
-    today: 0,
-    yesterday: 0,
-    prev: 0,
-  });
-  const currentWater = waterData[selectedDate] || 0;
-  const waterPercent = Math.min(100, Math.round((currentWater / targetWater) * 100));
+const WaterTracker: React.FC<WaterTrackerProps> = ({
+  selectedDate,
+  targetWater,
+  userId,
+  waterIntake,
+  onWaterChange,
+  isLoading,
+}) => {
+  const currentWater = waterIntake;
+  const waterPercent = Math.min(
+    100,
+    Math.round((currentWater / targetWater) * 100),
+  );
 
-  const handleAddWater = (amount: number) => {
-    setWaterData((prev) => ({
-      ...prev,
-      [selectedDate]: Math.min(4000, (prev[selectedDate] || 0) + amount),
-    }));
+  const handleAddWater = async (amount: number) => {
+    if (isLoading) return;
+    const newAmount = Math.min(4000, currentWater + amount);
+    onWaterChange(newAmount);
+
+    try {
+      await fetch(`/api/nutrition?userId=${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: selectedDate,
+          waterIntake: newAmount,
+        }),
+      });
+    } catch (error) {
+      console.error("Error saving water intake:", error);
+    }
   };
 
-  const handleResetWater = () => {
-    setWaterData((prev) => ({
-      ...prev,
-      [selectedDate]: 0,
-    }));
+  const handleResetWater = async () => {
+    if (isLoading) return;
+    onWaterChange(0);
+
+    try {
+      await fetch(`/api/nutrition?userId=${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: selectedDate,
+          waterIntake: 0,
+        }),
+      });
+    } catch (error) {
+      console.error("Error resetting water intake:", error);
+    }
   };
 
   return (
@@ -35,19 +68,32 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate, targetWater }
             <Droplet className="w-5 h-5 text-blue-400" />
             مصرف آب روزانه
           </h3>
-          <p className="text-white/50 text-[10px] sm:text-xs mt-1">پیشرفت تا هیدراتاسیون کامل بدن</p>
+          <p className="text-white/50 text-[10px] sm:text-xs mt-1">
+            پیشرفت تا هیدراتاسیون کامل بدن
+          </p>
         </div>
         <button
           onClick={handleResetWater}
-          className="text-[10px] text-red-400 hover:bg-red-500/10 px-2 py-1 rounded transition-colors"
+          disabled={isLoading}
+          className="text-[10px] text-red-400 hover:bg-red-500/10 px-2 py-1 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           صفر کردن
         </button>
       </div>
 
-      <div className="text-center my-4">
-        <span className="text-3xl sm:text-4xl font-extrabold text-blue-400 ss02">{currentWater}</span>
-        <span className="text-white/40 text-[10px] sm:text-xs mr-1 ss02">/ {targetWater} میلی‌لیتر</span>
+      <div className="text-center my-4 h-[40px] flex items-center justify-center gap-1">
+        {isLoading ? (
+          <BeatLoader color="#60a5fa" size={8} />
+        ) : (
+          <>
+            <span className="text-3xl sm:text-4xl font-extrabold text-blue-400 ss02">
+              {currentWater}
+            </span>
+            <span className="text-white/40 text-[10px] sm:text-xs mr-1 ss02">
+              / {targetWater} میلی‌لیتر
+            </span>
+          </>
+        )}
       </div>
 
       <div className="h-4 w-full bg-white/10 rounded-full overflow-hidden mb-4">
@@ -60,7 +106,8 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate, targetWater }
       <div className="grid grid-cols-2 gap-2 sm:gap-3">
         <button
           onClick={() => handleAddWater(250)}
-          className="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-300 font-medium py-2 px-1 rounded-xl transition-all flex items-center justify-center gap-1 text-[10px] sm:text-xs cursor-pointer"
+          disabled={isLoading}
+          className="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-300 font-medium py-2 px-1 rounded-xl transition-all flex items-center justify-center gap-1 text-[10px] sm:text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
           <span className="hidden sm:inline ss02">۲۵۰ میلی‌لیتر (۱ لیوان)</span>
@@ -68,7 +115,8 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate, targetWater }
         </button>
         <button
           onClick={() => handleAddWater(500)}
-          className="bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90 text-white font-medium py-2 px-1 rounded-xl transition-all flex items-center justify-center gap-1 text-[10px] sm:text-xs cursor-pointer"
+          disabled={isLoading}
+          className="bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90 text-white font-medium py-2 px-1 rounded-xl transition-all flex items-center justify-center gap-1 text-[10px] sm:text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
           <span className="hidden sm:inline ss02">۵۰۰ میلی‌لیتر (بطری)</span>
