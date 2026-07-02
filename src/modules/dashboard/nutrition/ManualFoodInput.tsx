@@ -1,34 +1,9 @@
 import React from "react";
+import { useFormContext } from "react-hook-form";
 
-interface ManualFoodInputProps {
-  manualName: string;
-  manualCalories: string;
-  foodQuantity: string;
-  manualProtein: string;
-  manualCarbs: string;
-  manualFat: string;
-  onChangeName: (val: string) => void;
-  onChangeCalories: (val: string) => void;
-  onChangeQuantity: (val: string) => void;
-  onChangeProtein: (val: string) => void;
-  onChangeCarbs: (val: string) => void;
-  onChangeFat: (val: string) => void;
-}
+const ManualFoodInput: React.FC = () => {
+  const { register } = useFormContext();
 
-const ManualFoodInput: React.FC<ManualFoodInputProps> = ({
-  manualName,
-  manualCalories,
-  foodQuantity,
-  manualProtein,
-  manualCarbs,
-  manualFat,
-  onChangeName,
-  onChangeCalories,
-  onChangeQuantity,
-  onChangeProtein,
-  onChangeCarbs,
-  onChangeFat,
-}) => {
   return (
     <div className="space-y-4">
       <div>
@@ -37,8 +12,7 @@ const ManualFoodInput: React.FC<ManualFoodInputProps> = ({
         </label>
         <input
           type="text"
-          value={manualName}
-          onChange={(e) => onChangeName(e.target.value)}
+          {...register("manualName", { required: true })}
           placeholder="مثال: فیله بوقلمون"
           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 text-sm"
         />
@@ -51,8 +25,7 @@ const ManualFoodInput: React.FC<ManualFoodInputProps> = ({
           </label>
           <input
             type="number"
-            value={manualCalories}
-            onChange={(e) => onChangeCalories(e.target.value)}
+            {...register("manualCalories", { required: true })}
             placeholder="مثال: ۱۵۰"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 text-sm"
           />
@@ -63,8 +36,7 @@ const ManualFoodInput: React.FC<ManualFoodInputProps> = ({
           </label>
           <input
             type="number"
-            value={foodQuantity}
-            onChange={(e) => onChangeQuantity(e.target.value)}
+            {...register("foodQuantity", { required: true })}
             placeholder="مثال: ۱"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 text-sm"
           />
@@ -82,8 +54,7 @@ const ManualFoodInput: React.FC<ManualFoodInputProps> = ({
             </label>
             <input
               type="number"
-              value={manualProtein}
-              onChange={(e) => onChangeProtein(e.target.value)}
+              {...register("manualProtein")}
               placeholder="0"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/50 text-xs"
             />
@@ -94,8 +65,7 @@ const ManualFoodInput: React.FC<ManualFoodInputProps> = ({
             </label>
             <input
               type="number"
-              value={manualCarbs}
-              onChange={(e) => onChangeCarbs(e.target.value)}
+              {...register("manualCarbs")}
               placeholder="0"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/20 focus:outline-none focus:border-orange-500/50 text-xs"
             />
@@ -106,8 +76,7 @@ const ManualFoodInput: React.FC<ManualFoodInputProps> = ({
             </label>
             <input
               type="number"
-              value={manualFat}
-              onChange={(e) => onChangeFat(e.target.value)}
+              {...register("manualFat")}
               placeholder="0"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/20 focus:outline-none focus:border-yellow-500/50 text-xs"
             />

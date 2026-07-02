@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { Droplet, Plus } from "lucide-react";
-
-interface WaterTrackerProps {
-  selectedDate: string;
-  targetWater: number;
-}
+import type { WaterTrackerProps } from "@/types/nutrition";
 
 const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate, targetWater }) => {
   const [waterData, setWaterData] = useState<Record<string, number>>({

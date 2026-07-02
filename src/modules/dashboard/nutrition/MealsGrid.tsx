@@ -1,14 +1,7 @@
 import React from "react";
 import { Coffee, Utensils, Salad, Sparkles, Trash2, Plus } from "lucide-react";
-import type { MealData } from "@/types/nutrition";
+import type { MealData, MealsGridProps } from "@/types/nutrition";
 import MealSkeleton from "./MealSkeleton";
-
-interface MealsGridProps {
-  currentMeals: MealData;
-  isLoadingMeals: boolean;
-  onDeleteFood: (mealType: keyof MealData, itemId: string) => void;
-  onAddFoodClick: (mealType: keyof MealData) => void;
-}
 
 const translateMealName = (type: keyof MealData): string => {
   switch (type) {

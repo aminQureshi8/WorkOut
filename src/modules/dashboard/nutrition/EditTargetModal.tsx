@@ -1,21 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Flame, Plus } from "lucide-react";
-
-interface EditTargetModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  userId: string;
-  targetCalories: number;
-  targetMacros: { protein: number; carbs: number; fat: number };
-  targetWater: number;
-  onSaveTargets: (
-    calories: number,
-    protein: number,
-    carbs: number,
-    fat: number,
-    water: number,
-  ) => void;
-}
+import type { EditTargetModalProps } from "@/types/nutrition";
 
 const EditTargetModal: React.FC<EditTargetModalProps> = ({
   isOpen,

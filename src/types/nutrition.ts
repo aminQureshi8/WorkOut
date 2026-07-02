@@ -87,13 +87,7 @@ export interface MealData {
   snack: FoodItem[];
 }
 
-export interface WaterTrackerProps {
-  currentWater: number;
-  targetWater: number;
-  waterPercent: number;
-  onAddWater: (amount: number) => void;
-  onResetWater: () => void;
-}
+
 
 export interface AddFoodModalProps {
   isOpen: boolean;
@@ -129,4 +123,41 @@ export interface MealPlan {
 export interface IMealPlan extends Omit<MealPlan, "_id" | "createdAt" | "updatedAt">, Document {
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface EditTargetModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  userId: string;
+  targetCalories: number;
+  targetMacros: { protein: number; carbs: number; fat: number };
+  targetWater: number;
+  onSaveTargets: (
+    calories: number,
+    protein: number,
+    carbs: number,
+    fat: number,
+    water: number,
+  ) => void;
+}
+
+export interface MealsGridProps {
+  currentMeals: MealData;
+  isLoadingMeals: boolean;
+  onDeleteFood: (mealType: keyof MealData, itemId: string) => void;
+  onAddFoodClick: (mealType: keyof MealData) => void;
+}
+
+export interface WaterTrackerProps {
+  selectedDate: string;
+  targetWater: number;
+}
+
+export interface FoodFormValues {
+  manualName: string;
+  manualCalories: string;
+  foodQuantity: string;
+  manualProtein: string;
+  manualCarbs: string;
+  manualFat: string;
 }
