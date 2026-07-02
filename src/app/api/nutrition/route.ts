@@ -92,3 +92,44 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    await dbConnect();
+
+    const { searchParams } = req.nextUrl;
+    const userId = searchParams.get("userId");
+
+    const {
+      tempTargetCalories,
+      tempTargetProtein,
+      tempTargetCarbs,
+      tempTargetFat,
+      tempTargetWater,
+    } = await req.json();
+
+    await NutritionLog.updateMany(
+      { userId },
+      {
+        $set: {
+          targetCalories: tempTargetCalories,
+          targetProtein: tempTargetProtein,
+          targetCarbs: tempTargetCarbs,
+          targetFat: tempTargetFat,
+          targetWater: tempTargetWater,
+        },
+      }
+    );
+
+    return NextResponse.json(
+      { message: "اطلاعات تغذیه با موفقیت بروزرسانی شد." },
+      { status: 200 },
+    );
+  } catch (error: any) {
+    console.error("Nutrition API PUT Error:", error);
+    return NextResponse.json(
+      { message: error.message || "خطای سرور در بروزرسانی اطلاعات تغذیه." },
+      { status: 500 },
+    );
+  }
+}

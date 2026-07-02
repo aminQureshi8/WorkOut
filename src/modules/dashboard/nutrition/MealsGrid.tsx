@@ -60,7 +60,7 @@ const MealsGrid: React.FC<MealsGridProps> = ({
                   {translateMealName(mealType)}
                 </h4>
               </div>
-              <span className="text-white/60 font-sans text-[10px] sm:text-xs bg-white/5 border border-white/5 px-2 py-1 rounded-md ss02">
+              <span className="text-white/60 text-[10px] sm:text-xs bg-white/5 border border-white/5 px-2 py-1 rounded-md ss02">
                 {mealCalories}  کالری
               </span>
             </div>

@@ -4,21 +4,26 @@ import { Flame, Plus } from "lucide-react";
 interface EditTargetModalProps {
   isOpen: boolean;
   onClose: () => void;
+  userId: string;
   targetCalories: number;
   targetMacros: { protein: number; carbs: number; fat: number };
+  targetWater: number;
   onSaveTargets: (
     calories: number,
     protein: number,
     carbs: number,
     fat: number,
+    water: number,
   ) => void;
 }
 
 const EditTargetModal: React.FC<EditTargetModalProps> = ({
   isOpen,
   onClose,
+  userId,
   targetCalories,
   targetMacros,
+  targetWater,
   onSaveTargets,
 }) => {
   const [tempTargetCalories, setTempTargetCalories] = useState(
@@ -33,6 +38,9 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
   const [tempTargetFat, setTempTargetFat] = useState(
     targetMacros.fat.toString(),
   );
+  const [tempTargetWater, setTempTargetWater] = useState(
+    targetWater.toString(),
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -40,17 +48,44 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
       setTempTargetProtein(targetMacros.protein.toString());
       setTempTargetCarbs(targetMacros.carbs.toString());
       setTempTargetFat(targetMacros.fat.toString());
+      setTempTargetWater(targetWater.toString());
     }
-  }, [isOpen, targetCalories, targetMacros]);
+  }, [isOpen, targetCalories, targetMacros, targetWater]);
 
   if (!isOpen) return null;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const calories = parseInt(tempTargetCalories) || 2200;
     const protein = parseInt(tempTargetProtein) || 140;
     const carbs = parseInt(tempTargetCarbs) || 240;
     const fat = parseInt(tempTargetFat) || 70;
-    onSaveTargets(calories, protein, carbs, fat);
+    const water = parseInt(tempTargetWater) || 2500;
+
+    try {
+      const response = await fetch(`/api/nutrition?userId=${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tempTargetCalories: calories,
+          tempTargetProtein: protein,
+          tempTargetCarbs: carbs,
+          tempTargetFat: fat,
+          tempTargetWater: water,
+        }),
+      });
+
+      if (response.ok) {
+        localStorage.removeItem("targetCalories");
+        localStorage.removeItem("targetMacros");
+        localStorage.removeItem("targetWater");
+      }
+    } catch (e) {
+      console.error("Error updating targets via PUT:", e);
+    }
+
+    onSaveTargets(calories, protein, carbs, fat, water);
   };
 
   return (
@@ -82,7 +117,20 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
               value={tempTargetCalories}
               onChange={(e) => setTempTargetCalories(e.target.value)}
               placeholder="مثال: ۲۲۰۰"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500/50 text-sm font-sans ss02"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500/50 text-sm ss02"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white/80 mb-2 text-xs">
+              آب هدف روزانه (میلی‌لیتر):
+            </label>
+            <input
+              type="number"
+              value={tempTargetWater}
+              onChange={(e) => setTempTargetWater(e.target.value)}
+              placeholder="مثال: ۲۵۰۰"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500/50 text-sm ss02"
             />
           </div>
 
@@ -100,7 +148,7 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
                   value={tempTargetProtein}
                   onChange={(e) => setTempTargetProtein(e.target.value)}
                   placeholder="140"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500/50 text-xs font-sans ss02"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500/50 text-xs ss02"
                 />
               </div>
               <div>
@@ -112,7 +160,7 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
                   value={tempTargetCarbs}
                   onChange={(e) => setTempTargetCarbs(e.target.value)}
                   placeholder="240"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500/50 text-xs font-sans ss02"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500/50 text-xs ss02"
                 />
               </div>
               <div>
@@ -124,7 +172,7 @@ const EditTargetModal: React.FC<EditTargetModalProps> = ({
                   value={tempTargetFat}
                   onChange={(e) => setTempTargetFat(e.target.value)}
                   placeholder="70"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-500/50 text-xs font-sans ss02"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-500/50 text-xs ss02"
                 />
               </div>
             </div>

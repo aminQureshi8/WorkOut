@@ -3,16 +3,15 @@ import { Droplet, Plus } from "lucide-react";
 
 interface WaterTrackerProps {
   selectedDate: string;
+  targetWater: number;
 }
 
-const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate }) => {
+const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate, targetWater }) => {
   const [waterData, setWaterData] = useState<Record<string, number>>({
     today: 0,
     yesterday: 0,
     prev: 0,
   });
-
-  const targetWater = 2500;
   const currentWater = waterData[selectedDate] || 0;
   const waterPercent = Math.min(100, Math.round((currentWater / targetWater) * 100));
 
@@ -51,7 +50,7 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({ selectedDate }) => {
       </div>
 
       <div className="text-center my-4">
-        <span className="text-3xl sm:text-4xl font-extrabold text-blue-400 font-sans ss02">{currentWater}</span>
+        <span className="text-3xl sm:text-4xl font-extrabold text-blue-400 ss02">{currentWater}</span>
         <span className="text-white/40 text-[10px] sm:text-xs mr-1 ss02">/ {targetWater} میلی‌لیتر</span>
       </div>
 

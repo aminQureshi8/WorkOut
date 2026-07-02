@@ -42,6 +42,7 @@ export interface NutritionLog {
   targetProtein: number;
   targetCarbs: number;
   targetFat: number;
+  targetWater: number;
   createdAt?: string;
   updatedAt?: string;
 }

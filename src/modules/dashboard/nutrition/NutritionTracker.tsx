@@ -33,6 +33,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
     carbs: 240,
     fat: 70,
   });
+  const [targetWater, setTargetWater] = useState<number>(2500);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeMealType, setActiveMealType] =
@@ -76,6 +77,13 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         console.error(e);
       }
     }
+    const savedWater = localStorage.getItem("targetWater");
+    if (savedWater) {
+      const water = parseInt(savedWater);
+      if (water) {
+        setTargetWater(water);
+      }
+    }
     setTargetsLoaded(true);
   }, []);
 
@@ -84,7 +92,6 @@ export default function NutritionTracker({ userId }: { userId: string }) {
       if (mealsData[selectedDate]) {
         return;
       }
-      console.log("🌐 در حال فچ کردن اطلاعات از سرور برای تاریخ:", selectedDate);
       setIsLoadingMeals(true);
       try {
         const res = await fetch(
@@ -263,17 +270,6 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 flex flex-col sm:flex-row gap-3 justify-between sm:items-center text-xs sm:text-sm">
-          <div className="flex items-center gap-2 text-white/80 font-medium">
-            <Activity className="w-4 h-4 text-emerald-400" />
-            تاریخ فعال:{" "}
-            <span className="ss02">{getPersianDateLabel(selectedDate)}</span>
-          </div>
-          <div className="text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] sm:text-xs self-start sm:self-auto">
-            پکیج فعال: کاهش وزن سریع
           </div>
         </div>
 
@@ -460,7 +456,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
             </div>
           </div>
 
-          <WaterTracker selectedDate={selectedDate} />
+          <WaterTracker selectedDate={selectedDate} targetWater={targetWater} />
         </div>
 
         <h3 className="text-lg sm:text-xl text-white font-bold mb-6 flex items-center gap-2">
@@ -493,16 +489,14 @@ export default function NutritionTracker({ userId }: { userId: string }) {
       <EditTargetModal
         isOpen={isEditingTarget}
         onClose={() => setIsEditingTarget(false)}
+        userId={userId}
         targetCalories={targetCalories}
         targetMacros={targetMacros}
-        onSaveTargets={(calories, protein, carbs, fat) => {
+        targetWater={targetWater}
+        onSaveTargets={(calories, protein, carbs, fat, water) => {
           setTargetCalories(calories);
           setTargetMacros({ protein, carbs, fat });
-          localStorage.setItem("targetCalories", calories.toString());
-          localStorage.setItem(
-            "targetMacros",
-            JSON.stringify({ protein, carbs, fat }),
-          );
+          setTargetWater(water);
           setIsEditingTarget(false);
         }}
       />

@@ -27,6 +27,7 @@ const NutritionLogSchema = new Schema<INutritionLog>(
     targetProtein: { type: Number, default: 120, min: 0 },
     targetCarbs: { type: Number, default: 220, min: 0 },
     targetFat: { type: Number, default: 65, min: 0 },
+    targetWater: { type: Number, default: 2500, min: 0 },
   },
   { timestamps: true }
 );

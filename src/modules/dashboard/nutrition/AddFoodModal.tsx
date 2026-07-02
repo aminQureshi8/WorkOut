@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { X, Search, Zap } from "lucide-react";
 import type { AddFoodModalProps, FoodItem, Food } from "@/types/nutrition";
-
-
+import ManualFoodInput from "./ManualFoodInput";
 
 const AddFoodModal: React.FC<AddFoodModalProps> = ({
   isOpen,
@@ -126,7 +125,10 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
 
     const dateStr = selectedDate;
     const updatedMeals = { ...currentMeals };
-    updatedMeals[activeMealType] = [...(updatedMeals[activeMealType] || []), newItem];
+    updatedMeals[activeMealType] = [
+      ...(updatedMeals[activeMealType] || []),
+      newItem,
+    ];
 
     try {
       const response = await fetch(`/api/nutrition?userId=${userId}`, {
@@ -219,7 +221,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                   setSelectedPresetFood(null);
                 }}
                 placeholder="مثلاً: سینه مرغ، تخم‌مرغ..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white placeholder:text-white/40 focus:outline-none focus:border-emerald-500/50 text-sm font-sans"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white placeholder:text-white/40 focus:outline-none focus:border-emerald-500/50 text-sm"
               />
               <Search className="w-4 h-4 text-white/40 absolute top-3.5 right-3.5" />
             </div>
@@ -234,7 +236,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                     className="w-full text-right text-xs text-white/80 hover:text-white bg-white/5 hover:bg-emerald-500/20 border border-white/5 hover:border-emerald-500/30 px-3 py-2 rounded-xl transition-all flex justify-between items-center"
                   >
                     <span>{food.name}</span>
-                    <span className="text-white/40 font-sans">
+                    <span className="text-white/40">
                       {food.calories} کالری در {food.unit}
                     </span>
                   </button>
@@ -280,7 +282,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                   <span className="text-white text-xs font-semibold">
                     {selectedPresetFood.name}
                   </span>
-                  <span className="text-emerald-400 font-sans text-xs bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                  <span className="text-emerald-400 text-xs bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                     {selectedPresetFood.calories} کالری پایه
                   </span>
                 </div>
@@ -301,98 +303,27 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                     type="number"
                     value={foodQuantity}
                     onChange={(e) => setFoodQuantity(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500/50 text-sm font-sans"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500/50 text-sm"
                   />
                 </div>
               </div>
             )}
           </div>
         ) : (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-white/80 mb-2 text-xs">
-                نام غذا / مکمل:
-              </label>
-              <input
-                type="text"
-                value={manualName}
-                onChange={(e) => setManualName(e.target.value)}
-                placeholder="مثال: فیله بوقلمون"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 text-sm"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-white/80 mb-2 text-xs">
-                  کالری (هر واحد):
-                </label>
-                <input
-                  type="number"
-                  value={manualCalories}
-                  onChange={(e) => setManualCalories(e.target.value)}
-                  placeholder="مثال: ۱۵۰"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 text-sm font-sans"
-                />
-              </div>
-              <div>
-                <label className="block text-white/80 mb-2 text-xs">
-                  تعداد / مقدار:
-                </label>
-                <input
-                  type="number"
-                  value={foodQuantity}
-                  onChange={(e) => setFoodQuantity(e.target.value)}
-                  placeholder="مثال: ۱"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 text-sm font-sans"
-                />
-              </div>
-            </div>
-
-            <div className="border-t border-white/5 pt-4">
-              <p className="text-white/40 text-[10px] font-semibold uppercase tracking-wider mb-3">
-                درشت‌مغذی‌ها به ازای هر واحد (اختیاری):
-              </p>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-purple-300 mb-1 text-[10px]">
-                    پروتئین (g):
-                  </label>
-                  <input
-                    type="number"
-                    value={manualProtein}
-                    onChange={(e) => setManualProtein(e.target.value)}
-                    placeholder="0"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/50 text-xs font-sans"
-                  />
-                </div>
-                <div>
-                  <label className="block text-orange-300 mb-1 text-[10px]">
-                    کربوهیدرات (g):
-                  </label>
-                  <input
-                    type="number"
-                    value={manualCarbs}
-                    onChange={(e) => setManualCarbs(e.target.value)}
-                    placeholder="0"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/20 focus:outline-none focus:border-orange-500/50 text-xs font-sans"
-                  />
-                </div>
-                <div>
-                  <label className="block text-yellow-300 mb-1 text-[10px]">
-                    چربی (g):
-                  </label>
-                  <input
-                    type="number"
-                    value={manualFat}
-                    onChange={(e) => setManualFat(e.target.value)}
-                    placeholder="0"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/20 focus:outline-none focus:border-yellow-500/50 text-xs font-sans"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          <ManualFoodInput
+            manualName={manualName}
+            manualCalories={manualCalories}
+            foodQuantity={foodQuantity}
+            manualProtein={manualProtein}
+            manualCarbs={manualCarbs}
+            manualFat={manualFat}
+            onChangeName={setManualName}
+            onChangeCalories={setManualCalories}
+            onChangeQuantity={setFoodQuantity}
+            onChangeProtein={setManualProtein}
+            onChangeCarbs={setManualCarbs}
+            onChangeFat={setManualFat}
+          />
         )}
 
         <div className="flex gap-4 mt-6 pt-4 border-t border-white/5">
