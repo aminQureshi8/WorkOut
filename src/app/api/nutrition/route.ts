@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const log = await NutritionLog.findOne({ userId, date });
+    const log = await NutritionLog.findOne({ userId, date } , "-__v -updatedAt");
     return NextResponse.json(log || null, { status: 200 });
   } catch (error: any) {
     console.error("Nutrition API GET Error:", error);

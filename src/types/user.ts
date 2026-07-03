@@ -12,3 +12,19 @@ export interface IUser extends Document {
   lastLogin?: Date;
   createdAt: Date;
 }
+
+// Client-Side Admin User Type
+export interface IAdminUser {
+  _id: string;
+  username: string;
+  email: string;
+  phone?: string;
+  role: "user" | "admin" | "coach";
+  status: string;
+  package?: string;
+  avatar?: string;
+  lastLogin?: string;
+  totalPayments?: number;
+  createdAt: string;
+}
+

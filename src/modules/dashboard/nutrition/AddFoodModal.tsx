@@ -29,7 +29,6 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
   const [isFetchingPopular, setIsFetchingPopular] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -38,7 +37,6 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch initial popular foods when modal opens or activeMealType changes
   useEffect(() => {
     const fetchPopularFoods = async () => {
       if (!isOpen) return;
@@ -49,6 +47,8 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
         );
         if (res.ok) {
           const data = await res.json();
+console.log(data);
+
           setDbFoods(data || []);
         }
       } catch (err) {
@@ -60,7 +60,6 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
     fetchPopularFoods();
   }, [isOpen, activeMealType]);
 
-  // Fetch search results when debounced query changes
   useEffect(() => {
     const searchFoods = async () => {
       if (!debouncedSearchQuery.trim()) {
