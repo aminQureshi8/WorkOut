@@ -93,7 +93,6 @@ export interface AddFoodModalProps {
   isOpen: boolean;
   onClose: () => void;
   activeMealType: keyof MealData;
-  dbFoods: Food[];
   onSaveFood: (newItem: FoodItem) => void;
   userId: string;
   selectedDate: string;

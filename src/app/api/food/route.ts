@@ -8,17 +8,24 @@ export async function GET(req: NextRequest) {
 
     const search = req.nextUrl.searchParams.get("search") || "";
     const all = req.nextUrl.searchParams.get("all") === "true";
+    const isAddModal = req.nextUrl.searchParams.get("isAddModal") === "true";
+    const type = req.nextUrl.searchParams.get("type") || "";
     const query: any = {};
+    const limit = isAddModal ? 10 : 100;
 
     if (!all) {
       query.isActive = true;
+    }
+
+    if (type) {
+      query.type = { $in: [type, "all"] };
     }
 
     if (search.trim()) {
       query.name = { $regex: search, $options: "i" };
     }
 
-    const foods = await Food.find(query).sort({ name: 1 });
+    const foods = await Food.find(query).limit(limit).sort({ name: 1 });
     return NextResponse.json(foods, { status: 200 });
   } catch (error: any) {
     console.error("Food API GET Error:", error);

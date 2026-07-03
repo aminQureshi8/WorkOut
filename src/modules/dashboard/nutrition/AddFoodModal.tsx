@@ -1,6 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { X, Search, Zap } from "lucide-react";
-import type { AddFoodModalProps, FoodItem, Food, FoodFormValues } from "@/types/nutrition";
+import type {
+  AddFoodModalProps,
+  FoodItem,
+  Food,
+  FoodFormValues,
+} from "@/types/nutrition";
 import ManualFoodInput from "./ManualFoodInput";
 import { useForm, FormProvider } from "react-hook-form";
 
@@ -8,17 +13,79 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
   isOpen,
   onClose,
   activeMealType,
-  dbFoods,
   onSaveFood,
   userId,
   selectedDate,
   currentMeals,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedPresetFood, setSelectedPresetFood] = useState<Food | null>(
     null,
   );
   const [isManualInput, setIsManualInput] = useState(false);
+  const [dbFoods, setDbFoods] = useState<Food[]>([]);
+  const [searchResults, setSearchResults] = useState<Food[]>([]);
+  const [isFetchingPopular, setIsFetchingPopular] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch initial popular foods when modal opens or activeMealType changes
+  useEffect(() => {
+    const fetchPopularFoods = async () => {
+      if (!isOpen) return;
+      setIsFetchingPopular(true);
+      try {
+        const res = await fetch(
+          `/api/food?isAddModal=true&type=${activeMealType}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setDbFoods(data || []);
+        }
+      } catch (err) {
+        console.error("Error fetching popular foods:", err);
+      } finally {
+        setIsFetchingPopular(false);
+      }
+    };
+    fetchPopularFoods();
+  }, [isOpen, activeMealType]);
+
+  // Fetch search results when debounced query changes
+  useEffect(() => {
+    const searchFoods = async () => {
+      if (!debouncedSearchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const res = await fetch(
+          `/api/food?search=${encodeURIComponent(debouncedSearchQuery)}&isAddModal=true&type=${activeMealType}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data || []);
+        }
+      } catch (err) {
+        console.error("Error searching foods:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    searchFoods();
+  }, [debouncedSearchQuery, activeMealType]);
 
   const methods = useForm<FoodFormValues>({
     defaultValues: {
@@ -40,18 +107,13 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
   useEffect(() => {
     if (!isOpen) {
       setSearchQuery("");
+      setDebouncedSearchQuery("");
+      setSearchResults([]);
       setSelectedPresetFood(null);
       setIsManualInput(false);
       reset();
     }
   }, [isOpen, reset]);
-
-  const filteredPresetFoods = useMemo(() => {
-    if (!searchQuery) return [];
-    return dbFoods.filter((f) =>
-      f.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [searchQuery, dbFoods]);
 
   const popularFoods = useMemo(() => {
     return dbFoods.filter((f) => f.type === activeMealType || f.type === "all");
@@ -235,8 +297,12 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                 </div>
 
                 <div className="max-h-40 overflow-y-auto space-y-1">
-                  {searchQuery && filteredPresetFoods.length > 0 ? (
-                    filteredPresetFoods.map((food) => (
+                  {isSearching ? (
+                    <div className="text-center py-4 text-white/40 text-xs">
+                      در حال جستجو...
+                    </div>
+                  ) : searchQuery && searchResults.length > 0 ? (
+                    searchResults.map((food) => (
                       <button
                         type="button"
                         key={food._id}
@@ -259,7 +325,11 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                       <p className="text-white/40 text-[10px] font-semibold uppercase tracking-wider mb-2">
                         غذاهای پر مصرف:
                       </p>
-                      {popularFoods.length === 0 ? (
+                      {isFetchingPopular ? (
+                        <div className="text-center py-4 text-white/30 text-xs">
+                          در حال بارگذاری غذاها...
+                        </div>
+                      ) : popularFoods.length === 0 ? (
                         <div className="text-center py-4 text-white/30 text-xs">
                           غذایی برای این وعده یافت نشد.
                         </div>
@@ -272,7 +342,9 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({
                               onClick={() => handleSelectPreset(food)}
                               className="text-right text-xs bg-white/5 hover:bg-white/10 hover:text-white text-white/70 border border-white/5 px-3 py-2.5 rounded-xl transition-all"
                             >
-                              <span className="block font-medium">{food.name}</span>
+                              <span className="block font-medium">
+                                {food.name}
+                              </span>
                               <span className="block text-[9px] text-white/40 mt-0.5">
                                 {food.calories} kcal / {food.unit}
                               </span>

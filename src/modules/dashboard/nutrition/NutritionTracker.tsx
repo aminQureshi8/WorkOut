@@ -3,14 +3,13 @@
 import { useState, useMemo, useEffect } from "react";
 import {
   Salad,
-  Activity,
   Flame,
   Utensils,
   Edit2,
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
-import type { Food, FoodItem, MealData } from "@/types/nutrition";
+import type { FoodItem, MealData } from "@/types/nutrition";
 import WaterTracker from "./WaterTracker";
 import AddFoodModal from "./AddFoodModal";
 import EditTargetModal from "./EditTargetModal";
@@ -26,8 +25,6 @@ export default function NutritionTracker({ userId }: { userId: string }) {
   const [mealsData, setMealsData] = useState<Record<string, MealData>>({});
   const [waterData, setWaterData] = useState<Record<string, number>>({});
 
-  const [dbFoods, setDbFoods] = useState<Food[]>([]);
-  const [isFetchingFoods, setIsFetchingFoods] = useState(false);
   const [targetCalories, setTargetCalories] = useState<number>(2200);
   const [targetMacros, setTargetMacros] = useState({
     protein: 140,
@@ -50,43 +47,6 @@ export default function NutritionTracker({ userId }: { userId: string }) {
     dinner: [],
     snack: [],
   };
-
-  useEffect(() => {
-    const fetchDbFoods = async () => {
-      setIsFetchingFoods(true);
-      try {
-        const res = await fetch("/api/food");
-        if (res.ok) {
-          const data = await res.json();
-          setDbFoods(data || []);
-        }
-      } catch (err) {
-        console.error("Error fetching foods:", err);
-      } finally {
-        setIsFetchingFoods(false);
-      }
-    };
-    fetchDbFoods();
-    const savedMacros = localStorage.getItem("targetMacros");
-    if (savedMacros) {
-      try {
-        const macros = JSON.parse(savedMacros);
-        if (macros) {
-          setTargetMacros(macros);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    const savedWater = localStorage.getItem("targetWater");
-    if (savedWater) {
-      const water = parseInt(savedWater);
-      if (water) {
-        setTargetWater(water);
-      }
-    }
-    setTargetsLoaded(true);
-  }, []);
 
   useEffect(() => {
     const fetchDailyLog = async () => {
@@ -158,6 +118,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         console.error("Error fetching daily log:", err);
       } finally {
         setIsLoadingMeals(false);
+        setTargetsLoaded(true);
       }
     };
     fetchDailyLog();
@@ -527,7 +488,6 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         activeMealType={activeMealType}
-        dbFoods={dbFoods}
         onSaveFood={handleSaveFood}
         userId={userId}
         selectedDate={selectedDate}
