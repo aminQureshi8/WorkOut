@@ -64,12 +64,7 @@ export default function LoginForm() {
         return;
       }
 
-      await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
-      router.push("/dashboard");
+      router.push(`/otp?email=${encodeURIComponent(data.email)}`);
     } catch {
       setServerError("خطا در ارتباط با سرور");
     }

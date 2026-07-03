@@ -27,4 +27,8 @@ export interface IAdminUser {
   totalPayments?: number;
   createdAt: string;
 }
-
+export interface IOtp extends Document {
+  email: string;
+  code: string;
+  createdAt: Date;
+}
