@@ -124,3 +124,42 @@ export interface IWorkoutExercise extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface WorkoutPlanFormInputs {
+  title: string;
+  description: string;
+}
+
+export interface WorkoutDayFormInputs {
+  dayName: string;
+  muscleGroup: string;
+  sortOrder: number;
+}
+
+export interface WorkoutExerciseFormInputs {
+  name: string;
+  sets: number;
+  reps: string;
+  restSec: number;
+  videoId: string;
+  videoId2: string;
+  sortOrder: number;
+}
+
+export interface WorkoutPlanModalProps {
+  selectedPackageForPlan: PackageInfo;
+  onClose: () => void;
+  videos: VideoInfo[];
+  setWatchingVideo: (video: VideoInfo | null) => void;
+}
+
+export interface EditSubscriptionFormInputs {
+  status: SubscriptionItem["status"];
+  endsAt: string;
+}
+
+export interface EditSubscriptionModalProps {
+  selectedSubscription: SubscriptionItem;
+  onClose: () => void;
+  onSuccess: () => void;
+}
