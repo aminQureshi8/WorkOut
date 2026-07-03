@@ -163,3 +163,16 @@ export interface EditSubscriptionModalProps {
   onClose: () => void;
   onSuccess: () => void;
 }
+
+export interface VideoPlayerModalProps {
+  video: VideoInfo;
+  onClose: () => void;
+}
+
+export interface WorkoutDayFormProps {
+  editingDay: WorkoutDay | null;
+  workoutPlanId: string;
+  onSuccess: (updatedDay?: WorkoutDay) => void;
+  onCancel: () => void;
+  defaultSortOrder: number;
+}

@@ -12,6 +12,7 @@ import CreateSubscriptionModal from "./CreateSubscriptionModal";
 import SubscriptionsTable from "./SubscriptionsTable";
 import WorkoutPlanModal from "./WorkoutPlanModal";
 import EditSubscriptionModal from "./EditSubscriptionModal";
+import VideoPlayerModal from "@/components/VideoPlayerModal";
 
 export default function SubscriptionsManagement() {
   const [activeTab, setActiveTab] = useState<"subscriptions" | "videos">(
@@ -42,8 +43,6 @@ export default function SubscriptionsManagement() {
     useState<SubscriptionItem | null>(null);
   const [selectedPackageForPlan, setSelectedPackageForPlan] =
     useState<PackageInfo | null>(null);
-
-
 
   const [packages, setPackages] = useState<PackageInfo[]>([]);
 
@@ -126,7 +125,6 @@ export default function SubscriptionsManagement() {
       setLoadingVideos(false);
     }
   };
-
 
   const handleOpenPlanModal = (pkg: PackageInfo) => {
     setSelectedPackageForPlan(pkg);
@@ -314,6 +312,13 @@ export default function SubscriptionsManagement() {
             onClose={() => setShowPlanModal(false)}
             videos={videos}
             setWatchingVideo={setWatchingVideo}
+          />
+        )}
+
+        {watchingVideo && (
+          <VideoPlayerModal
+            video={watchingVideo}
+            onClose={() => setWatchingVideo(null)}
           />
         )}
       </div>
