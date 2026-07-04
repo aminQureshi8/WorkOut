@@ -6,8 +6,8 @@ import {
   Flame,
   Utensils,
   Edit2,
-  ChevronUp,
-  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import type { FoodItem, MealData } from "@/types/nutrition";
 import WaterTracker from "./WaterTracker";
@@ -239,7 +239,15 @@ export default function NutritionTracker({ userId }: { userId: string }) {
             </div>
           </div>
 
-          <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl p-1 gap-1">
+          <div className="flex items-center justify-between w-full sm:w-auto bg-white/5 border border-white/10 rounded-2xl p-1 gap-1">
+            <button
+              onClick={() => changeDate("prev")}
+              className="p-2 rounded-xl text-white/60 hover:text-emerald-400 hover:bg-white/5 transition-all cursor-pointer"
+              title="دیروز"
+            >
+              <ChevronRight className="w-4 h-4 sm:w-5 h-5" />
+            </button>
+
             <button
               onClick={() => {
                 const todayStr = getLocalDateString(0);
@@ -247,26 +255,18 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                   setSelectedDate(todayStr);
                 }
               }}
-              className="px-4 py-2 text-xs sm:text-sm font-semibold text-white/80 hover:text-white rounded-xl hover:bg-white/5 transition-all cursor-pointer select-none"
+              className="px-3 sm:px-6 py-2 text-xs sm:text-sm font-semibold text-white/80 hover:text-white rounded-xl hover:bg-white/5 transition-all cursor-pointer select-none flex-1 text-center"
             >
               <span className="ss02">{getPersianDateLabel(selectedDate)}</span>
             </button>
-            <div className="flex flex-col border-r border-white/10 pr-1 mr-1">
-              <button
-                onClick={() => changeDate("next")}
-                className="p-1 rounded-lg text-white/60 hover:text-emerald-400 hover:bg-white/5 transition-all cursor-pointer"
-                title="فردا"
-              >
-                <ChevronUp className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => changeDate("prev")}
-                className="p-1 rounded-lg text-white/60 hover:text-emerald-400 hover:bg-white/5 transition-all cursor-pointer"
-                title="دیروز"
-              >
-                <ChevronDown className="w-4 h-4" />
-              </button>
-            </div>
+
+            <button
+              onClick={() => changeDate("next")}
+              className="p-2 rounded-xl text-white/60 hover:text-emerald-400 hover:bg-white/5 transition-all cursor-pointer"
+              title="فردا"
+            >
+              <ChevronLeft className="w-4 h-4 sm:w-5 h-5" />
+            </button>
           </div>
         </div>
 
