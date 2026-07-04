@@ -1,22 +1,18 @@
 import { BsInstagram } from "react-icons/bs";
 import Link from "next/link";
 import { FiMessageCircle } from "react-icons/fi";
-import { BiCheckCircle, BiDumbbell, BiPhone } from "react-icons/bi";
+import { BiDumbbell } from "react-icons/bi";
 import { CgMail } from "react-icons/cg";
-import { CiLock } from "react-icons/ci";
 export default function Footer() {
   return (
     <footer className="bg-black/30 border-t border-white/10 py-16">
       <div className="container mx-auto">
-        <div className="grid md:grid-cols-5 gap-8 mb-12">
-          <div className="md:col-span-2">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-8 sm:gap-8 mb-12">
+          <div className="col-span-2 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <BiDumbbell className="w-8 h-8 text-orange-500" />
-              <span
-                className="font-bold text-xl text-white"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
-                فیت‌کوچ
+              <span className="font-bold text-xl text-white font-morabbaReg">
+                استار فیت
               </span>
             </div>
             <p className="text-white/60 mb-6 leading-relaxed">
@@ -44,7 +40,7 @@ export default function Footer() {
               </a>
             </div>
           </div>
-          <div>
+          <div className="col-span-1">
             <h4
               className="font-bold text-white mb-4"
               style={{ fontFamily: "Marbeh, sans-serif" }}
@@ -88,7 +84,7 @@ export default function Footer() {
               </div>
             </div>
           </div>
-          <div>
+          <div className="col-span-1">
             <h4
               className="font-bold text-white mb-4"
               style={{ fontFamily: "Marbeh, sans-serif" }}
@@ -126,37 +122,6 @@ export default function Footer() {
               </div>
             </div>
           </div>
-          <div>
-            <h4
-              className="font-bold text-white mb-4"
-              style={{ fontFamily: "Marbeh, sans-serif" }}
-            >
-              اطلاعات تماس
-            </h4>
-            <div className="space-y-4 text-white/60 text-sm">
-              <div className="flex items-start gap-3">
-                <BiPhone className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-white mb-1">تلفن تماس</div>
-                  <div>۰۲۱-۱۲۳۴۵۶۷۸</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CgMail className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-white mb-1">ایمیل</div>
-                  <div>info@fitcoach.ir</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CiLock className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-white mb-1">ساعات پاسخگویی</div>
-                  <div>۹ صبح تا ۹ شب</div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div className="border-t border-white/10 pt-8">
@@ -164,38 +129,16 @@ export default function Footer() {
             <div className="text-white/50 text-sm text-center md:text-right">
               © ۱۴۰۳ فیت‌کوچ. تمامی حقوق محفوظ است.
             </div>
-            <div className="flex flex-wrap gap-6 text-white/50 text-sm">
-              <a href="#" className="hover:text-orange-500 transition-colors">
-                شرایط و قوانین
+            <div className="text-white/50 text-sm text-center md:text-left" dir="ltr">
+              built pixel by pixel by{" "}
+              <a
+                href="https://www.linkedin.com/in/amin-ghoreishi-399a26395?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-500 hover:text-orange-400 transition-colors"
+              >
+                Amin Ghoreishi
               </a>
-              <a href="#" className="hover:text-orange-500 transition-colors">
-                حریم خصوصی
-              </a>
-              <a href="#" className="hover:text-orange-500 transition-colors">
-                سوالات متداول
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Trust Badges */}
-        <div className="mt-8 pt-8 border-t border-white/10">
-          <div className="flex flex-wrap justify-center items-center gap-8 opacity-50">
-            <div className="flex items-center gap-2">
-              <BiCheckCircle className="w-5 h-5 text-green-500" />
-              <span className="text-white/60 text-sm">پرداخت امن</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BiCheckCircle className="w-5 h-5 text-green-500" />
-              <span className="text-white/60 text-sm">۷ روز ضمانت بازگشت</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BiCheckCircle className="w-5 h-5 text-green-500" />
-              <span className="text-white/60 text-sm">پشتیبانی ۲۴/۷</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BiCheckCircle className="w-5 h-5 text-green-500" />
-              <span className="text-white/60 text-sm">مربیان مجرب</span>
             </div>
           </div>
         </div>
