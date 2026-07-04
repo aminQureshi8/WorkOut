@@ -15,7 +15,7 @@ export default function Footer() {
                 استار فیت
               </span>
             </div>
-            <p className="text-white/60 mb-6 leading-relaxed">
+            <p className="text-white/60 font-danaMed max-sm:text-sm mb-6 leading-relaxed">
               پلتفرم آنلاین تمرینات بدنسازی و فیتنس با بیش از ۱۰ سال تجربه در
               زمینه مربیگری و برنامه‌نویسی تمرینی. همراه شما در مسیر تحول بدنی
             </p>
@@ -40,13 +40,8 @@ export default function Footer() {
               </a>
             </div>
           </div>
-          <div className="col-span-1">
-            <h4
-              className="font-bold text-white mb-4"
-              style={{ fontFamily: "Marbeh, sans-serif" }}
-            >
-              دسترسی سریع
-            </h4>
+          <div className="col-span-1 font-danaMed">
+            <h4 className="font-bold text-white mb-4">دسترسی سریع</h4>
             <div className="space-y-3 text-white/60 text-sm">
               <div>
                 <Link
@@ -85,12 +80,7 @@ export default function Footer() {
             </div>
           </div>
           <div className="col-span-1">
-            <h4
-              className="font-bold text-white mb-4"
-              style={{ fontFamily: "Marbeh, sans-serif" }}
-            >
-              خدمات
-            </h4>
+            <h4 className="font-bold text-white mb-4">خدمات</h4>
             <div className="space-y-3 text-white/60 text-sm">
               <div>
                 <a href="#" className="hover:text-orange-500 transition-colors">
@@ -124,13 +114,16 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-8">
+        <div className="border-t border-white/10 pt-8 font-danaMed">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-white/50 text-sm text-center md:text-right">
-              © ۱۴۰۳ فیت‌کوچ. تمامی حقوق محفوظ است.
+            <div className="text-white/50 ss02 text-sm text-center md:text-right">
+              © 1405 استار فیت. تمامی حقوق محفوظ است.
             </div>
-            <div className="text-white/50 text-sm text-center md:text-left" dir="ltr">
-              built pixel by pixel by{" "}
+            <div
+              className="text-white/50 text-sm text-center md:text-left"
+              dir="ltr"
+            >
+              Built pixel by pixel by{" "}
               <a
                 href="https://www.linkedin.com/in/amin-ghoreishi-399a26395?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
                 target="_blank"
