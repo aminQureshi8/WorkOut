@@ -21,7 +21,9 @@ export default function Header({ session }: { session: any }) {
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center gap-2">
               <BiDumbbell className="w-8 h-8 text-orange-500" />
-              <span className="font-bold text-xl text-white font-morabbaReg">استارفیت</span>
+              <span className="font-bold text-xl text-white font-morabbaReg">
+                استارفیت
+              </span>
             </Link>
             <div className="hidden md:flex gap-8">
               <Link href="/" className={getLinkClass("/")}>
@@ -33,10 +35,13 @@ export default function Header({ session }: { session: any }) {
               <Link href="/nutrition" className={getLinkClass("/nutrition")}>
                 کالری شمار
               </Link>
-                <Link href="/articles" className={getLinkClass("/articles")}>
+              <Link href="/articles" className={getLinkClass("/articles")}>
                 مقالات
               </Link>
-              <Link href="/dashboard/tickets" className={getLinkClass("/tickets")}>
+              <Link
+                href="/dashboard/tickets"
+                className={getLinkClass("/tickets")}
+              >
                 پشتیبانی
               </Link>
             </div>

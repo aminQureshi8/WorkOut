@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Salad,
   Flame,
@@ -164,7 +164,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
     Math.round((dailyTotals.calories / targetCalories) * 100),
   );
 
-  const handleDeleteFood = async (mealType: keyof MealData, itemId: string) => {
+  const handleDeleteFood = useCallback(async (mealType: keyof MealData, itemId: string) => {
     const dayMeals = mealsData[selectedDate] || {
       breakfast: [],
       lunch: [],
@@ -200,9 +200,9 @@ export default function NutritionTracker({ userId }: { userId: string }) {
     } catch (error) {
       console.error("Error deleting food log:", error);
     }
-  };
+  }, [selectedDate, userId, mealsData]);
 
-  const handleSaveFood = (newItem: FoodItem) => {
+  const handleSaveFood = useCallback((newItem: FoodItem) => {
     setMealsData((prev) => {
       const dayMeals = prev[selectedDate] || {
         breakfast: [],
@@ -219,7 +219,19 @@ export default function NutritionTracker({ userId }: { userId: string }) {
       };
     });
     setIsModalOpen(false);
-  };
+  }, [selectedDate, activeMealType]);
+
+  const handleWaterChange = useCallback((newAmount: number) => {
+    setWaterData((prev) => ({
+      ...prev,
+      [selectedDate]: newAmount,
+    }));
+  }, [selectedDate]);
+
+  const handleAddFoodClick = useCallback((mealType: keyof MealData) => {
+    setActiveMealType(mealType);
+    setIsModalOpen(true);
+  }, []);
 
   return (
     <div className="font-danaMed pt-4 md:pt-8" dir="rtl">
@@ -458,12 +470,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
             selectedDate={selectedDate}
             targetWater={targetWater}
             waterIntake={waterData[selectedDate] || 0}
-            onWaterChange={(newAmount) => {
-              setWaterData((prev) => ({
-                ...prev,
-                [selectedDate]: newAmount,
-              }));
-            }}
+            onWaterChange={handleWaterChange}
             isLoading={isLoadingMeals}
           />
         </div>
@@ -477,10 +484,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
           currentMeals={currentMeals}
           isLoadingMeals={isLoadingMeals}
           onDeleteFood={handleDeleteFood}
-          onAddFoodClick={(mealType) => {
-            setActiveMealType(mealType);
-            setIsModalOpen(true);
-          }}
+          onAddFoodClick={handleAddFoodClick}
         />
       </div>
 
