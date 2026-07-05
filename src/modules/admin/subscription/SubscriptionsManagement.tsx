@@ -1,32 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Users, Check, X, Clock, Film } from "lucide-react";
 
 import { PackageInfo, SubscriptionItem, VideoInfo } from "@/types/workout";
 
-import { showAlert, showConfirm } from "@/utils/alert";
 import UploadVideoModal from "./UploadVideoModal";
 import VideosManagement from "./VideosManagement";
 import CreateSubscriptionModal from "./CreateSubscriptionModal";
-import SubscriptionsTable from "./SubscriptionsTable";
+import SubscriptionsTable, {
+  SubscriptionsTableRef,
+} from "./SubscriptionsTable";
 import WorkoutPlanModal from "./WorkoutPlanModal";
 import EditSubscriptionModal from "./EditSubscriptionModal";
 import VideoPlayerModal from "@/components/VideoPlayerModal";
 
 export default function SubscriptionsManagement() {
+  const tableRef = useRef<SubscriptionsTableRef>(null);
+
   const [activeTab, setActiveTab] = useState<"subscriptions" | "videos">(
     "subscriptions",
   );
-
-  const [subscriptions, setSubscriptions] = useState<SubscriptionItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
 
   const [stats, setStats] = useState({
     total: 0,
@@ -51,53 +45,6 @@ export default function SubscriptionsManagement() {
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [showUploadVideoModal, setShowUploadVideoModal] = useState(false);
   const [watchingVideo, setWatchingVideo] = useState<VideoInfo | null>(null);
-
-  useEffect(() => {
-    fetchSubscriptions();
-  }, [currentPage, debouncedSearch, statusFilter]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  useEffect(() => {
-    fetchPackages();
-    fetchVideos();
-  }, []);
-
-  const fetchSubscriptions = async () => {
-    setLoading(true);
-    try {
-      const url = `/api/admin/subscription?page=${currentPage}&limit=8&status=${statusFilter}&search=${encodeURIComponent(debouncedSearch)}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch subscriptions");
-      const data = await res.json();
-      setSubscriptions(data.subscriptions || []);
-      setTotal(data.total || 0);
-      setTotalPages(data.totalPages || 1);
-
-      const statsRes = await fetch("/api/admin/subscription?limit=10000");
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        const allSubs: SubscriptionItem[] = statsData.subscriptions || [];
-        setStats({
-          total: allSubs.length,
-          active: allSubs.filter((s) => s.status === "active").length,
-          trial: allSubs.filter((s) => s.status === "trial").length,
-          expired: allSubs.filter((s) => s.status === "expired").length,
-        });
-      }
-    } catch (e) {
-      console.error(e);
-      showAlert("خطا", "خطا در بارگذاری اشتراک‌ها", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchPackages = async () => {
     try {
@@ -125,6 +72,12 @@ export default function SubscriptionsManagement() {
       setLoadingVideos(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchPackages();
+    fetchVideos();
+  }, []);
 
   const handleOpenPlanModal = (pkg: PackageInfo) => {
     setSelectedPackageForPlan(pkg);
@@ -254,21 +207,13 @@ export default function SubscriptionsManagement() {
             </div>
 
             <SubscriptionsTable
-              loading={loading}
-              subscriptions={subscriptions}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              setCurrentPage={setCurrentPage}
+              ref={tableRef}
               onOpenPlanModal={handleOpenPlanModal}
               onEdit={(sub) => {
                 setSelectedSubscription(sub);
                 setShowEditModal(true);
               }}
-              fetchSubscriptions={fetchSubscriptions}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
+              onStatsUpdate={setStats}
             />
           </>
         )}
@@ -293,7 +238,7 @@ export default function SubscriptionsManagement() {
         {showCreateModal && (
           <CreateSubscriptionModal
             onClose={() => setShowCreateModal(false)}
-            onSuccess={fetchSubscriptions}
+            onSuccess={() => tableRef.current?.refresh()}
             packages={packages}
           />
         )}
@@ -302,7 +247,7 @@ export default function SubscriptionsManagement() {
           <EditSubscriptionModal
             selectedSubscription={selectedSubscription}
             onClose={() => setShowEditModal(false)}
-            onSuccess={fetchSubscriptions}
+            onSuccess={() => tableRef.current?.refresh()}
           />
         )}
 

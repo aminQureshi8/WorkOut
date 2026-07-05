@@ -11,7 +11,13 @@ export default function AdminMealPlansPage() {
   const [packages, setPackages] = useState<PackageItem[]>([]);
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("search") || "";
+    }
+    return "";
+  });
   const [showForm, setShowForm] = useState(false);
   const [editingPlan, setEditingPlan] = useState<MealPlanData | null>(null);
   const [expandedPlanId, setExpandedPlanId] = useState<string | null>(null);

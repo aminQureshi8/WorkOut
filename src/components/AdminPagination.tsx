@@ -22,7 +22,7 @@ export default function Pagination({
       <button
         disabled={currentPage === 1}
         onClick={goToPrevious}
-        className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-8 h-8 bg-white/5 cursor-pointer hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <ChevronRight className="w-4 h-4 text-white" />
       </button>
@@ -31,7 +31,7 @@ export default function Pagination({
         <button
           key={page}
           onClick={() => setCurrentPage(page)}
-          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${currentPage === page ? "bg-orange-500 text-white" : "bg-white/5 text-white/70 hover:bg-white/10"}`}
+          className={`w-8 h-8 rounded-lg cursor-pointer flex items-center justify-center transition-colors ${currentPage === page ? "bg-orange-500 text-white" : "bg-white/5 text-white/70 hover:bg-white/10"}`}
         >
           {page}
         </button>
@@ -40,7 +40,7 @@ export default function Pagination({
       <button
         disabled={currentPage === totalPages}
         onClick={goToNext}
-        className="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-8 h-8 bg-white/5 cursor-pointer hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <ChevronLeft className="w-4 h-4 text-white" />
       </button>

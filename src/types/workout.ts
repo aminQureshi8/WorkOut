@@ -176,3 +176,13 @@ export interface WorkoutDayFormProps {
   onCancel: () => void;
   defaultSortOrder: number;
 }
+
+export interface SubscriptionsTableRef {
+  refresh: () => void;
+}
+
+export interface SubscriptionsTableProps {
+  onOpenPlanModal: (pkg: PackageInfo) => void;
+  onEdit: (sub: SubscriptionItem) => void;
+  onStatsUpdate: (stats: { total: number; active: number; trial: number; expired: number }) => void;
+}

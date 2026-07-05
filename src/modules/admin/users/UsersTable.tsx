@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { IAdminUser } from "@/types/user";
 import { showAlert, showConfirm } from "@/utils/alert";
+import { getStatusBadge, getRoleBadge, getRoleLabel } from "@/utils/user";
 import UserEditModal from "./UserEditModal";
 import UsersStats from "./UsersStats";
 
@@ -141,7 +142,9 @@ export default function UsersTable() {
 
         showAlert({
           title: "موفقیت",
-          text: isBlocked ? "کاربر با موفقیت فعال شد." : "کاربر با موفقیت مسدود شد.",
+          text: isBlocked
+            ? "کاربر با موفقیت فعال شد."
+            : "کاربر با موفقیت مسدود شد.",
           icon: "success",
         });
 
@@ -158,41 +161,6 @@ export default function UsersTable() {
 
   const formatNumber = (num: number) =>
     new Intl.NumberFormat("fa-IR").format(num);
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "فعال":
-        return "bg-green-500/20 text-green-400 border-green-500/50";
-      case "منقضی":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50";
-      case "مسدود":
-        return "bg-red-500/20 text-red-400 border-red-500/50";
-      default:
-        return "bg-white/20 text-white/60 border-white/30";
-    }
-  };
-
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-purple-500/20 text-purple-400 border-purple-500/50";
-      case "coach":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/50";
-      default:
-        return "bg-white/10 text-white/60 border-white/20";
-    }
-  };
-
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "ادمین";
-      case "coach":
-        return "مربی";
-      default:
-        return "کاربر";
-    }
-  };
 
   const filteredUsers = users.filter((u) => {
     if (filterStatus === "all") return true;
@@ -247,7 +215,10 @@ export default function UsersTable() {
                   <input
                     type="checkbox"
                     className="w-4 h-4 rounded border-white/20 cursor-pointer"
-                    checked={filteredUsers.length > 0 && selectedUsers.length === filteredUsers.length}
+                    checked={
+                      filteredUsers.length > 0 &&
+                      selectedUsers.length === filteredUsers.length
+                    }
                     onChange={(e) => {
                       if (e.target.checked) {
                         setSelectedUsers(filteredUsers.map((u) => u._id));
@@ -289,13 +260,19 @@ export default function UsersTable() {
             <tbody className="divide-y divide-white/10">
               {isLoading ? (
                 <tr>
-                  <td colSpan={10} className="p-12 text-center text-white/50 text-sm">
+                  <td
+                    colSpan={10}
+                    className="p-12 text-center text-white/50 text-sm"
+                  >
                     در حال بارگذاری اطلاعات کاربران...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={10} className="p-12 text-center text-red-400 text-sm">
+                  <td
+                    colSpan={10}
+                    className="p-12 text-center text-red-400 text-sm"
+                  >
                     {error}
                   </td>
                 </tr>
@@ -330,7 +307,9 @@ export default function UsersTable() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center text-xl font-bold text-orange-400">
-                          {user.avatar || user.username[0]?.toUpperCase() || "👤"}
+                          {user.avatar ||
+                            user.username[0]?.toUpperCase() ||
+                            "👤"}
                         </div>
                         <div>
                           <div className="text-white font-medium text-sm">
@@ -394,11 +373,11 @@ export default function UsersTable() {
                         className="text-white font-medium"
                         style={{ fontFamily: "Marbeh, sans-serif" }}
                       >
-                        {user.totalPayments ? formatNumber(user.totalPayments) : "۰"}
+                        {user.totalPayments
+                          ? formatNumber(user.totalPayments)
+                          : "۰"}
                       </span>
-                      <span className="text-white/60 text-xs mr-1">
-                        تومان
-                      </span>
+                      <span className="text-white/60 text-xs mr-1">تومان</span>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
@@ -412,9 +391,15 @@ export default function UsersTable() {
                         <button
                           onClick={() => handleToggleBlock(user)}
                           className="w-8 h-8 bg-white/5 hover:bg-red-500/20 rounded-lg flex items-center justify-center transition-colors cursor-pointer"
-                          title={user.status === "مسدود" ? "رفع مسدودیت" : "مسدود کردن"}
+                          title={
+                            user.status === "مسدود"
+                              ? "رفع مسدودیت"
+                              : "مسدود کردن"
+                          }
                         >
-                          <Ban className={`w-4 h-4 ${user.status === "مسدود" ? "text-green-400" : "text-red-400"}`} />
+                          <Ban
+                            className={`w-4 h-4 ${user.status === "مسدود" ? "text-green-400" : "text-red-400"}`}
+                          />
                         </button>
                       </div>
                     </td>

@@ -60,7 +60,6 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         );
         if (res.ok) {
           const data = await res.json();
-          console.log(data);
 
           if (data) {
             if (data.targetCalories) setTargetCalories(data.targetCalories);
@@ -164,69 +163,80 @@ export default function NutritionTracker({ userId }: { userId: string }) {
     Math.round((dailyTotals.calories / targetCalories) * 100),
   );
 
-  const handleDeleteFood = useCallback(async (mealType: keyof MealData, itemId: string) => {
-    const dayMeals = mealsData[selectedDate] || {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snack: [],
-    };
-    const updatedMeal = dayMeals[mealType].filter((item) => item.id !== itemId);
-
-    const updatedMealsForDate = {
-      ...dayMeals,
-      [mealType]: updatedMeal,
-    };
-
-    setMealsData((prev) => ({
-      ...prev,
-      [selectedDate]: updatedMealsForDate,
-    }));
-
-    try {
-      const response = await fetch(`/api/nutrition?userId=${userId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          date: selectedDate,
-          meals: updatedMealsForDate,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to delete food log from server");
-      }
-    } catch (error) {
-      console.error("Error deleting food log:", error);
-    }
-  }, [selectedDate, userId, mealsData]);
-
-  const handleSaveFood = useCallback((newItem: FoodItem) => {
-    setMealsData((prev) => {
-      const dayMeals = prev[selectedDate] || {
+  const handleDeleteFood = useCallback(
+    async (mealType: keyof MealData, itemId: string) => {
+      const dayMeals = mealsData[selectedDate] || {
         breakfast: [],
         lunch: [],
         dinner: [],
         snack: [],
       };
-      return {
-        ...prev,
-        [selectedDate]: {
-          ...dayMeals,
-          [activeMealType]: [...dayMeals[activeMealType], newItem],
-        },
-      };
-    });
-    setIsModalOpen(false);
-  }, [selectedDate, activeMealType]);
+      const updatedMeal = dayMeals[mealType].filter(
+        (item) => item.id !== itemId,
+      );
 
-  const handleWaterChange = useCallback((newAmount: number) => {
-    setWaterData((prev) => ({
-      ...prev,
-      [selectedDate]: newAmount,
-    }));
-  }, [selectedDate]);
+      const updatedMealsForDate = {
+        ...dayMeals,
+        [mealType]: updatedMeal,
+      };
+
+      setMealsData((prev) => ({
+        ...prev,
+        [selectedDate]: updatedMealsForDate,
+      }));
+
+      try {
+        const response = await fetch(`/api/nutrition?userId=${userId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            date: selectedDate,
+            meals: updatedMealsForDate,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to delete food log from server");
+        }
+      } catch (error) {
+        console.error("Error deleting food log:", error);
+      }
+    },
+    [selectedDate, userId, mealsData],
+  );
+
+  const handleSaveFood = useCallback(
+    (newItem: FoodItem) => {
+      setMealsData((prev) => {
+        const dayMeals = prev[selectedDate] || {
+          breakfast: [],
+          lunch: [],
+          dinner: [],
+          snack: [],
+        };
+        return {
+          ...prev,
+          [selectedDate]: {
+            ...dayMeals,
+            [activeMealType]: [...dayMeals[activeMealType], newItem],
+          },
+        };
+      });
+      setIsModalOpen(false);
+    },
+    [selectedDate, activeMealType],
+  );
+
+  const handleWaterChange = useCallback(
+    (newAmount: number) => {
+      setWaterData((prev) => ({
+        ...prev,
+        [selectedDate]: newAmount,
+      }));
+    },
+    [selectedDate],
+  );
 
   const handleAddFoodClick = useCallback((mealType: keyof MealData) => {
     setActiveMealType(mealType);
