@@ -1,4 +1,5 @@
 import mongoose, { Document } from "mongoose";
+import { UseFormRegister, FieldErrors } from "react-hook-form";
 
 // Client-Side Types
 export interface Food {
@@ -164,3 +165,28 @@ export interface FoodFormValues {
   manualCarbs: string;
   manualFat: string;
 }
+
+
+export interface FoodFormData {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  unit: string;
+  type: "breakfast" | "lunch" | "dinner" | "snack" | "all";
+  isActive: boolean;
+}
+
+export interface FoodFormProps {
+  register: UseFormRegister<FoodFormData>;
+  errors: FieldErrors<FoodFormData>;
+  isSubmitting: boolean;
+  onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
+}
+
+export interface FoodsTableRef {
+  refresh: () => void;
+}
+
+export type FoodsTableProps = Record<string, never>;
