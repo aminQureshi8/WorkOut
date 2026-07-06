@@ -4,8 +4,7 @@ import User from "@/model/User";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-export const dynamic = "force-dynamic";
+import { uploadFileToS3 } from "@/lib/arvan";
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,7 +12,10 @@ export async function GET(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ message: "دسترسی غیرمجاز. لطفا وارد شوید." }, { status: 401 });
+      return NextResponse.json(
+        { message: "دسترسی غیرمجاز. لطفا وارد شوید." },
+        { status: 401 },
+      );
     }
 
     const tickets = await Ticket.find({ userId: session.user.id })
@@ -34,25 +36,55 @@ export async function POST(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ message: "دسترسی غیرمجاز. لطفا وارد شوید." }, { status: 401 });
+      return NextResponse.json(
+        { message: "دسترسی غیرمجاز. لطفا وارد شوید." },
+        { status: 401 },
+      );
     }
 
-    const body = await req.json();
-    const { subject, description, category } = body;
+    let subject = "";
+    let description = "";
+    let category = "";
+    let file: File | null = null;
+
+    const contentType = req.headers.get("content-type") || "";
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      subject = (formData.get("subject") as string) || "";
+      description = (formData.get("description") as string) || "";
+      category = (formData.get("category") as string) || "";
+      file = formData.get("file") as File | null;
+    } else {
+      const body = await req.json();
+      subject = body.subject || "";
+      description = body.description || "";
+      category = body.category || "";
+    }
 
     if (!subject || !description || !category) {
       return NextResponse.json(
         { message: "پر کردن موضوع، شرح پیام و دسته‌بندی الزامی است." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const validCategories = ["workout", "nutrition", "form_check", "injury", "technical"];
+    const validCategories = [
+      "workout",
+      "nutrition",
+      "form_check",
+      "injury",
+      "technical",
+    ];
     if (!validCategories.includes(category)) {
       return NextResponse.json(
         { message: "دسته‌بندی نامعتبر است." },
-        { status: 400 }
+        { status: 400 },
       );
+    }
+
+    let videoUrl = "";
+    if (file && file instanceof File && file.size > 0) {
+      videoUrl = await uploadFileToS3(file, "tickets");
     }
 
     const ticket = await Ticket.create({
@@ -60,6 +92,7 @@ export async function POST(req: NextRequest) {
       subject: subject.trim(),
       description: description.trim(),
       category,
+      videoUrl: videoUrl || undefined,
       status: "pending",
       messages: [],
     });
@@ -68,7 +101,10 @@ export async function POST(req: NextRequest) {
       .populate("userId", "username fullName email avatar role")
       .lean();
 
-    return NextResponse.json({ success: true, ticket: populatedTicket }, { status: 201 });
+    return NextResponse.json(
+      { success: true, ticket: populatedTicket },
+      { status: 201 },
+    );
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
@@ -81,7 +117,10 @@ export async function PUT(req: NextRequest) {
     // Session Check
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ message: "دسترسی غیرمجاز. لطفا وارد شوید." }, { status: 401 });
+      return NextResponse.json(
+        { message: "دسترسی غیرمجاز. لطفا وارد شوید." },
+        { status: 401 },
+      );
     }
 
     const body = await req.json();
@@ -90,7 +129,7 @@ export async function PUT(req: NextRequest) {
     if (!id || !messageText || !messageText.trim()) {
       return NextResponse.json(
         { message: "شناسه تیکت و متن پیام الزامی است." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -99,19 +138,23 @@ export async function PUT(req: NextRequest) {
     if (!ticket) {
       return NextResponse.json(
         { message: "تیکت یافت نشد یا دسترسی غیرمجاز است." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (ticket.status === "closed") {
       return NextResponse.json(
         { message: "این تیکت بسته شده است و امکان ارسال پیام وجود ندارد." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const dbUser = await User.findById(session.user.id);
-    const senderName = dbUser?.fullName || dbUser?.username || session.user.username || "کاربر فیت‌کوچ";
+    const senderName =
+      dbUser?.fullName ||
+      dbUser?.username ||
+      session.user.username ||
+      "کاربر فیت‌کوچ";
 
     ticket.messages.push({
       senderId: session.user.id,

@@ -4,8 +4,7 @@ import User from "@/model/User";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextRequest, NextResponse } from "next/server";
-import { arvanClient } from "@/lib/arvan";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { uploadFileToS3 } from "@/lib/arvan";
 import { validateBlog, validateBlogUpdate } from "@/validator/blog";
 
 async function generateUniqueSlug(title: string): Promise<string> {
@@ -27,22 +26,7 @@ async function generateUniqueSlug(title: string): Promise<string> {
   return slug;
 }
 
-async function uploadFileToS3(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const ext = file.name.split(".").pop() || "jpg";
-  const imageKey = `blogs/${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${ext}`;
 
-  await arvanClient.send(
-    new PutObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME!,
-      Key: imageKey,
-      Body: buffer,
-      ContentType: file.type,
-    }),
-  );
-
-  return `${process.env.S3_PUBLIC_URL}/${imageKey}`;
-}
 
 export async function GET(req: NextRequest) {
   try {
@@ -204,7 +188,7 @@ export async function POST(req: NextRequest) {
 
     let imageUrl = "";
     if (imageFile && imageFile instanceof File && imageFile.size > 0) {
-      imageUrl = await uploadFileToS3(imageFile);
+      imageUrl = await uploadFileToS3(imageFile, "blogs");
     }
 
     const blog = await Blog.create({
@@ -295,7 +279,7 @@ export async function PUT(req: NextRequest) {
     if (excerpt !== undefined) blog.excerpt = excerpt;
 
     if (imageInput && imageInput instanceof File && imageInput.size > 0) {
-      blog.image = await uploadFileToS3(imageInput);
+      blog.image = await uploadFileToS3(imageInput, "blogs");
     } else if (
       imageInput === "null" ||
       imageInput === "deleted" ||

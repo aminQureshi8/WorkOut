@@ -30,7 +30,6 @@ export default function UserTickets() {
         const data = await res.json();
         const userTickets = data.tickets || [];
         setTickets(userTickets);
-
         if (selectIdAfterFetch) {
           const updated = userTickets.find(
             (t: ITicket) => t._id === selectIdAfterFetch,

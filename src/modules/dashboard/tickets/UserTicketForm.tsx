@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { HelpCircle, Plus } from "lucide-react";
 import { showAlert } from "@/utils/alert";
@@ -32,7 +31,8 @@ export default function UserTicketForm({
   const selectedFile = file && file.length > 0 ? file[0] : null;
 
   const onSubmit = async (data: TicketFormValues) => {
-    if (!data.subject.trim() || !data.description.trim() || isSubmitting) return;
+    if (!data.subject.trim() || !data.description.trim() || isSubmitting)
+      return;
 
     try {
       const formData = new FormData();
