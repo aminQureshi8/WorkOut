@@ -91,3 +91,15 @@ export interface TicketDetailsProps {
   onReopenTicket: (id: string) => void;
   onDeleteTicket: (id: string) => void;
 }
+
+export interface TicketFormValues {
+  subject: string;
+  category: "workout" | "nutrition" | "form_check" | "injury" | "technical";
+  file?: FileList | null;
+  description: string;
+}
+
+export interface UserTicketFormProps {
+  setShowCreateForm: (show: boolean) => void;
+  fetchTickets: (selectIdAfterFetch?: string) => Promise<void>;
+}
