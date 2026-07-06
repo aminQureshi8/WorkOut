@@ -15,6 +15,7 @@ export interface ITicket extends Document {
   description: string;
   status: "pending" | "answered" | "closed";
   category: "workout" | "nutrition" | "form_check" | "injury" | "technical";
+  videoUrl?: string;
   messages: IMessage[];
   createdAt: Date;
   updatedAt: Date;
@@ -45,6 +46,7 @@ export interface IClientTicket {
   description: string;
   status: "pending" | "answered" | "closed";
   category: "workout" | "nutrition" | "form_check" | "injury" | "technical";
+  videoUrl?: string;
   messages: IClientMessage[];
   createdAt: string;
   updatedAt: string;

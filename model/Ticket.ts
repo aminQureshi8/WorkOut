@@ -27,6 +27,7 @@ const TicketSchema = new Schema<ITicket>(
       required: true,
       index: true,
     },
+    videoUrl: { type: String },
     messages: [MessageSchema],
   },
   { timestamps: true }
