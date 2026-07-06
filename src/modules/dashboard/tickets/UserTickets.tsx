@@ -28,6 +28,7 @@ export default function UserTickets() {
         const res = await fetch("/api/user/ticket");
         if (!res.ok) throw new Error("خطا در دریافت لیست تیکت‌ها");
         const data = await res.json();
+     
         const userTickets = data.tickets || [];
         setTickets(userTickets);
         if (selectIdAfterFetch) {

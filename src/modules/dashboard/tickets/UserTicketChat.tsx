@@ -11,6 +11,11 @@ import {
   getCategoryLabel,
 } from "./ticketHelpers";
 
+const isVideo = (url: string) => {
+  const videoExtensions = [".mp4", ".mov", ".webm", ".avi", ".mkv"];
+  return videoExtensions.some((ext) => url.toLowerCase().endsWith(ext));
+};
+
 interface UserTicketChatProps {
   tickets: ITicket[];
   selectedTicket: ITicket | null;
@@ -162,6 +167,33 @@ export default function UserTicketChat({
                   <p className="leading-relaxed whitespace-pre-line">
                     {selectedTicket.description}
                   </p>
+                  {selectedTicket.videoUrl && (
+                    <div className="mt-3 rounded-xl overflow-hidden border border-white/10 max-w-sm bg-black/40">
+                      {isVideo(selectedTicket.videoUrl) ? (
+                        <video
+                          src={selectedTicket.videoUrl}
+                          controls
+                          className="w-full h-auto max-h-56 object-cover"
+                        />
+                      ) : (
+                        <a
+                          href={selectedTicket.videoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block relative group overflow-hidden"
+                        >
+                          <img
+                            src={selectedTicket.videoUrl}
+                            alt="پیوست حرکت"
+                            className="w-full h-auto max-h-56 object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] text-white">
+                            مشاهده تصویر کامل
+                          </div>
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
