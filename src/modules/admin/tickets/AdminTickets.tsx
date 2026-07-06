@@ -27,7 +27,6 @@ export default function AdminTickets() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalTickets, setTotalTickets] = useState(0);
@@ -47,9 +46,6 @@ export default function AdminTickets() {
       let url = `/api/admin/ticket?page=${currentPage}&limit=8`;
       if (statusFilter !== "all") {
         url += `&status=${statusFilter}`;
-      }
-      if (priorityFilter !== "all") {
-        url += `&priority=${priorityFilter}`;
       }
       if (debouncedSearchQuery.trim()) {
         url += `&search=${encodeURIComponent(debouncedSearchQuery)}`;
@@ -79,7 +75,7 @@ export default function AdminTickets() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, statusFilter, priorityFilter, debouncedSearchQuery]);
+  }, [currentPage, statusFilter, debouncedSearchQuery]);
 
 
   useEffect(() => {
@@ -220,8 +216,6 @@ export default function AdminTickets() {
           setSearchQuery={setSearchQuery}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
-          priorityFilter={priorityFilter}
-          setPriorityFilter={setPriorityFilter}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           totalPages={totalPages}

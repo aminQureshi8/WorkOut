@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
     const page = searchParams.get("page") || "1";
     const limit = searchParams.get("limit") || "10";
     const status = searchParams.get("status");
-    const priority = searchParams.get("priority");
     const search = searchParams.get("search");
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -29,9 +28,6 @@ export async function GET(req: NextRequest) {
 
     if (status && status !== "all") {
       query.status = status;
-    }
-    if (priority && priority !== "all") {
-      query.priority = priority;
     }
 
     if (search) {

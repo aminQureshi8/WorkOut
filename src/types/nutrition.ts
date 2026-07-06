@@ -189,4 +189,4 @@ export interface FoodsTableRef {
   refresh: () => void;
 }
 
-export type FoodsTableProps = Record<string, never>;
+export interface FoodsTableProps {}

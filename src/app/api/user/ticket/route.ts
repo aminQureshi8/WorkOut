@@ -38,11 +38,19 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { subject, description, priority } = body;
+    const { subject, description, category } = body;
 
-    if (!subject || !description) {
+    if (!subject || !description || !category) {
       return NextResponse.json(
-        { message: "پر کردن موضوع و شرح پیام الزامی است." },
+        { message: "پر کردن موضوع، شرح پیام و دسته‌بندی الزامی است." },
+        { status: 400 }
+      );
+    }
+
+    const validCategories = ["workout", "nutrition", "form_check", "injury", "technical"];
+    if (!validCategories.includes(category)) {
+      return NextResponse.json(
+        { message: "دسته‌بندی نامعتبر است." },
         { status: 400 }
       );
     }
@@ -51,7 +59,7 @@ export async function POST(req: NextRequest) {
       userId: session.user.id,
       subject: subject.trim(),
       description: description.trim(),
-      priority: priority || "medium",
+      category,
       status: "pending",
       messages: [],
     });

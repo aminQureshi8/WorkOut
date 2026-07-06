@@ -8,9 +8,8 @@ import { PackageInfo, SubscriptionItem, VideoInfo } from "@/types/workout";
 import UploadVideoModal from "./UploadVideoModal";
 import VideosManagement from "./VideosManagement";
 import CreateSubscriptionModal from "./CreateSubscriptionModal";
-import SubscriptionsTable, {
-  SubscriptionsTableRef,
-} from "./SubscriptionsTable";
+import SubscriptionsTable from "./SubscriptionsTable";
+import { SubscriptionsTableRef } from "@/types/workout";
 import WorkoutPlanModal from "./WorkoutPlanModal";
 import EditSubscriptionModal from "./EditSubscriptionModal";
 import VideoPlayerModal from "@/components/VideoPlayerModal";

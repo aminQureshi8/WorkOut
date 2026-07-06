@@ -14,7 +14,7 @@ export interface ITicket extends Document {
   subject: string;
   description: string;
   status: "pending" | "answered" | "closed";
-  priority: "low" | "medium" | "high";
+  category: "workout" | "nutrition" | "form_check" | "injury" | "technical";
   messages: IMessage[];
   createdAt: Date;
   updatedAt: Date;
@@ -44,7 +44,7 @@ export interface IClientTicket {
   subject: string;
   description: string;
   status: "pending" | "answered" | "closed";
-  priority: "low" | "medium" | "high";
+  category: "workout" | "nutrition" | "form_check" | "injury" | "technical";
   messages: IClientMessage[];
   createdAt: string;
   updatedAt: string;
@@ -72,8 +72,6 @@ export interface TicketListProps {
   setSearchQuery: (query: string) => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
-  priorityFilter: string;
-  setPriorityFilter: (priority: string) => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   totalPages: number;

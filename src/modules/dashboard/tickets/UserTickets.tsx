@@ -26,7 +26,7 @@ export default function UserTickets() {
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [subject, setSubject] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
+  const [category, setCategory] = useState<"workout" | "nutrition" | "form_check" | "injury" | "technical">("workout");
   const [description, setDescription] = useState("");
   const [submittingTicket, setSubmittingTicket] = useState(false);
 
@@ -87,7 +87,7 @@ export default function UserTickets() {
         body: JSON.stringify({
           subject: subject.trim(),
           description: description.trim(),
-          priority,
+          category,
         }),
       });
 
@@ -95,7 +95,7 @@ export default function UserTickets() {
         const data = await res.json();
         setSubject("");
         setDescription("");
-        setPriority("medium");
+        setCategory("workout");
         setShowCreateForm(false);
         showAlert(
           "موفقیت",
@@ -171,31 +171,41 @@ export default function UserTickets() {
     }
   };
 
-  const getPriorityBadge = (priority: ITicket["priority"]) => {
-    switch (priority) {
-      case "high":
-        return "bg-red-500/20 text-red-400 border-red-500/30";
-      case "medium":
+  const getCategoryBadge = (category: ITicket["category"]) => {
+    switch (category) {
+      case "workout":
+        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      case "nutrition":
+        return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+      case "form_check":
         return "bg-purple-500/20 text-purple-400 border-purple-500/30";
-      case "low":
-        return "bg-white/5 text-white/60 border-white/10";
+      case "injury":
+        return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "technical":
+        return "bg-amber-500/20 text-amber-400 border-amber-500/30";
       default:
         return "bg-white/5 text-white/60 border-white/10";
     }
   };
 
-  const getPriorityLabel = (priority: ITicket["priority"]) => {
-    switch (priority) {
-      case "high":
-        return "فوری";
-      case "medium":
-        return "متوسط";
-      case "low":
-        return "کم اهمیت";
+  const getCategoryLabel = (category: ITicket["category"]) => {
+    switch (category) {
+      case "workout":
+        return "سوال تمرینی";
+      case "nutrition":
+        return "سوال تغذیه";
+      case "form_check":
+        return "بررسی فرم حرکت";
+      case "injury":
+        return "درد یا آسیب";
+      case "technical":
+        return "مشکل سایت";
       default:
-        return priority;
+        return category;
     }
   };
+
+
 
   return (
     <div
@@ -265,18 +275,22 @@ export default function UserTickets() {
 
               <div>
                 <label className="block text-white/70 text-xs mb-2">
-                  اولویت
+                  دسته‌بندی موضوع
                 </label>
                 <select
-                  value={priority}
-                  onChange={(e: any) => setPriority(e.target.value)}
+                  value={category}
+                  onChange={(e: any) => setCategory(e.target.value)}
                   className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 text-sm"
                 >
-                  <option value="low">کم اهمیت</option>
-                  <option value="medium">متوسط</option>
-                  <option value="high">فوری و مهم</option>
+                  <option value="workout">سوال تمرینی</option>
+                  <option value="nutrition">سوال تغذیه</option>
+                  <option value="form_check">بررسی فرم حرکت</option>
+                  <option value="injury">درد یا آسیب</option>
+                  <option value="technical">مشکل سایت</option>
                 </select>
               </div>
+
+
 
               <div>
                 <label className="block text-white/70 text-xs mb-2">
@@ -335,9 +349,9 @@ export default function UserTickets() {
                             {t.subject}
                           </span>
                           <span
-                            className={`px-2 py-0.5 rounded border text-[9px] ${getPriorityBadge(t.priority)}`}
+                            className={`px-2 py-0.5 rounded border text-[9px] ${getCategoryBadge(t.category)}`}
                           >
-                            {getPriorityLabel(t.priority)}
+                            {getCategoryLabel(t.category)}
                           </span>
                         </div>
                         <p className="text-xs text-white/60 line-clamp-2 leading-relaxed">
@@ -386,9 +400,9 @@ export default function UserTickets() {
                           {getStatusLabel(selectedTicket.status)}
                         </span>
                         <span
-                          className={`px-2 py-0.5 rounded border text-[8px] ${getPriorityBadge(selectedTicket.priority)}`}
+                          className={`px-2 py-0.5 rounded border text-[8px] ${getCategoryBadge(selectedTicket.category)}`}
                         >
-                          اولویت: {getPriorityLabel(selectedTicket.priority)}
+                          {getCategoryLabel(selectedTicket.category)}
                         </span>
                         <span className="text-[9px] text-white/40 ss02">
                           ثبت:{" "}

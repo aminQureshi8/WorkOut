@@ -11,8 +11,8 @@ import type { TicketDetailsProps } from "@/types/ticket";
 import {
   getStatusBadge,
   getStatusLabel,
-  getPriorityBadge,
-  getPriorityLabel,
+  getCategoryBadge,
+  getCategoryLabel,
 } from "./ticketHelpers";
 
 const TicketDetails: React.FC<TicketDetailsProps> = ({
@@ -59,9 +59,9 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
               {getStatusLabel(selectedTicket.status)}
             </span>
             <span
-              className={`px-2 py-0.5 rounded border text-[10px] ${getPriorityBadge(selectedTicket.priority)}`}
+              className={`px-2 py-0.5 rounded border text-[10px] ${getCategoryBadge(selectedTicket.category)}`}
             >
-              اولویت: {getPriorityLabel(selectedTicket.priority)}
+              دسته‌بندی: {getCategoryLabel(selectedTicket.category)}
             </span>
             <span className="text-[10px] text-white/40 ss02">
               ثبت:{" "}

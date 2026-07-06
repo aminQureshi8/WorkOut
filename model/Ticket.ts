@@ -21,10 +21,10 @@ const TicketSchema = new Schema<ITicket>(
       default: "pending",
       index: true,
     },
-    priority: {
+    category: {
       type: String,
-      enum: ["low", "medium", "high"],
-      default: "medium",
+      enum: ["workout", "nutrition", "form_check", "injury", "technical"],
+      required: true,
       index: true,
     },
     messages: [MessageSchema],

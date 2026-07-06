@@ -26,31 +26,41 @@ export const getStatusLabel = (status: ITicket["status"]) => {
   }
 };
 
-export const getPriorityBadge = (priority: ITicket["priority"]) => {
-  switch (priority) {
-    case "high":
-      return "bg-red-500/20 text-red-400 border-red-500/40";
-    case "medium":
+export const getCategoryBadge = (category: ITicket["category"]) => {
+  switch (category) {
+    case "workout":
       return "bg-blue-500/20 text-blue-400 border-blue-500/40";
-    case "low":
-      return "bg-white/5 text-white/60 border-white/10";
+    case "nutrition":
+      return "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+    case "form_check":
+      return "bg-purple-500/20 text-purple-400 border-purple-500/40";
+    case "injury":
+      return "bg-red-500/20 text-red-400 border-red-500/40";
+    case "technical":
+      return "bg-amber-500/20 text-amber-400 border-amber-500/40";
     default:
       return "bg-white/5 text-white/60 border-white/10";
   }
 };
 
-export const getPriorityLabel = (priority: ITicket["priority"]) => {
-  switch (priority) {
-    case "high":
-      return "فوری";
-    case "medium":
-      return "متوسط";
-    case "low":
-      return "کم اهمیت";
+export const getCategoryLabel = (category: ITicket["category"]) => {
+  switch (category) {
+    case "workout":
+      return "سوال تمرینی";
+    case "nutrition":
+      return "سوال تغذیه";
+    case "form_check":
+      return "بررسی فرم حرکت";
+    case "injury":
+      return "درد یا آسیب";
+    case "technical":
+      return "مشکل سایت";
     default:
-      return priority;
+      return category;
   }
 };
+
+
 
 export const formatNumber = (num: number) => {
   return new Intl.NumberFormat("fa-IR").format(num);

@@ -5,8 +5,8 @@ import type { TicketListProps } from "@/types/ticket";
 import {
   getStatusBadge,
   getStatusLabel,
-  getPriorityBadge,
-  getPriorityLabel,
+  getCategoryBadge,
+  getCategoryLabel,
 } from "./ticketHelpers";
 
 const TicketList: React.FC<TicketListProps> = ({
@@ -19,8 +19,6 @@ const TicketList: React.FC<TicketListProps> = ({
   setSearchQuery,
   statusFilter,
   setStatusFilter,
-  priorityFilter,
-  setPriorityFilter,
   currentPage,
   setCurrentPage,
   totalPages,
@@ -57,19 +55,6 @@ const TicketList: React.FC<TicketListProps> = ({
               <option value="pending">در انتظار پاسخ</option>
               <option value="answered">پاسخ داده شده</option>
               <option value="closed">بسته شده</option>
-            </select>
-            <select
-              value={priorityFilter}
-              onChange={(e) => {
-                setPriorityFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="bg-white/5 *:bg-gray-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 text-sm"
-            >
-              <option value="all">همه اولویت‌ها</option>
-              <option value="high">فوری</option>
-              <option value="medium">متوسط</option>
-              <option value="low">کم اهمیت</option>
             </select>
           </div>
         </div>
@@ -113,9 +98,9 @@ const TicketList: React.FC<TicketListProps> = ({
                         {t.subject}
                       </div>
                       <span
-                        className={`px-2 py-0.5 rounded border text-[10px] ${getPriorityBadge(t.priority)}`}
+                        className={`px-2 py-0.5 rounded border text-[10px] ${getCategoryBadge(t.category)}`}
                       >
-                        {getPriorityLabel(t.priority)}
+                        {getCategoryLabel(t.category)}
                       </span>
                     </div>
                     <p className="text-xs text-white/60 line-clamp-2 leading-relaxed">
