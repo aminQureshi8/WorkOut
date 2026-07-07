@@ -1,5 +1,5 @@
 import mongoose, { Document } from "mongoose";
-import type { ReactNode, FormEvent } from "react";
+import type { ReactNode, FormEvent, RefObject } from "react";
 
 // Mongoose / DB Schema Types
 export interface IMessage {
@@ -101,5 +101,13 @@ export interface TicketFormValues {
 
 export interface UserTicketFormProps {
   setShowCreateForm: (show: boolean) => void;
+  fetchTickets: (selectIdAfterFetch?: string) => Promise<void>;
+}
+
+export interface UserTicketChatProps {
+  tickets: IClientTicket[];
+  selectedTicket: IClientTicket | null;
+  setSelectedTicket: (ticket: IClientTicket | null) => void;
+  chatEndRef: RefObject<HTMLDivElement | null>;
   fetchTickets: (selectIdAfterFetch?: string) => Promise<void>;
 }

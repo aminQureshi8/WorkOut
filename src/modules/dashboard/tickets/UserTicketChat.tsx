@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { MessageSquare, Shield, Lock, Send } from "lucide-react";
-import { IClientTicket as ITicket } from "@/types/ticket";
+import { IClientTicket as ITicket, UserTicketChatProps } from "@/types/ticket";
 import { showAlert } from "@/utils/alert";
 import {
   getStatusBadge,
@@ -15,14 +15,6 @@ const isVideo = (url: string) => {
   const videoExtensions = [".mp4", ".mov", ".webm", ".avi", ".mkv"];
   return videoExtensions.some((ext) => url.toLowerCase().endsWith(ext));
 };
-
-interface UserTicketChatProps {
-  tickets: ITicket[];
-  selectedTicket: ITicket | null;
-  setSelectedTicket: (ticket: ITicket | null) => void;
-  chatEndRef: React.RefObject<HTMLDivElement | null>;
-  fetchTickets: (selectIdAfterFetch?: string) => Promise<void>;
-}
 
 export default function UserTicketChat({
   tickets,
@@ -158,7 +150,7 @@ export default function UserTicketChat({
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-black/20">
-              <div className="flex gap-3 justify-end max-w-[85%] mr-auto flex-row-reverse">
+              <div className="flex gap-3 max-w-[85%] mr-auto flex-row-reverse">
                 <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-bold flex-shrink-0">
                   من
                 </div>
@@ -207,7 +199,7 @@ export default function UserTicketChat({
                   return (
                     <div
                       key={msg._id}
-                      className={`flex gap-3 max-w-[85%] ${isSupport ? "justify-start" : "mr-auto justify-end flex-row-reverse"}`}
+                      className={`flex gap-3 max-w-[85%] ${isSupport ? "justify-start" : "mr-auto flex-row-reverse"}`}
                     >
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 border ${
