@@ -114,11 +114,11 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-black/20">
-        <div className="flex gap-3 justify-start max-w-[85%]">
+        <div className="flex gap-3 max-w-[85%] mr-auto flex-row-reverse">
           <div className="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 text-xs font-bold flex-shrink-0">
             {selectedTicket.userId?.username?.charAt(0) || "👤"}
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tr-none p-4 text-white text-sm">
+          <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tl-none p-4 text-white text-sm">
             <div className="text-white/40 text-[10px] mb-1.5">
               {selectedTicket.userId?.fullName ||
                 selectedTicket.userId?.username}
@@ -166,7 +166,7 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
             return (
               <div
                 key={msg._id}
-                className={`flex gap-3 max-w-[85%] ${isSupport ? "mr-auto justify-end flex-row-reverse" : "justify-start"}`}
+                className={`flex gap-3 max-w-[85%] ${isSupport ? "" : "mr-auto flex-row-reverse"}`}
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border ${
@@ -182,8 +182,8 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
                 <div
                   className={`rounded-2xl p-4 text-white text-sm border ${
                     isSupport
-                      ? "bg-purple-500/10 border-purple-500/20 rounded-tl-none"
-                      : "bg-white/5 border-white/10 rounded-tr-none"
+                      ? "bg-purple-500/10 border-purple-500/20 rounded-tr-none"
+                      : "bg-white/5 border-white/10 rounded-tl-none"
                   }`}
                 >
                   <div className="flex justify-between items-center gap-6 text-white/40 text-[10px] mb-1.5">
