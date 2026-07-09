@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Pagination from "@/components/AdminPagination";
 import { Search, MessageCircle } from "lucide-react";
 import type { TicketListProps } from "@/types/ticket";
@@ -14,17 +14,51 @@ const TicketList: React.FC<TicketListProps> = ({
   tickets,
   selectedTicket,
   setSelectedTicket,
-  setReplyText,
-  searchQuery,
-  setSearchQuery,
-  statusFilter,
-  setStatusFilter,
-  currentPage,
-  setCurrentPage,
-  totalPages,
-  isLoading,
-  error,
+  fetchTickets,
+  paramsRef,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Load tickets on parameters change
+  useEffect(() => {
+    const load = async () => {
+      paramsRef.current = {
+        page: currentPage,
+        status: statusFilter,
+        search: debouncedSearchQuery,
+      };
+
+      setIsLoading(true);
+      setError(null);
+      try {
+        const result = await fetchTickets();
+        setTotalPages(result.totalPages);
+      } catch (err: any) {
+        setError(err.message || "دریافت اطلاعات با خطا مواجه شد");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, [currentPage, statusFilter, debouncedSearchQuery, fetchTickets, paramsRef]);
+
   return (
     <>
       <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 mb-6">
@@ -37,7 +71,6 @@ const TicketList: React.FC<TicketListProps> = ({
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                setCurrentPage(1);
               }}
               className="w-full bg-white/5 border border-white/10 rounded-lg pr-12 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500 text-sm"
             />
@@ -85,7 +118,6 @@ const TicketList: React.FC<TicketListProps> = ({
                     key={t._id}
                     onClick={() => {
                       setSelectedTicket(t);
-                      setReplyText("");
                     }}
                     className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col gap-3 ${
                       isSelected

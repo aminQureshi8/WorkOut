@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   MessageSquare,
   Lock,
@@ -8,6 +8,7 @@ import {
   Send,
 } from "lucide-react";
 import type { TicketDetailsProps } from "@/types/ticket";
+import { showAlert, showConfirm } from "@/utils/alert";
 import {
   getStatusBadge,
   getStatusLabel,
@@ -22,21 +23,123 @@ const isVideo = (url: string) => {
 
 const TicketDetails: React.FC<TicketDetailsProps> = ({
   selectedTicket,
-  replyText,
-  setReplyText,
-  sendingReply,
-  onSendReply,
-  onCloseTicket,
-  onReopenTicket,
-  onDeleteTicket,
+  setSelectedTicket,
+  fetchTickets,
 }) => {
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const [replyText, setReplyText] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
 
   useEffect(() => {
     if (selectedTicket?.messages) {
       messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [selectedTicket?.messages]);
+
+  useEffect(() => {
+    setReplyText("");
+  }, [selectedTicket?._id]);
+
+  const handleSendReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTicket || !replyText.trim() || sendingReply) return;
+
+    setSendingReply(true);
+    try {
+      const res = await fetch("/api/admin/ticket", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedTicket._id,
+          messageText: replyText.trim(),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setReplyText("");
+        setSelectedTicket(data.ticket);
+        fetchTickets(selectedTicket._id);
+      } else {
+        throw new Error("خطا در ارسال پاسخ");
+      }
+    } catch (err: any) {
+      showAlert("خطا", err.message || "پاسخ ارسال نشد.", "error");
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  const handleCloseTicket = async (id: string) => {
+    if (!(await showConfirm("بستن تیکت", "آیا از بستن این تیکت اطمینان دارید؟ در صورت نیاز بعدا می‌توانید دوباره آن را باز کنید.", "بله، بسته شود"))) return;
+
+    try {
+      const res = await fetch("/api/admin/ticket", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          status: "closed",
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedTicket(data.ticket);
+        showAlert("موفقیت", "تیکت با موفقیت بسته شد.", "success");
+        fetchTickets(id);
+      } else {
+        throw new Error();
+      }
+    } catch (e) {
+      showAlert("خطا", "عملیات با خطا مواجه شد", "error");
+    }
+  };
+
+  const handleReopenTicket = async (id: string) => {
+    try {
+      const res = await fetch("/api/admin/ticket", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          status: "pending",
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedTicket(data.ticket);
+        showAlert("موفقیت", "تیکت با موفقیت بازگشایی شد.", "success");
+        fetchTickets(id);
+      } else {
+        throw new Error();
+      }
+    } catch (e) {
+      showAlert("خطا", "عملیات با خطا مواجه شد", "error");
+    }
+  };
+
+  const handleDeleteTicket = async (id: string) => {
+    if (!(await showConfirm("حذف تیکت", "آیا از حذف این تیکت پشتیبانی اطمینان دارید؟ این عمل غیرقابل بازگشت است."))) return;
+
+    try {
+      const res = await fetch(`/api/admin/ticket?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setSelectedTicket(null);
+        showAlert("حذف شد", "تیکت با موفقیت حذف شد.", "success");
+        fetchTickets();
+      } else {
+        throw new Error();
+      }
+    } catch (e) {
+      showAlert("خطا", "حذف تیکت با خطا مواجه شد.", "error");
+    }
+  };
+
 
   if (!selectedTicket) {
     return (
@@ -86,7 +189,7 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
         <div className="flex gap-2">
           {selectedTicket.status !== "closed" ? (
             <button
-              onClick={() => onCloseTicket(selectedTicket._id)}
+              onClick={() => handleCloseTicket(selectedTicket._id)}
               className="bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 p-2 rounded-lg transition-all text-xs flex items-center gap-1"
               title="بستن تیکت"
             >
@@ -95,7 +198,7 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
             </button>
           ) : (
             <button
-              onClick={() => onReopenTicket(selectedTicket._id)}
+              onClick={() => handleReopenTicket(selectedTicket._id)}
               className="bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 p-2 rounded-lg transition-all text-xs flex items-center gap-1"
               title="بازگشایی تیکت"
             >
@@ -104,7 +207,7 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
             </button>
           )}
           <button
-            onClick={() => onDeleteTicket(selectedTicket._id)}
+            onClick={() => handleDeleteTicket(selectedTicket._id)}
             className="bg-white/5 hover:bg-red-500/20 border border-white/10 text-red-400 p-2 rounded-lg transition-all"
             title="حذف تیکت"
           >
@@ -213,7 +316,7 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
             تیکت در بالای پنل را کلیک کنید.
           </div>
         ) : (
-          <form onSubmit={onSendReply} className="flex gap-2">
+          <form onSubmit={handleSendReply} className="flex gap-2">
             <textarea
               rows={1}
               value={replyText}
@@ -223,7 +326,7 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  onSendReply(e);
+                  handleSendReply(e);
                 }
               }}
             />

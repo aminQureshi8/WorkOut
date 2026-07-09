@@ -64,32 +64,21 @@ export interface TicketStatsProps {
   formatNumber: (num: number) => string;
 }
 
+
+
 export interface TicketListProps {
   children?: ReactNode;
   tickets: IClientTicket[];
   selectedTicket: IClientTicket | null;
   setSelectedTicket: (ticket: IClientTicket | null) => void;
-  setReplyText: (text: string) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  statusFilter: string;
-  setStatusFilter: (status: string) => void;
-  currentPage: number;
-  setCurrentPage: (page: number) => void;
-  totalPages: number;
-  isLoading: boolean;
-  error: string | null;
+  fetchTickets: (selectIdAfterFetch?: string) => Promise<{ totalPages: number; total: number }>;
+  paramsRef: React.MutableRefObject<{ page: number; status: string; search: string }>;
 }
 
 export interface TicketDetailsProps {
   selectedTicket: IClientTicket | null;
-  replyText: string;
-  setReplyText: (text: string) => void;
-  sendingReply: boolean;
-  onSendReply: (e: FormEvent) => void;
-  onCloseTicket: (id: string) => void;
-  onReopenTicket: (id: string) => void;
-  onDeleteTicket: (id: string) => void;
+  setSelectedTicket: (ticket: IClientTicket | null) => void;
+  fetchTickets: (selectIdAfterFetch?: string) => Promise<any>;
 }
 
 export interface TicketFormValues {
