@@ -71,8 +71,8 @@ export interface TicketListProps {
   tickets: IClientTicket[];
   selectedTicket: IClientTicket | null;
   setSelectedTicket: (ticket: IClientTicket | null) => void;
-  fetchTickets: (selectIdAfterFetch?: string) => Promise<{ totalPages: number; total: number }>;
-  paramsRef: React.MutableRefObject<{ page: number; status: string; search: string }>;
+  fetchTickets: (selectIdAfterFetch?: string) => Promise<any>;
+  paramsRef: React.MutableRefObject<{ status: string; search: string }>;
 }
 
 export interface TicketDetailsProps {

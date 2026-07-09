@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Pagination from "@/components/AdminPagination";
 import { Search, MessageCircle } from "lucide-react";
 import type { TicketListProps } from "@/types/ticket";
 import {
@@ -17,8 +16,6 @@ const TicketList: React.FC<TicketListProps> = ({
   fetchTickets,
   paramsRef,
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +26,6 @@ const TicketList: React.FC<TicketListProps> = ({
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
-      setCurrentPage(1);
       setDebouncedSearchQuery(searchQuery);
     }, 500);
 
@@ -40,7 +36,6 @@ const TicketList: React.FC<TicketListProps> = ({
   useEffect(() => {
     const load = async () => {
       paramsRef.current = {
-        page: currentPage,
         status: statusFilter,
         search: debouncedSearchQuery,
       };
@@ -48,8 +43,7 @@ const TicketList: React.FC<TicketListProps> = ({
       setIsLoading(true);
       setError(null);
       try {
-        const result = await fetchTickets();
-        setTotalPages(result.totalPages);
+        await fetchTickets();
       } catch (err: any) {
         setError(err.message || "دریافت اطلاعات با خطا مواجه شد");
       } finally {
@@ -57,7 +51,7 @@ const TicketList: React.FC<TicketListProps> = ({
       }
     };
     load();
-  }, [currentPage, statusFilter, debouncedSearchQuery, fetchTickets, paramsRef]);
+  }, [statusFilter, debouncedSearchQuery, fetchTickets, paramsRef]);
 
   return (
     <>
@@ -80,7 +74,6 @@ const TicketList: React.FC<TicketListProps> = ({
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
-                setCurrentPage(1);
               }}
               className="bg-white/5 *:bg-gray-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 text-sm"
             >
@@ -164,15 +157,6 @@ const TicketList: React.FC<TicketListProps> = ({
                 );
               })}
 
-              {totalPages > 1 && (
-                <div className="pt-2 flex justify-center">
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    setCurrentPage={setCurrentPage}
-                  />
-                </div>
-              )}
             </div>
           )}
         </div>

@@ -20,7 +20,7 @@ export default function AdminTickets() {
     closedCount: 0,
   });
 
-  const paramsRef = useRef({ page: 1, status: "all", search: "" });
+  const paramsRef = useRef({ status: "all", search: "" });
 
   const selectedTicketRef = useRef<ITicket | null>(null);
   useEffect(() => {
@@ -28,8 +28,8 @@ export default function AdminTickets() {
   }, [selectedTicket]);
 
   const fetchTickets = useCallback(async (selectIdAfterFetch?: string) => {
-    const { page, status, search } = paramsRef.current;
-    let url = `/api/admin/ticket?page=${page}&limit=8`;
+    const { status, search } = paramsRef.current;
+    let url = `/api/admin/ticket?limit=1000`;
     if (status !== "all") {
       url += `&status=${status}`;
     }
@@ -58,21 +58,13 @@ export default function AdminTickets() {
       );
       if (updated) setSelectedTicket(updated);
     }
-
-    return {
-      totalPages: data.totalPages || 1,
-      total: data.total || 0,
-    };
   }, []);
 
   return (
     <div className="overflow-hidden font-danaMed" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1
-            className="text-3xl font-bold text-white mb-2"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <h1 className="text-3xl font-bold text-white mb-2 font-morabbaReg">
             مدیریت تیکت‌های پشتیبانی
           </h1>
           <p className="text-white/60 text-sm">
