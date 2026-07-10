@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Search, MessageCircle } from "lucide-react";
 import type {
   TicketListProps,
@@ -10,6 +10,7 @@ import {
   getCategoryBadge,
   getCategoryLabel,
 } from "./ticketHelpers";
+import Pagination from "@/components/AdminPagination";
 
 const TicketList: React.FC<TicketListProps> = ({
   children,
@@ -25,22 +26,26 @@ const TicketList: React.FC<TicketListProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const lastUpdatedRef = useRef<string | number | undefined>(undefined);
   const lastMsgCountRef = useRef<number>(0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      setCurrentPage(1);
       setDebouncedSearchQuery(searchQuery);
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const loadTickets = async () => {
+  const loadTickets = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      let url = `/api/admin/ticket?limit=1000`;
+      let url = `/api/admin/ticket?page=${currentPage}&limit=8`;
       if (statusFilter !== "all") {
         url += `&status=${statusFilter}`;
       }
@@ -52,6 +57,7 @@ const TicketList: React.FC<TicketListProps> = ({
       if (!res.ok) throw new Error("خطا در دریافت لیست تیکت‌ها");
       const data = await res.json();
       setTickets(data.tickets || []);
+      setTotalPages(data.totalPages || 1);
       if (data.stats) {
         onStatsUpdate(data.stats);
       }
@@ -60,11 +66,11 @@ const TicketList: React.FC<TicketListProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, statusFilter, debouncedSearchQuery, onStatsUpdate]);
 
   useEffect(() => {
     loadTickets();
-  }, [statusFilter, debouncedSearchQuery]);
+  }, [loadTickets]);
 
   useEffect(() => {
     if (!selectedTicket) {
@@ -86,7 +92,7 @@ const TicketList: React.FC<TicketListProps> = ({
 
     lastUpdatedRef.current = selectedTicket.updatedAt;
     lastMsgCountRef.current = selectedTicket.messages?.length || 0;
-  }, [selectedTicket]);
+  }, [selectedTicket, loadTickets]);
 
   return (
     <>
@@ -109,6 +115,7 @@ const TicketList: React.FC<TicketListProps> = ({
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
+                setCurrentPage(1);
               }}
               className="bg-white/5 *:bg-gray-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 text-sm"
             >
@@ -191,7 +198,11 @@ const TicketList: React.FC<TicketListProps> = ({
                   </div>
                 );
               })}
-
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                setCurrentPage={setCurrentPage}
+              />
             </div>
           )}
         </div>

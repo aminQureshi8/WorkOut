@@ -78,6 +78,7 @@ export interface TicketDetailsProps {
   setSelectedTicket: (ticket: IClientTicket | null) => void;
 }
 
+
 export interface TicketFormValues {
   subject: string;
   category: "workout" | "nutrition" | "form_check" | "injury" | "technical";
