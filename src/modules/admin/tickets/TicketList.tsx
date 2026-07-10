@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Search, MessageCircle } from "lucide-react";
-import type { TicketListProps } from "@/types/ticket";
+import type {
+  TicketListProps,
+  IClientTicket as ITicket,
+} from "@/types/ticket";
 import {
   getStatusBadge,
   getStatusLabel,
@@ -10,12 +13,11 @@ import {
 
 const TicketList: React.FC<TicketListProps> = ({
   children,
-  tickets,
   selectedTicket,
   setSelectedTicket,
-  fetchTickets,
-  paramsRef,
+  onStatsUpdate,
 }) => {
+  const [tickets, setTickets] = useState<ITicket[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +25,9 @@ const TicketList: React.FC<TicketListProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
-  // Debounce search input
+  const lastUpdatedRef = useRef<string | number | undefined>(undefined);
+  const lastMsgCountRef = useRef<number>(0);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -32,26 +36,57 @@ const TicketList: React.FC<TicketListProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Load tickets on parameters change
-  useEffect(() => {
-    const load = async () => {
-      paramsRef.current = {
-        status: statusFilter,
-        search: debouncedSearchQuery,
-      };
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        await fetchTickets();
-      } catch (err: any) {
-        setError(err.message || "دریافت اطلاعات با خطا مواجه شد");
-      } finally {
-        setIsLoading(false);
+  const loadTickets = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      let url = `/api/admin/ticket?limit=1000`;
+      if (statusFilter !== "all") {
+        url += `&status=${statusFilter}`;
       }
-    };
-    load();
-  }, [statusFilter, debouncedSearchQuery, fetchTickets, paramsRef]);
+      if (debouncedSearchQuery.trim()) {
+        url += `&search=${encodeURIComponent(debouncedSearchQuery)}`;
+      }
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("خطا در دریافت لیست تیکت‌ها");
+      const data = await res.json();
+      setTickets(data.tickets || []);
+      if (data.stats) {
+        onStatsUpdate(data.stats);
+      }
+    } catch (err: any) {
+      setError(err.message || "دریافت اطلاعات با خطا مواجه شد");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTickets();
+  }, [statusFilter, debouncedSearchQuery]);
+
+  useEffect(() => {
+    if (!selectedTicket) {
+      if (lastUpdatedRef.current) {
+        loadTickets();
+      }
+      lastUpdatedRef.current = undefined;
+      lastMsgCountRef.current = 0;
+      return;
+    }
+
+    if (
+      lastUpdatedRef.current &&
+      (selectedTicket.updatedAt !== lastUpdatedRef.current ||
+        (selectedTicket.messages?.length || 0) !== lastMsgCountRef.current)
+    ) {
+      loadTickets();
+    }
+
+    lastUpdatedRef.current = selectedTicket.updatedAt;
+    lastMsgCountRef.current = selectedTicket.messages?.length || 0;
+  }, [selectedTicket]);
 
   return (
     <>

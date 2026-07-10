@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState } from "react";
 import type {
   IClientTicket as ITicket,
   ITicketStats as IStats,
@@ -11,7 +11,6 @@ import TicketDetails from "./TicketDetails";
 import { formatNumber } from "./ticketHelpers";
 
 export default function AdminTickets() {
-  const [tickets, setTickets] = useState<ITicket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [stats, setStats] = useState<IStats>({
     totalCount: 0,
@@ -19,46 +18,6 @@ export default function AdminTickets() {
     answeredCount: 0,
     closedCount: 0,
   });
-
-  const paramsRef = useRef({ status: "all", search: "" });
-
-  const selectedTicketRef = useRef<ITicket | null>(null);
-  useEffect(() => {
-    selectedTicketRef.current = selectedTicket;
-  }, [selectedTicket]);
-
-  const fetchTickets = useCallback(async (selectIdAfterFetch?: string) => {
-    const { status, search } = paramsRef.current;
-    let url = `/api/admin/ticket?limit=1000`;
-    if (status !== "all") {
-      url += `&status=${status}`;
-    }
-    if (search.trim()) {
-      url += `&search=${encodeURIComponent(search)}`;
-    }
-
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("خطا در دریافت لیست تیکت‌ها");
-    const data = await res.json();
-    setTickets(data.tickets || []);
-
-    if (data.stats) {
-      setStats(data.stats);
-    }
-
-    const currentSelected = selectedTicketRef.current;
-    if (selectIdAfterFetch) {
-      const updated = data.tickets.find(
-        (t: ITicket) => t._id === selectIdAfterFetch,
-      );
-      if (updated) setSelectedTicket(updated);
-    } else if (currentSelected) {
-      const updated = data.tickets.find(
-        (t: ITicket) => t._id === currentSelected._id,
-      );
-      if (updated) setSelectedTicket(updated);
-    }
-  }, []);
 
   return (
     <div className="overflow-hidden font-danaMed" dir="rtl">
@@ -76,16 +35,13 @@ export default function AdminTickets() {
         <TicketStats stats={stats} formatNumber={formatNumber} />
 
         <TicketList
-          tickets={tickets}
           selectedTicket={selectedTicket}
           setSelectedTicket={setSelectedTicket}
-          fetchTickets={fetchTickets}
-          paramsRef={paramsRef}
+          onStatsUpdate={setStats}
         >
           <TicketDetails
             selectedTicket={selectedTicket}
             setSelectedTicket={setSelectedTicket}
-            fetchTickets={fetchTickets}
           />
         </TicketList>
       </div>

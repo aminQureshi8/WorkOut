@@ -5,14 +5,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
 
     const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== "admin" && session.user.role !== "coach")) {
+    if (
+      !session ||
+      (session.user.role !== "admin" && session.user.role !== "coach")
+    ) {
       return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
     }
 
@@ -49,8 +50,8 @@ export async function GET(req: NextRequest) {
     }
 
     const tickets = await Ticket.find(query)
+      .select("userId subject description status category createdAt updatedAt")
       .populate("userId", "username fullName email avatar role")
-      .populate("messages.senderId", "username fullName email avatar role")
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(Number(limit))
@@ -75,87 +76,6 @@ export async function GET(req: NextRequest) {
         closedCount,
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
-  }
-}
-
-export async function PUT(req: NextRequest) {
-  try {
-    await dbConnect();
-
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== "admin" && session.user.role !== "coach")) {
-      return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
-    }
-
-    const body = await req.json();
-    const { id, status, messageText } = body;
-
-    if (!id) {
-      return NextResponse.json({ message: "شناسه تیکت الزامی است" }, { status: 400 });
-    }
-
-    const ticket = await Ticket.findById(id);
-    if (!ticket) {
-      return NextResponse.json({ message: "تیکت یافت نشد" }, { status: 404 });
-    }
-
-    if (status) {
-      ticket.status = status;
-    }
-
-    if (messageText && messageText.trim()) {
-      const dbAdmin = await User.findById(session.user.id);
-      const senderName = dbAdmin?.fullName || dbAdmin?.username || session.user.username || "پشتیبان فیت‌کوچ";
-
-      ticket.messages.push({
-        senderId: session.user.id,
-        senderName,
-        text: messageText.trim(),
-        createdAt: new Date(),
-      });
-
-      if (!status) {
-        ticket.status = "answered";
-      }
-    }
-
-    await ticket.save();
-
-    const updatedTicket = await Ticket.findById(ticket._id)
-      .populate("userId", "username fullName email avatar role")
-      .populate("messages.senderId", "username fullName email avatar role")
-      .lean();
-
-    return NextResponse.json({ success: true, ticket: updatedTicket });
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  try {
-    await dbConnect();
-
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== "admin" && session.user.role !== "coach")) {
-      return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
-    }
-
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json({ message: "شناسه تیکت الزامی است" }, { status: 400 });
-    }
-
-    const ticket = await Ticket.findByIdAndDelete(id);
-    if (!ticket) {
-      return NextResponse.json({ message: "تیکت یافت نشد" }, { status: 404 });
-    }
-
-    return NextResponse.json({ success: true, message: "تیکت با موفقیت حذف شد" });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }

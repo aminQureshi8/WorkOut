@@ -8,6 +8,7 @@ import {
   Send,
 } from "lucide-react";
 import type { TicketDetailsProps } from "@/types/ticket";
+import EmptyTicketState from "./EmptyTicketState";
 import { showAlert, showConfirm } from "@/utils/alert";
 import {
   getStatusBadge,
@@ -24,7 +25,6 @@ const isVideo = (url: string) => {
 const TicketDetails: React.FC<TicketDetailsProps> = ({
   selectedTicket,
   setSelectedTicket,
-  fetchTickets,
 }) => {
   const messageEndRef = useRef<HTMLDivElement>(null);
   const [replyText, setReplyText] = useState("");
@@ -40,17 +40,35 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
     setReplyText("");
   }, [selectedTicket?._id]);
 
+  useEffect(() => {
+    if (!selectedTicket?._id) return;
+
+    const fetchDetails = async () => {
+      try {
+        const res = await fetch(`/api/admin/ticket/${selectedTicket._id}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (data.success && data.ticket) {
+          setSelectedTicket(data.ticket);
+        }
+      } catch (err) {
+        showAlert("خطا", "خطا در دریافت جزئیات تیکت", "error");
+      }
+    };
+
+    fetchDetails();
+  }, [selectedTicket?._id, setSelectedTicket]);
+
   const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTicket || !replyText.trim() || sendingReply) return;
 
     setSendingReply(true);
     try {
-      const res = await fetch("/api/admin/ticket", {
+      const res = await fetch(`/api/admin/ticket/${selectedTicket._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: selectedTicket._id,
           messageText: replyText.trim(),
         }),
       });
@@ -59,7 +77,6 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
         const data = await res.json();
         setReplyText("");
         setSelectedTicket(data.ticket);
-        fetchTickets(selectedTicket._id);
       } else {
         throw new Error("خطا در ارسال پاسخ");
       }
@@ -71,14 +88,20 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
   };
 
   const handleCloseTicket = async (id: string) => {
-    if (!(await showConfirm("بستن تیکت", "آیا از بستن این تیکت اطمینان دارید؟ در صورت نیاز بعدا می‌توانید دوباره آن را باز کنید.", "بله، بسته شود"))) return;
+    if (
+      !(await showConfirm(
+        "بستن تیکت",
+        "آیا از بستن این تیکت اطمینان دارید؟ در صورت نیاز بعدا می‌توانید دوباره آن را باز کنید.",
+        "بله، بسته شود",
+      ))
+    )
+      return;
 
     try {
-      const res = await fetch("/api/admin/ticket", {
+      const res = await fetch(`/api/admin/ticket/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id,
           status: "closed",
         }),
       });
@@ -87,7 +110,6 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
         const data = await res.json();
         setSelectedTicket(data.ticket);
         showAlert("موفقیت", "تیکت با موفقیت بسته شد.", "success");
-        fetchTickets(id);
       } else {
         throw new Error();
       }
@@ -98,11 +120,10 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
 
   const handleReopenTicket = async (id: string) => {
     try {
-      const res = await fetch("/api/admin/ticket", {
+      const res = await fetch(`/api/admin/ticket/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id,
           status: "pending",
         }),
       });
@@ -111,7 +132,6 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
         const data = await res.json();
         setSelectedTicket(data.ticket);
         showAlert("موفقیت", "تیکت با موفقیت بازگشایی شد.", "success");
-        fetchTickets(id);
       } else {
         throw new Error();
       }
@@ -121,17 +141,22 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
   };
 
   const handleDeleteTicket = async (id: string) => {
-    if (!(await showConfirm("حذف تیکت", "آیا از حذف این تیکت پشتیبانی اطمینان دارید؟ این عمل غیرقابل بازگشت است."))) return;
+    if (
+      !(await showConfirm(
+        "حذف تیکت",
+        "آیا از حذف این تیکت پشتیبانی اطمینان دارید؟ این عمل غیرقابل بازگشت است.",
+      ))
+    )
+      return;
 
     try {
-      const res = await fetch(`/api/admin/ticket?id=${id}`, {
+      const res = await fetch(`/api/admin/ticket/${id}`, {
         method: "DELETE",
       });
 
       if (res.ok) {
         setSelectedTicket(null);
         showAlert("حذف شد", "تیکت با موفقیت حذف شد.", "success");
-        fetchTickets();
       } else {
         throw new Error();
       }
@@ -140,20 +165,8 @@ const TicketDetails: React.FC<TicketDetailsProps> = ({
     }
   };
 
-
   if (!selectedTicket) {
-    return (
-      <div className="lg:col-span-7 h-[500px] border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-white/40 p-8 text-center bg-white/5">
-        <MessageSquare className="w-16 h-16 mb-4 opacity-20 text-orange-500" />
-        <h4 className="font-bold text-lg text-white mb-2">
-          تیکتی انتخاب نشده است
-        </h4>
-        <p className="text-sm">
-          برای مشاهده گفتگو و پاسخ به کاربر، یکی از تیکت‌های ستون راست را انتخاب
-          کنید.
-        </p>
-      </div>
-    );
+    return <EmptyTicketState />;
   }
 
   return (

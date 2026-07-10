@@ -68,17 +68,14 @@ export interface TicketStatsProps {
 
 export interface TicketListProps {
   children?: ReactNode;
-  tickets: IClientTicket[];
   selectedTicket: IClientTicket | null;
   setSelectedTicket: (ticket: IClientTicket | null) => void;
-  fetchTickets: (selectIdAfterFetch?: string) => Promise<any>;
-  paramsRef: React.MutableRefObject<{ status: string; search: string }>;
+  onStatsUpdate: (stats: ITicketStats) => void;
 }
 
 export interface TicketDetailsProps {
   selectedTicket: IClientTicket | null;
   setSelectedTicket: (ticket: IClientTicket | null) => void;
-  fetchTickets: (selectIdAfterFetch?: string) => Promise<any>;
 }
 
 export interface TicketFormValues {
