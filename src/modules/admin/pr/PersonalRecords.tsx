@@ -7,29 +7,29 @@ export default function PersonalRecords() {
   return (
     <div className="min-h-screen bg-gray-950 p-4 md:p-8" dir="rtl">
       <div className="max-w-6xl mx-auto">
+        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400">
               <Trophy className="w-8 h-8" />
             </div>
             <div>
-              <h1
-                className="text-3xl text-white font-bold"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
-                رکوردهای شخصی (Personal Records - PR)
+              <h1 className="text-3xl text-white font-bold font-morabbaReg">
+                رکوردهای شخصی
               </h1>
-              <p className="text-white/60">
-                بیشترین وزنه‌هایی که تاکنون جابه‌جا کرده‌اید را ثبت و روند رشد
-                خود را تحلیل کنید
-              </p>
             </div>
           </div>
 
-          <UserSearchBar />
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <UserSearchBar />
+            <button className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300 shadow-lg shadow-purple-500/10 text-sm whitespace-nowrap cursor-pointer">
+              ثبت رکورد جدید
+            </button>
+          </div>
         </div>
 
         <PRChart />
+
       </div>
     </div>
   );

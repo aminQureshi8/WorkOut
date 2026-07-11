@@ -12,7 +12,7 @@ export default function UserSearchBar() {
   useEffect(() => {
     const fethUsers = async () => {
       const res = await fetch(
-        `/api/admin/user/pr?search=${encodeURIComponent(debouncedSearchQuery)}`
+        `/api/admin/user/pr?search=${encodeURIComponent(debouncedSearchQuery)}`,
       );
       const data = await res.json();
       setUsers(data);
