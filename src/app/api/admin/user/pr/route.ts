@@ -8,6 +8,9 @@ export async function GET(req: NextRequest) {
     await dbConnect();
 
     const search = req.nextUrl.searchParams.get("search");
+    if (!search || !search.trim()) {
+      return NextResponse.json([]);
+    }
 
     const findUsers = await User.find(
       {
@@ -22,11 +25,15 @@ export async function GET(req: NextRequest) {
 
     const userIds = findUsers.map((user) => user._id);
 
-    const subscriptions = await Subscription.find({
-      userId: { $in: userIds },
-      status: { $in: ["active", "trial"] },
-    })
-      .populate("packageId", "name")
+    const subscriptions = await Subscription.find(
+      {
+        userId: { $in: userIds },
+        status: { $in: ["active", "trial"] },
+      },
+      "userId",
+    )
+
+      .populate("userId", "username fullName email")
       .lean();
 
     return NextResponse.json(subscriptions);
