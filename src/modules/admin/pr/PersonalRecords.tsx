@@ -1,9 +1,14 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { Trophy } from "lucide-react";
 import UserSearchBar from "./UserSearchBar";
 import PRChart from "./PRChart";
+import CreatePRModal from "./CreatePRModal";
 
 export default function PersonalRecords() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-950 p-4 md:p-8" dir="rtl">
       <div className="max-w-6xl mx-auto">
@@ -22,13 +27,18 @@ export default function PersonalRecords() {
 
           <div className="flex items-center gap-3 w-full md:w-auto">
             <UserSearchBar />
-            <button className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300 shadow-lg shadow-purple-500/10 text-sm whitespace-nowrap cursor-pointer">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-300 shadow-lg shadow-purple-500/10 text-sm whitespace-nowrap cursor-pointer"
+            >
               ثبت رکورد جدید
             </button>
           </div>
         </div>
 
         <PRChart />
+
+        <CreatePRModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       </div>
     </div>
