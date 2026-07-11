@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import { useState } from "react";
 import type {
   IClientTicket as ITicket,
   ITicketStats as IStats,

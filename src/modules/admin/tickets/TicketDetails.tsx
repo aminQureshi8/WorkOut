@@ -1,12 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import {
-  MessageSquare,
-  Lock,
-  CheckCircle,
-  Trash2,
-  AlertCircle,
-  Send,
-} from "lucide-react";
+import { Lock, CheckCircle, Trash2, AlertCircle, Send } from "lucide-react";
 import type { TicketDetailsProps } from "@/types/ticket";
 import EmptyTicketState from "./EmptyTicketState";
 import { showAlert, showConfirm } from "@/utils/alert";
