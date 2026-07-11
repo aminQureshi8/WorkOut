@@ -15,6 +15,7 @@ import {
   Activity,
   Salad,
   Utensils,
+  Trophy,
 } from "lucide-react";
 import React from "react";
 
@@ -100,6 +101,13 @@ export function getAdminMenuItems(
           icon: Dumbbell,
           badge: null,
           href: "/admin/workouts",
+        },
+        {
+          id: "personal-records",
+          label: "رکورد های شخصی PR",
+          icon: Trophy,
+          badge: null,
+          href: "/admin/pr",
         },
         {
           id: "foods",
