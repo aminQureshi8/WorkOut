@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     if (!userId || !category || !testName || value === undefined || !unit) {
       return NextResponse.json(
         { message: "اطلاعات ارسالی ناقص است" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     return NextResponse.json(
       { message: error.message || "Failed to create PR record" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

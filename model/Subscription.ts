@@ -1,20 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { ISubscription } from "@/types/subscription";
 
-export interface ISubscription extends Document {
-  orderId: mongoose.Types.ObjectId;
-  userId: mongoose.Types.ObjectId;
-  packageId: mongoose.Types.ObjectId;
-  coachId?: mongoose.Types.ObjectId;
-  status: "trial" | "active" | "expired" | "cancelled";
-  startsAt: Date;
-  endsAt: Date;
-  trialEndsAt?: Date;
-  cancelledAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export interface ISubscriptionDocument extends ISubscription, Document {}
 
-const SubscriptionSchema = new Schema<ISubscription>(
+const SubscriptionSchema = new Schema<ISubscriptionDocument>(
   {
     orderId: { type: Schema.Types.ObjectId, ref: "Order", required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -30,8 +19,19 @@ const SubscriptionSchema = new Schema<ISubscription>(
     trialEndsAt: { type: Date, default: null },
     cancelledAt: { type: Date, default: null },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
+SubscriptionSchema.virtual("pr", {
+  ref: "Pr",
+  localField: "userId",
+  foreignField: "userId",
+  justOne: false,
+});
+
 export default mongoose.models.Subscription ||
-  mongoose.model<ISubscription>("Subscription", SubscriptionSchema);
+  mongoose.model<ISubscriptionDocument>("Subscription", SubscriptionSchema);

@@ -278,7 +278,7 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
                             برنامه غذایی
                           </Link>
                           <Link
-                            href={`/admin/pr?search=${encodeURIComponent(sub.userId?.fullName || sub.userId?.username || "")}`}
+                            href={`/admin/pr?userId=${encodeURIComponent(sub.userId?._id || "")}`}
                             className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/30 px-3 py-1.5 rounded-lg flex items-center gap-1 text-xs transition-colors cursor-pointer"
                           >
                             <Trophy className="w-3.5 h-3.5" />

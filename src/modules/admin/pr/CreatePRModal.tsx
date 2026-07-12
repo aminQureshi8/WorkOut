@@ -1,28 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { X, Loader2, Search, Check } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { showAlert } from "@/utils/alert";
+import type { CreatePRModalProps, PRFormInput } from "@/types/pr";
 
-interface CreatePRModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
-}
-
-interface PRFormInput {
-  userId: string;
-  category: string;
-  testName: string;
-  value: number;
-  unit: string;
-  date: string;
-  notes: string;
-}
-
-export default function CreatePRModal({ isOpen, onClose, onSuccess }: CreatePRModalProps) {
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<PRFormInput>({
+export default function CreatePRModal({ isOpen, onClose, onSuccess, userId }: CreatePRModalProps) {
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<PRFormInput>({
     defaultValues: {
       category: "strength",
       testName: "1RM Squat",
@@ -32,57 +17,14 @@ export default function CreatePRModal({ isOpen, onClose, onSuccess }: CreatePRMo
     }
   });
 
-  const [userSearch, setUserSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [foundUsers, setFoundUsers] = useState<any[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const watchUserId = watch("userId");
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(userSearch);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [userSearch]);
-
-  useEffect(() => {
-    if (!debouncedSearch.trim()) {
-      setFoundUsers([]);
+  const onSubmit = async (data: PRFormInput) => {
+    if (!userId) {
+      showAlert("خطا", "شناسه کاربر یافت نشد. امکان ثبت رکورد وجود ندارد.", "error");
       return;
     }
 
-    const searchUsers = async () => {
-      setSearching(true);
-      try {
-        const res = await fetch(`/api/admin/user/pr?search=${encodeURIComponent(debouncedSearch)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setFoundUsers(data);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setSearching(false);
-      }
-    };
-
-    searchUsers();
-  }, [debouncedSearch]);
-
-  const selectUser = (sub: any) => {
-    const user = sub.userId;
-    if (user) {
-      setSelectedUser(user);
-      setValue("userId", user._id, { shouldValidate: true });
-      setUserSearch("");
-      setFoundUsers([]);
-    }
-  };
-
-  const onSubmit = async (data: PRFormInput) => {
     setSubmitting(true);
     try {
       const res = await fetch("/api/admin/user/pr", {
@@ -90,13 +32,15 @@ export default function CreatePRModal({ isOpen, onClose, onSuccess }: CreatePRMo
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          userId,
+        }),
       });
 
       if (res.ok) {
         showAlert("موفقیت", "رکورد شخصی با موفقیت ثبت شد", "success");
         reset();
-        setSelectedUser(null);
         if (onSuccess) onSuccess();
         onClose();
       } else {
@@ -126,72 +70,7 @@ export default function CreatePRModal({ isOpen, onClose, onSuccess }: CreatePRMo
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4 overflow-y-auto flex-1">
-          <div>
-            <label className="block text-white/80 text-sm mb-2">انتخاب کاربر</label>
-            
-            {selectedUser ? (
-              <div className="flex items-center justify-between p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl">
-                <div>
-                  <div className="text-white text-sm font-medium">{selectedUser.fullName}</div>
-                  <div className="text-white/40 text-xs font-sans mt-0.5">@{selectedUser.username}</div>
-                </div>
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    setSelectedUser(null);
-                    setValue("userId", "");
-                  }} 
-                  className="text-red-400 hover:text-red-300 text-xs font-medium cursor-pointer"
-                >
-                  تغییر کاربر
-                </button>
-              </div>
-            ) : (
-              <div className="relative">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                <input
-                  type="text"
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  placeholder="نام، نام خانوادگی یا یوزرنیم کاربر را جستجو کنید..."
-                  className="w-full bg-gray-950 border border-white/10 rounded-xl pr-10 pl-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500 text-sm font-sans"
-                />
-                
-                {searching && (
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                    <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
-                  </div>
-                )}
-
-                {foundUsers.length > 0 && (
-                  <div className="absolute left-0 right-0 mt-2 bg-gray-950 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-20 divide-y divide-white/5 max-h-48 overflow-y-auto">
-                    {foundUsers.map((sub: any) => {
-                      const user = sub.userId;
-                      if (!user) return null;
-                      return (
-                        <button
-                          key={sub._id}
-                          type="button"
-                          onClick={() => selectUser(sub)}
-                          className="w-full p-3 hover:bg-white/5 transition-colors text-right flex justify-between items-center cursor-pointer"
-                        >
-                          <div>
-                            <div className="text-white text-sm font-medium">{user.fullName}</div>
-                            <div className="text-white/40 text-xs font-sans mt-0.5">@{user.username}</div>
-                          </div>
-                          <Check className="w-4 h-4 text-purple-400 opacity-0 hover:opacity-100" />
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-            
-            <input type="hidden" {...register("userId", { required: true })} />
-            {errors.userId && <p className="text-red-400 text-xs mt-1">انتخاب کاربر الزامی است.</p>}
-          </div>
-
+          
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-white/80 text-sm mb-2">دسته‌بندی</label>
