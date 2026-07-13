@@ -128,7 +128,7 @@ export default function AdminMealPlansPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white font-danaMed p-4 md:p-8" dir="rtl">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="container mx-auto pt-8 space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 pb-6">
           <div>
             <h1 className="text-3xl font-bold font-morabbaReg text-white flex items-center gap-3">

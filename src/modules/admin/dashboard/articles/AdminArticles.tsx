@@ -184,7 +184,7 @@ export default function AdminArticles() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br p-4 md:p-8" dir="rtl">
-      <div className="max-w-7xl mx-auto">
+      <div className="container mx-auto pt-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1

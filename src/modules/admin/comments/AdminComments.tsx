@@ -197,7 +197,7 @@ export default function AdminComments() {
 
   return (
     <div className="overflow-hidden font-danaMed" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto pt-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1
