@@ -4,6 +4,7 @@ import { IWorkoutweek } from "@/types/workout";
 const WorkoutweekSchema = new Schema<IWorkoutweek>(
   {
     packageId: { type: Schema.Types.ObjectId, ref: "Package", required: true },
+    title: { type: String },
   },
   {
     timestamps: true,
@@ -11,6 +12,28 @@ const WorkoutweekSchema = new Schema<IWorkoutweek>(
     toObject: { virtuals: true },
   }
 );
+
+WorkoutweekSchema.pre("save", async function () {
+  if (!this.title) {
+    const count = await (this.constructor as any).countDocuments({
+      packageId: this.packageId,
+    });
+    const persianWords = [
+      "اول",
+      "دوم",
+      "سوم",
+      "چهارم",
+      "پنجم",
+      "ششم",
+      "هفتم",
+      "هشتم",
+      "نهم",
+      "دهم",
+    ];
+    const ordinal = persianWords[count] || `${count + 1}`;
+    this.title = `هفته ${ordinal}`;
+  }
+});
 
 WorkoutweekSchema.virtual("workoutdays", {
   ref: "WorkoutDay",

@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import Subscription from "@/model/Subscription";
-import WorkoutPlan from "@/model/WorkoutPlan";
+import Workoutmonth from "@/model/Workoutmonth";
 import WorkoutDay from "@/model/WorkoutDay";
 import WorkoutExercise from "@/model/WorkoutExercise";
 
@@ -38,9 +38,8 @@ export default async function page() {
   let workoutDays: any[] = [];
 
   if (subscription) {
-    const rawPlan = await WorkoutPlan.findOne({
+    const rawPlan = await Workoutmonth.findOne({
       packageId: subscription.packageId?._id,
-      isActive: true,
     }).lean();
 
     if (rawPlan) {

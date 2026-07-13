@@ -26,6 +26,7 @@ import {
 } from "@/types/workout";
 import VideoPlayerModal from "@/components/VideoPlayerModal";
 import WorkoutDayForm from "./WorkoutDayForm";
+import CreatePlanForm from "./CreatePlanForm";
 
 export default function WorkoutsManagement() {
   const [packages, setPackages] = useState<PackageInfo[]>([]);
@@ -36,6 +37,8 @@ export default function WorkoutsManagement() {
   const [loadingPackages, setLoadingPackages] = useState(true);
 
   const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
+  const [workoutWeeks, setWorkoutWeeks] = useState<any[]>([]);
+  const [selectedWeek, setSelectedWeek] = useState<any | null>(null);
   const [workoutDays, setWorkoutDays] = useState<WorkoutDay[]>([]);
   const [selectedDay, setSelectedDay] = useState<WorkoutDay | null>(null);
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
@@ -45,6 +48,7 @@ export default function WorkoutsManagement() {
   const [isEditingPlanInfo, setIsEditingPlanInfo] = useState(false);
   const [showDayForm, setShowDayForm] = useState(false);
   const [editingDay, setEditingDay] = useState<WorkoutDay | null>(null);
+  const [showAddDropdown, setShowAddDropdown] = useState(false);
 
   const [showExerciseForm, setShowExerciseForm] = useState(false);
   const [editingExercise, setEditingExercise] =
@@ -98,6 +102,61 @@ export default function WorkoutsManagement() {
     }
   }, []);
 
+  const fetchWeeks = useCallback(async (packageId: string) => {
+    try {
+      const res = await fetch(`/api/admin/subscription/workout-week?packageId=${packageId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setWorkoutWeeks(data.weeks || []);
+        if (data.weeks && data.weeks.length > 0) {
+          setSelectedWeek(data.weeks[0]);
+          const resDays = await fetch(`/api/admin/subscription/workout-days?planId=${data.weeks[0]._id}`);
+          if (resDays.ok) {
+            const dataDays = await resDays.json();
+            setWorkoutDays(dataDays.days || []);
+          }
+        } else {
+          setSelectedWeek(null);
+          setWorkoutDays([]);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const handleCreateWeek = async () => {
+    if (!selectedPackage) return;
+    try {
+      const res = await fetch("/api/admin/subscription/workout-week", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packageId: selectedPackage._id }),
+      });
+      if (res.ok) {
+        showAlert("موفقیت", "هفته جدید با موفقیت ایجاد شد", "success");
+        fetchWeeks(selectedPackage._id);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteWeek = async (id: string) => {
+    if (!(await showConfirm("حذف هفته", "آیا از حذف این هفته اطمینان دارید؟"))) return;
+    try {
+      const res = await fetch(`/api/admin/subscription/workout-week?id=${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        showAlert("موفقیت", "هفته با موفقیت حذف شد", "success");
+        if (selectedPackage) fetchWeeks(selectedPackage._id);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const fetchExercises = useCallback(async (dayId: string) => {
     try {
       const res = await fetch(
@@ -122,7 +181,7 @@ export default function WorkoutsManagement() {
 
     try {
       const res = await fetch(
-        `/api/admin/subscription/workout-plans?packageId=${pkg._id}`,
+        `/api/admin/subscription/workout-month?packageId=${pkg._id}`,
       );
       if (res.ok) {
         const data = await res.json();
@@ -130,10 +189,10 @@ export default function WorkoutsManagement() {
         if (plan) {
           setWorkoutPlan(plan);
           setPlanForm({
-            title: plan.title,
+            title: plan.title || `برنامه تمرینی ${pkg.name}`,
             description: plan.description || "",
           });
-          fetchDays(plan._id);
+          fetchWeeks(pkg._id);
         } else {
           setPlanForm({ title: `برنامه تمرینی ${pkg.name}`, description: "" });
         }
@@ -142,30 +201,6 @@ export default function WorkoutsManagement() {
       console.error("Failed to load plan:", err);
     } finally {
       setLoadingPlan(false);
-    }
-  };
-
-  const handleCreatePlan = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedPackage) return;
-    try {
-      const res = await fetch("/api/admin/subscription/workout-plans", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          packageId: selectedPackage._id,
-          title: planForm.title,
-          description: planForm.description,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setWorkoutPlan(data.plan);
-        showAlert("موفقیت", "برنامه تمرینی با موفقیت ایجاد شد", "success");
-      }
-    } catch (e) {
-      console.error(e);
-      showAlert("خطا", "خطا در ایجاد برنامه", "error");
     }
   };
 
@@ -203,7 +238,7 @@ export default function WorkoutsManagement() {
       return;
     try {
       const res = await fetch(
-        `/api/admin/subscription/workout-plans?id=${workoutPlan._id}`,
+        `/api/admin/subscription/workout-month?id=${workoutPlan._id}`,
         {
           method: "DELETE",
         },
@@ -221,8 +256,8 @@ export default function WorkoutsManagement() {
   };
 
   const handleDaySuccess = (updatedDay?: WorkoutDay) => {
-    if (!workoutPlan) return;
-    fetchDays(workoutPlan._id);
+    if (!selectedWeek) return;
+    fetchDays(selectedWeek._id);
     setShowDayForm(false);
     setEditingDay(null);
     if (updatedDay && selectedDay?._id === updatedDay._id) {
@@ -247,7 +282,7 @@ export default function WorkoutsManagement() {
           setSelectedDay(null);
           setExercises([]);
         }
-        if (workoutPlan) fetchDays(workoutPlan._id);
+        if (selectedWeek) fetchDays(selectedWeek._id);
       }
     } catch (e) {
       console.error(e);
@@ -430,61 +465,18 @@ export default function WorkoutsManagement() {
                   </div>
 
                   {!workoutPlan ? (
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-                      <Info className="w-10 h-10 text-orange-500/60 mx-auto mb-3" />
-                      <h4 className="text-white font-bold text-lg mb-2">
-                        برنامه تمرینی یافت نشد
-                      </h4>
-                      <p className="text-white/60 text-sm mb-6">
-                        برنامه تمرینی برای پکیج {selectedPackage.name} تعریف
-                        نشده است. لطفاً ابتدا عنوان و توضیحات را وارد کنید.
-                      </p>
-                      <form
-                        onSubmit={handleCreatePlan}
-                        className="max-w-xl mx-auto space-y-4 text-right"
-                      >
-                        <div>
-                          <label className="block text-white/70 text-xs mb-2">
-                            عنوان برنامه
-                          </label>
-                          <input
-                            type="text"
-                            value={planForm.title}
-                            onChange={(e) =>
-                              setPlanForm({
-                                ...planForm,
-                                title: e.target.value,
-                              })
-                            }
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500 text-sm"
-                            placeholder="مثال: برنامه سه‌روزه هایپرتروفی بسته پایه"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-white/70 text-xs mb-2">
-                            توضیحات کلی
-                          </label>
-                          <textarea
-                            value={planForm.description}
-                            onChange={(e) =>
-                              setPlanForm({
-                                ...planForm,
-                                description: e.target.value,
-                              })
-                            }
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500 resize-none h-24 text-sm"
-                            placeholder="توضیحات مربوط به متد تمرین، دوره ریکاوری، تعداد روزها و..."
-                          />
-                        </div>
-                        <button
-                          type="submit"
-                          className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 rounded-lg font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all text-sm"
-                        >
-                          ایجاد برنامه تمرینی جدید
-                        </button>
-                      </form>
-                    </div>
+                    <CreatePlanForm
+                      selectedPackage={selectedPackage}
+                      onSuccess={(plan) => {
+                        setWorkoutPlan(plan);
+                        setPlanForm({
+                          title:
+                            plan.title ||
+                            `برنامه تمرینی ${selectedPackage.name}`,
+                          description: plan.description || "",
+                        });
+                      }}
+                    />
                   ) : (
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-6 relative">
                       {isEditingPlanInfo ? (
@@ -571,31 +563,110 @@ export default function WorkoutsManagement() {
                           <span className="text-white font-bold text-sm">
                             روزهای تمرینی
                           </span>
-                          <div className="flex gap-2">
+                          <div className="relative">
                             <button
                               type="button"
-                              className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+                              onClick={() =>
+                                setShowAddDropdown(!showAddDropdown)
+                              }
+                              className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
                             >
                               <Plus className="w-3.5 h-3.5" />
-                              هفته ی جدید
+                              <span>افزودن جدید</span>
+                              <ChevronDown
+                                className={`w-3.5 h-3.5 transition-transform duration-200 ${showAddDropdown ? "rotate-180" : ""}`}
+                              />
                             </button>
-                            <button
-                              onClick={() => {
-                                setEditingDay(null);
-                                setShowDayForm(true);
-                              }}
-                              className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                              روز جدید
-                            </button>
+
+                            {showAddDropdown && (
+                              <div className="absolute left-0 mt-2 w-36 bg-gray-900 border border-white/10 rounded-lg shadow-xl py-1.5 z-20">
+                                <button
+                                  type="button"
+                                  onClick={() => setShowAddDropdown(false)}
+                                  className="w-full text-right px-4 py-2 text-xs text-white/80 hover:text-white hover:bg-white/5 flex items-center gap-2 transition-colors"
+                                >
+                                  <Plus className="w-3.5 h-3.5 text-blue-400" />
+                                  <span>ماه جدید</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleCreateWeek();
+                                    setShowAddDropdown(false);
+                                  }}
+                                  className="w-full text-right px-4 py-2 text-xs text-white/80 hover:text-white hover:bg-white/5 flex items-center gap-2 transition-colors"
+                                >
+                                  <Plus className="w-3.5 h-3.5 text-purple-400" />
+                                  <span>هفته ی جدید</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={!selectedWeek}
+                                  onClick={() => {
+                                    setEditingDay(null);
+                                    setShowDayForm(true);
+                                    setShowAddDropdown(false);
+                                  }}
+                                  className="w-full text-right px-4 py-2 text-xs text-white/80 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white hover:bg-white/5 flex items-center gap-2 transition-colors"
+                                >
+                                  <Plus className="w-3.5 h-3.5 text-orange-400" />
+                                  <span>روز جدید</span>
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        {showDayForm && workoutPlan && (
+                        <div className="space-y-3">
+                          <h4 className="text-white font-bold text-sm">
+                            هفته‌های تمرینی
+                          </h4>
+                          <div className="space-y-2 overflow-y-auto max-h-[200px]">
+                            {workoutWeeks.length === 0 ? (
+                              <div className="text-white/40 text-center text-xs p-6 border border-dashed border-white/10 rounded-xl bg-white/5">
+                                هیچ هفته تمرینی تعریف نشده است
+                              </div>
+                            ) : (
+                              workoutWeeks.map((week) => {
+                                const isSelected = selectedWeek?._id === week._id;
+                                return (
+                                  <div
+                                    key={week._id}
+                                    onClick={() => {
+                                      setSelectedWeek(week);
+                                      fetchDays(week._id);
+                                      setSelectedDay(null);
+                                      setExercises([]);
+                                      setShowDayForm(false);
+                                    }}
+                                    className={`p-4 rounded-xl border text-right cursor-pointer transition-all flex items-center justify-between ${
+                                      isSelected
+                                        ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20"
+                                        : "bg-white/5 border-white/10 text-white hover:bg-white/10"
+                                    }`}
+                                  >
+                                    <span className="font-bold text-xs">{week.title}</span>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteWeek(week._id);
+                                      }}
+                                      className="p-1 rounded hover:bg-white/10 text-red-400"
+                                      title="حذف هفته"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+
+                        {showDayForm && selectedWeek && (
                           <WorkoutDayForm
                             editingDay={editingDay}
-                            workoutPlanId={workoutPlan._id}
+                            workoutPlanId={selectedWeek._id}
                             onSuccess={handleDaySuccess}
                             onCancel={() => {
                               setShowDayForm(false);
