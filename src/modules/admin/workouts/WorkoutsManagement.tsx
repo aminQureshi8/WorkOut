@@ -571,16 +571,25 @@ export default function WorkoutsManagement() {
                           <span className="text-white font-bold text-sm">
                             روزهای تمرینی
                           </span>
-                          <button
-                            onClick={() => {
-                              setEditingDay(null);
-                              setShowDayForm(true);
-                            }}
-                            className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                            روز جدید
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              هفته ی جدید
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingDay(null);
+                                setShowDayForm(true);
+                              }}
+                              className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              روز جدید
+                            </button>
+                          </div>
                         </div>
 
                         {showDayForm && workoutPlan && (

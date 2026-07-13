@@ -18,27 +18,7 @@ import {
   Trophy,
 } from "lucide-react";
 import React from "react";
-
-export interface SidebarCounts {
-  users: number;
-  subscriptions: number;
-  articles: number;
-  comments: number;
-  wishlist: number;
-}
-
-export interface MenuItem {
-  id: string;
-  label: string;
-  icon: React.ComponentType<any>;
-  badge: string | null;
-  href: string;
-}
-
-export interface MenuSection {
-  title: string;
-  items: MenuItem[];
-}
+import { SidebarCounts, MenuItem, MenuSection } from "@/types/sidebar";
 
 export function getAdminMenuItems(
   counts: SidebarCounts,
@@ -194,6 +174,13 @@ export function getUserMenuItems(
           icon: CreditCard,
           badge: null,
           href: "/dashboard/subscription",
+        },
+        {
+          id: "workout",
+          label: "برنامه ی تمرینی",
+          icon: Dumbbell,
+          badge: null,
+          href: "/dashboard/workout",
         },
         {
           id: "profile",
