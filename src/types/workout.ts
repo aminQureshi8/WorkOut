@@ -111,6 +111,13 @@ export interface IWorkoutweek extends Document {
   updatedAt: Date;
 }
 
+export interface IWorkoutmonth extends Document {
+  packageId: mongoose.Types.ObjectId;
+  workoutweeks?: any[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IWorkoutDay extends Document {
   planId: mongoose.Types.ObjectId;
   dayName: string;
