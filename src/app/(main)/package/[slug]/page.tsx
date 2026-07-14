@@ -11,6 +11,8 @@ export default async function page({
   const { slug } = await params;
 
   const packageFind = await Package.findOne({ slug }).lean();
+  console.log(packageFind);
+  
   if (!packageFind) {
     notFound();
   }

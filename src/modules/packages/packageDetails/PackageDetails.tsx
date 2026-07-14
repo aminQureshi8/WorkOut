@@ -1,41 +1,13 @@
-"use client";
-
 import FAQ from "@/modules/home/FAQ";
 import Testimonials from "@/modules/home/Testimonials";
-import {
-  Check,
-  X,
-  Star,
-  Users,
-  Clock,
-  Shield,
-  Award,
-  TrendingUp,
-  MessageCircle,
-  Video,
-  FileText,
-  Headphones,
-  Sparkles,
-  Play,
-} from "lucide-react";
+import Breadcrumb from "./Breadcrumb";
+import PackageFeatures from "./PackageFeatures";
+import PriceCard from "./PriceCard";
+import TrustBadges from "./TrustBadges";
+import PackageStats from "./PackageStats";
+import { Check, Star, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-
-// map icon string names (stored in DB) to actual Lucide components
-const iconMap: Record<string, React.ElementType> = {
-  Video,
-  FileText,
-  TrendingUp,
-  Headphones,
-  Award,
-  Sparkles,
-  MessageCircle,
-  Shield,
-  Users,
-  Clock,
-  Check,
-  Star,
-};
+import { iconMap } from "@/utils/icons";
 
 export default function PackageDetails({
   package: packageData,
@@ -44,157 +16,102 @@ export default function PackageDetails({
   package: any;
   features: any[];
 }) {
-  const [billingCycle, setBillingCycle] = useState<
-    "monthly" | "quarterly" | "biannual"
-  >("monthly");
-
-  const getPriceForCycle = (cycle: typeof billingCycle) => {
-    return packageData.price[cycle];
-  };
-
-  const getOriginalPriceForCycle = (cycle: typeof billingCycle) => {
-    return packageData.originalPrice[cycle];
-  };
-
-  const calculateDiscount = () => {
-    const original = parseInt(getOriginalPriceForCycle(billingCycle));
-    const current = parseInt(getPriceForCycle(billingCycle));
-    return Math.round(((original - current) / original) * 100);
-  };
+  const PackageIcon = iconMap[packageData.icon] || Sparkles;
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
+      className="min-h-screen bg-[#0B0F19] text-gray-100 relative overflow-hidden"
       dir="rtl"
     >
-      {/* Breadcrumb */}
-      <section className="py-6 bg-black/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-sm text-white/60">
-            <Link href="/" className="hover:text-orange-500">
-              خانه
-            </Link>
-            <span>/</span>
-            <Link href="/packages" className="hover:text-orange-500">
-              پکیج‌ها
-            </Link>
-            <span>/</span>
-            <span className="text-white">{packageData.name}</span>
-          </div>
-        </div>
-      </section>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[150px] pointer-events-none" />
 
-      {/* Hero Section */}
-      <section className="py-12 lg:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* Left Column */}
-            <div className="space-y-8">
+      <Breadcrumb packageName={packageData.name} />
+
+      <section className="py-12 lg:py-20 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <div className="lg:col-span-8 space-y-10">
               {packageData.popular && (
-                <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/50 text-orange-400 px-4 py-2 rounded-full">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="text-sm font-medium">
-                    {packageData.tagline}
-                  </span>
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30 text-orange-400 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide backdrop-blur-md shadow-[0_2px_12px_rgba(249,115,22,0.1)]">
+                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                  <span>{packageData.tagline}</span>
                 </div>
               )}
 
-              <div>
-                <div className="flex items-center gap-4 mb-4">
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                   <div
-                    className={`w-20 h-20 bg-gradient-to-br ${packageData.color} rounded-2xl flex items-center justify-center text-4xl`}
+                    className={`w-20 h-20 bg-gradient-to-br ${packageData.color || packageData.colorClass || "from-orange-500 to-red-500"} rounded-2xl flex items-center justify-center shadow-[0_8px_24px_rgba(0,0,0,0.3)] border border-white/10 transform hover:scale-105 transition-transform duration-300`}
                   >
-                    {packageData.icon}
+                    <PackageIcon className="w-10 h-10 text-white" />
                   </div>
                   <div>
-                    <h1
-                      className="text-4xl md:text-5xl font-bold text-white mb-2"
-                      style={{ fontFamily: "Marbeh, sans-serif" }}
-                    >
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-gray-400 mb-3 font-morabbaReg leading-tight">
                       {packageData.name}
                     </h1>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2 bg-white/5 py-1 px-3 rounded-full border border-white/5 w-fit">
+                      <div className="flex items-center gap-0.5">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-4 h-4 ${
+                            className={`w-3.5 h-3.5 ${
                               i < Math.floor(packageData.rating)
                                 ? "fill-orange-500 text-orange-500"
                                 : "text-white/20"
                             }`}
                           />
                         ))}
-                        <span className="text-white/80 mr-2">
-                          {packageData.rating}
-                        </span>
-                        <span className="text-white/50 text-sm">
-                          ({packageData.reviews} نظر)
-                        </span>
                       </div>
+                      <span className="text-white/90 text-xs font-bold mr-1">
+                        {packageData.rating}
+                      </span>
+                      <span className="text-white/40 text-xs">•</span>
+                      <span className="text-white/60 text-xs font-medium">
+                        {(
+                          packageData.reviewCount ||
+                          packageData.reviews ||
+                          0
+                        ).toLocaleString("fa-IR")}{" "}
+                        نظر
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-xl text-white/80 leading-relaxed">
+                <p className="text-lg text-white/70 leading-relaxed max-w-3xl">
                   {packageData.description}
                 </p>
               </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4">
-                  <div className="flex items-center gap-3">
-                    <Users className="w-8 h-8 text-orange-500" />
-                    <div>
-                      <div
-                        className="text-2xl font-bold text-white"
-                        style={{ fontFamily: "Marbeh, sans-serif" }}
-                      >
-                        {(packageData.studentCount ?? 0).toLocaleString(
-                          "fa-IR",
-                        )}
-                      </div>
-                      <div className="text-white/60 text-sm">دانشجو فعال</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4">
-                  <div className="flex items-center gap-3">
-                    <Star className="w-8 h-8 text-orange-500" />
-                    <div>
-                      <div
-                        className="text-2xl font-bold text-white"
-                        style={{ fontFamily: "Marbeh, sans-serif" }}
-                      >
-                        {packageData.rating}
-                      </div>
-                      <div className="text-white/60 text-sm">رتبه از ۵</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <PackageStats
+                studentCount={packageData.studentCount ?? 0}
+                rating={packageData.rating}
+                reviewCount={
+                  packageData.reviewCount ?? packageData.reviews ?? 0
+                }
+              />
 
-              {/* Highlights */}
               {packageData.highlights?.length > 0 && (
-                <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6">
-                  <h3
-                    className="text-xl font-bold text-white mb-4"
-                    style={{ fontFamily: "Marbeh, sans-serif" }}
-                  >
-                    نکات کلیدی
+                <div className="bg-slate-900/30 backdrop-blur-xl border border-white/5 rounded-3xl p-8 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-orange-500/5 to-transparent rounded-full blur-2xl" />
+                  <h3 className="text-xl font-bold text-white mb-6 font-morabbaReg flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-orange-500" />
+                    <span>نکات کلیدی پکیج</span>
                   </h3>
-                  <ul className="space-y-3">
+                  <ul className="grid sm:grid-cols-2 gap-4">
                     {packageData.highlights.map(
                       (highlight: string, index: number) => (
                         <li
                           key={index}
-                          className="flex items-center gap-3 text-white/80"
+                          className="flex items-center gap-3 text-white/80 group"
                         >
-                          <div className="w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-7 h-7 bg-orange-500/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/20 transition-colors">
                             <Check className="w-4 h-4 text-orange-500" />
                           </div>
-                          <span>{highlight}</span>
+                          <span className="text-sm font-medium">
+                            {highlight}
+                          </span>
                         </li>
                       ),
                     )}
@@ -203,218 +120,34 @@ export default function PackageDetails({
               )}
             </div>
 
-            {/* Right Column - Purchase Card */}
-            <div className="lg:sticky lg:top-8">
-              <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 space-y-6">
-                {/* Video Preview */}
-                <div className="relative aspect-video bg-gradient-to-br from-orange-500/30 to-purple-500/30 rounded-xl overflow-hidden group cursor-pointer">
-                  <div className="absolute inset-0 bg-black/40"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Play className="w-8 h-8 text-white mr-1" />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-lg text-white text-sm">
-                    پیش‌نمایش پکیج
-                  </div>
-                </div>
+            <div className="lg:col-span-4 lg:sticky lg:top-24">
+              <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] space-y-6 relative overflow-hidden">
+                <div className="absolute -top-16 -right-16 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl" />
 
-                {/* Billing Cycle */}
-                <div>
-                  <label className="block text-white/80 mb-3 text-sm">
-                    دوره پرداخت
-                  </label>
-                  <div className="grid grid-cols-3 gap-2 bg-white/5 p-1 rounded-lg">
-                    {(
-                      [
-                        { key: "monthly", label: "ماهانه" },
-                        { key: "quarterly", label: "۳ ماهه" },
-                        { key: "biannual", label: "۶ ماهه" },
-                      ] as const
-                    ).map(({ key, label }) => (
-                      <button
-                        key={key}
-                        onClick={() => setBillingCycle(key)}
-                        className={`py-2 rounded-lg text-sm transition-colors ${
-                          billingCycle === key
-                            ? "bg-orange-500 text-white"
-                            : "text-white/60 hover:text-white"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <PriceCard
+                  price={packageData.price}
+                  originalPrice={packageData.originalPrice}
+                />
 
-                {/* Price */}
-                <div className="space-y-3">
-                  <div className="flex items-baseline justify-between">
-                    <div>
-                      <div
-                        className="text-4xl font-bold text-white"
-                        style={{ fontFamily: "Marbeh, sans-serif" }}
-                      >
-                        {parseInt(
-                          getPriceForCycle(billingCycle),
-                        ).toLocaleString("fa-IR")}
-                        <span className="text-lg text-white/60 mr-2">
-                          تومان
-                        </span>
-                      </div>
-                      <div className="text-sm text-white/50 mt-1 line-through">
-                        {parseInt(
-                          getOriginalPriceForCycle(billingCycle),
-                        ).toLocaleString("fa-IR")}{" "}
-                        تومان
-                      </div>
-                    </div>
-                    <div className="bg-green-500/20 text-green-400 px-4 py-2 rounded-lg">
-                      <span className="font-bold">{calculateDiscount()}٪</span>
-                      <span className="text-sm mr-1">تخفیف</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CTA Buttons */}
-                <div className="space-y-3">
+                <div className="relative z-10 pt-2">
                   <Link
                     href={`/order/${packageData.slug}`}
-                    className="block w-full text-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 rounded-lg transition-all font-medium text-lg"
+                    className="block w-full text-center bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white py-4 rounded-2xl transition-all duration-300 font-semibold text-lg shadow-[0_8px_30px_rgba(249,115,22,0.3)] hover:shadow-[0_12px_40px_rgba(249,115,22,0.5)] hover:scale-[1.02] transform active:scale-[0.98]"
                   >
-                    شروع رایگان ۷ روزه
+                    خرید پکیج
                   </Link>
-
-                  <button className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 rounded-lg transition-colors">
-                    مشاوره رایگان
-                  </button>
                 </div>
 
-                {/* Trust Badges */}
-                <div className="pt-6 border-t border-white/10 space-y-3">
-                  <div className="flex items-center gap-3 text-white/70 text-sm">
-                    <Shield className="w-5 h-5 text-green-500" />
-                    <span>پرداخت کاملاً ایمن</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/70 text-sm">
-                    <Award className="w-5 h-5 text-green-500" />
-                    <span>۷ روز ضمانت بازگشت وجه</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/70 text-sm">
-                    <Clock className="w-5 h-5 text-green-500" />
-                    <span>فعال‌سازی آنی پس از خرید</span>
-                  </div>
-                </div>
+                <TrustBadges />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* What You Get */}
-      {packageData.whatYouGet?.length > 0 && (
-        <section className="py-20 bg-black/20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2
-                className="text-3xl md:text-4xl font-bold text-white mb-4"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
-                در این پکیج چه چیزهایی دریافت می‌کنید؟
-              </h2>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {packageData.whatYouGet.map(
-                (
-                  item: { icon: string; title: string; description: string },
-                  index: number,
-                ) => {
-                  const IconComponent = iconMap[item.icon];
-                  return (
-                    <div
-                      key={index}
-                      className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all"
-                    >
-                      <div className="w-14 h-14 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4">
-                        {IconComponent ? (
-                          <IconComponent className="w-7 h-7 text-orange-500" />
-                        ) : (
-                          <Sparkles className="w-7 h-7 text-orange-500" />
-                        )}
-                      </div>
-                      <h3
-                        className="text-lg font-bold text-white mb-2"
-                        style={{ fontFamily: "Marbeh, sans-serif" }}
-                      >
-                        {item.title}
-                      </h3>
-                      <p className="text-white/70 text-sm">
-                        {item.description}
-                      </p>
-                    </div>
-                  );
-                },
-              )}
-            </div>
-          </div>
-        </section>
-      )}
+      <PackageFeatures features={features} />
 
-      {/* Detailed Features */}
-      {features?.length > 0 && (
-        <section className="py-20">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2
-                className="text-3xl md:text-4xl font-bold text-white mb-4"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
-                لیست کامل امکانات
-              </h2>
-            </div>
-            <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl overflow-hidden">
-              <div className="divide-y divide-white/10">
-                {features.map((feature, index) => (
-                  <div
-                    key={index}
-                    className="p-6 hover:bg-white/5 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div
-                          className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 ${
-                            feature.included
-                              ? "bg-green-500/20"
-                              : "bg-red-500/20"
-                          }`}
-                        >
-                          {feature.included ? (
-                            <Check className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <X className="w-4 h-4 text-red-500" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-white font-medium mb-1">
-                            {feature.name}
-                          </div>
-                          {feature.description && (
-                            <div className="text-white/60 text-sm">
-                              {feature.description}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Testimonials */}
       <Testimonials />
 
       <FAQ />

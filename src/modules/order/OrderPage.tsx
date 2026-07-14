@@ -209,33 +209,40 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
               </h2>
 
               <div className="space-y-3">
-                {["monthly", "quarterly", "biannual"].map((cycle) => (
-                  <button
-                    key={cycle}
-                    type="button"
-                    onClick={() => setValue("billingCycle", cycle)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all flex justify-between items-center ${
-                      billingCycle === cycle
-                        ? "border-orange-500 bg-orange-500/10"
-                        : "border-white/10 bg-white/5 hover:border-white/20"
-                    }`}
-                  >
-                    <div className="text-right">
-                      <div className="text-white font-medium">
-                        {cycle === "monthly" && "یک ماهه"}
-                        {cycle === "quarterly" && "سه ماهه"}
-                        {cycle === "biannual" && "شش ماهه"}
-                      </div>
-                    </div>
-
-                    <div
-                      className="text-white font-bold"
-                      style={{ fontFamily: "Marbeh, sans-serif" }}
+                {["monthly", "quarterly", "biannual"]
+                  .filter((cycle) => {
+                    if (currentPackage?.slug === "footballers") {
+                      return cycle === "monthly";
+                    }
+                    return true;
+                  })
+                  .map((cycle) => (
+                    <button
+                      key={cycle}
+                      type="button"
+                      onClick={() => setValue("billingCycle", cycle)}
+                      className={`w-full p-4 rounded-xl border-2 transition-all flex justify-between items-center ${
+                        billingCycle === cycle
+                          ? "border-orange-500 bg-orange-500/10"
+                          : "border-white/10 bg-white/5 hover:border-white/20"
+                      }`}
                     >
-                      {formatNumber(currentPackage?.price?.[cycle])} تومان
-                    </div>
-                  </button>
-                ))}
+                      <div className="text-right">
+                        <div className="text-white font-medium">
+                          {cycle === "monthly" && "یک ماهه"}
+                          {cycle === "quarterly" && "سه ماهه"}
+                          {cycle === "biannual" && "شش ماهه"}
+                        </div>
+                      </div>
+
+                      <div
+                        className="text-white font-bold"
+                        style={{ fontFamily: "Marbeh, sans-serif" }}
+                      >
+                        {formatNumber(currentPackage?.price?.[cycle])} تومان
+                      </div>
+                    </button>
+                  ))}
               </div>
             </div>
 

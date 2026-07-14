@@ -1,0 +1,36 @@
+import type { ElementType } from "react";
+import {
+  Video,
+  FileText,
+  TrendingUp,
+  Headphones,
+  Award,
+  Sparkles,
+  MessageCircle,
+  Shield,
+  Users,
+  Clock,
+  Check,
+  Star,
+  Activity,
+  Package as LucidePackage,
+} from "lucide-react";
+
+export const iconMap: Record<string, ElementType> = {
+  Video,
+  FileText,
+  TrendingUp,
+  Headphones,
+  Award,
+  Sparkles,
+  MessageCircle,
+  Shield,
+  Users,
+  Clock,
+  Check,
+  Star,
+  Activity,
+  activity: Activity,
+  Package: LucidePackage,
+  package: LucidePackage,
+};

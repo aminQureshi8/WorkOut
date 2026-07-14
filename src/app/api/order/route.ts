@@ -47,6 +47,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (pkg.slug === "footballers" && billingCycle !== "monthly") {
+      return NextResponse.json(
+        { message: "Only monthly billing cycle is allowed for this package" },
+        { status: 400 },
+      );
+    }
+
     const originalAmount = pkg.price[billingCycle];
 
     let discountPercent = 0;
