@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { WorkoutDayFormProps, WorkoutDayFormInputs, WorkoutDay } from "@/types/workout";
+import { showAlert } from "@/utils/alert";
 
 export default function WorkoutDayForm({
   editingDay,
@@ -29,6 +30,10 @@ export default function WorkoutDayForm({
   }, [editingDay, defaultSortOrder, reset]);
 
   const onSubmit = async (data: WorkoutDayFormInputs) => {
+    if (!data.dayName?.trim() || !data.muscleGroup?.trim()) {
+      showAlert("خطا", "پر کردن نام روز و گروه عضلانی الزامی است.", "error");
+      return;
+    }
     try {
       if (editingDay) {
         const res = await fetch("/api/admin/subscription/workout-days", {

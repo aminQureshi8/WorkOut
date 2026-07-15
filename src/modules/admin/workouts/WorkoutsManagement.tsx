@@ -207,7 +207,7 @@ export default function WorkoutsManagement() {
   const handleUpdatePlan = async () => {
     if (!workoutPlan) return;
     try {
-      const res = await fetch("/api/admin/subscription/workout-plans", {
+      const res = await fetch("/api/admin/subscription/workout-month", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -580,14 +580,6 @@ export default function WorkoutsManagement() {
 
                             {showAddDropdown && (
                               <div className="absolute left-0 mt-2 w-36 bg-gray-900 border border-white/10 rounded-lg shadow-xl py-1.5 z-20">
-                                <button
-                                  type="button"
-                                  onClick={() => setShowAddDropdown(false)}
-                                  className="w-full text-right px-4 py-2 text-xs text-white/80 hover:text-white hover:bg-white/5 flex items-center gap-2 transition-colors"
-                                >
-                                  <Plus className="w-3.5 h-3.5 text-blue-400" />
-                                  <span>ماه جدید</span>
-                                </button>
                                 <button
                                   type="button"
                                   onClick={() => {

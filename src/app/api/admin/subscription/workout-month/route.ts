@@ -26,6 +26,32 @@ export async function GET(req: NextRequest) {
   }
 }
 
+export async function PUT(req: NextRequest) {
+  try {
+    await dbConnect();
+    const body = await req.json();
+    const { id, title, description } = body;
+
+    if (!id) {
+      return NextResponse.json({ message: "شناسه الزامی است" }, { status: 400 });
+    }
+
+    const updatedData: any = {};
+    if (title !== undefined) updatedData.title = title;
+    if (description !== undefined) updatedData.description = description;
+
+    const plan = await Workoutmonth.findByIdAndUpdate(id, updatedData, { new: true });
+
+    if (!plan) {
+      return NextResponse.json({ message: "یافت نشد" }, { status: 404 });
+    }
+
+    return NextResponse.json({ plan });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   try {
     await dbConnect();

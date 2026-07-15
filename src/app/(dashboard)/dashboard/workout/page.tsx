@@ -7,8 +7,10 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import Subscription from "@/model/Subscription";
 import Workoutmonth from "@/model/Workoutmonth";
+import Workoutweek from "@/model/Workoutweek";
 import WorkoutDay from "@/model/WorkoutDay";
 import WorkoutExercise from "@/model/WorkoutExercise";
+import type { DayItem } from "@/types/workout";
 
 export const metadata = {
   title: "استار فیت | برنامه تمرینی من",
@@ -35,7 +37,7 @@ export default async function page() {
     .populate("orderId");
 
   let workoutPlan = null;
-  let workoutDays: any[] = [];
+  let workoutDays: DayItem[] = [];
 
   if (subscription) {
     const rawPlan = await Workoutmonth.findOne({
@@ -43,29 +45,42 @@ export default async function page() {
     }).lean();
 
     if (rawPlan) {
-      workoutPlan = JSON.parse(JSON.stringify(rawPlan));
+      workoutPlan = {
+        _id: rawPlan._id.toString(),
+        packageId: rawPlan.packageId.toString(),
+        title: rawPlan.title || subscription.packageId?.name || "برنامه تمرینی من",
+        description: rawPlan.description || subscription.packageId?.tagline || "",
+        isActive: true,
+      };
 
-      const days = await WorkoutDay.find({ planId: rawPlan._id })
-        .sort({ sortOrder: 1 })
-        .lean();
+      const weeks = await Workoutweek.find({
+        packageId: subscription.packageId?._id,
+      }).sort({ createdAt: 1 }).lean();
 
-      const dayIds = days.map((d) => d._id);
-      const exercises = await WorkoutExercise.find({
-        dayId: { $in: dayIds },
-      })
-        .populate("videoId")
-        .populate("videoId2")
-        .sort({ sortOrder: 1 })
-        .lean();
+      if (weeks && weeks.length > 0) {
+        const activeWeek = weeks[0];
+        const days = await WorkoutDay.find({ planId: activeWeek._id })
+          .sort({ sortOrder: 1 })
+          .lean();
 
-      const mappedDays = days.map((day) => ({
-        ...day,
-        exercises: exercises.filter(
-          (e) => e.dayId.toString() === day._id.toString(),
-        ),
-      }));
+        const dayIds = days.map((d) => d._id);
+        const exercises = await WorkoutExercise.find({
+          dayId: { $in: dayIds },
+        })
+          .populate("videoId")
+          .populate("videoId2")
+          .sort({ sortOrder: 1 })
+          .lean();
 
-      workoutDays = JSON.parse(JSON.stringify(mappedDays));
+        const mappedDays = days.map((day) => ({
+          ...day,
+          exercises: exercises.filter(
+            (e) => e.dayId.toString() === day._id.toString(),
+          ),
+        }));
+
+        workoutDays = JSON.parse(JSON.stringify(mappedDays));
+      }
     }
   }
 

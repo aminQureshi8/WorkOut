@@ -70,40 +70,53 @@ export default function WorkoutPlanModal({
     );
   };
 
-  useEffect(() => {
-    fetchInitialPlan();
-  }, [selectedPackageForPlan]);
-
-  const fetchInitialPlan = async () => {
+  const fetchDays = async (planId: string) => {
     try {
       const res = await fetch(
-        `/api/admin/subscription/workout-plans?packageId=${selectedPackageForPlan._id}`,
+        `/api/admin/subscription/workout-days?planId=${planId}`,
       );
       if (res.ok) {
         const data = await res.json();
-        const plan = data.plans && data.plans.length > 0 ? data.plans[0] : null;
-        if (plan) {
-          setWorkoutPlan(plan);
-          resetPlan({
-            title: plan.title,
-            description: plan.description || "",
-          });
-          fetchDays(plan._id);
-        } else {
-          setWorkoutPlan(null);
-          setWorkoutDays([]);
-          setSelectedDay(null);
-          setExercises([]);
-          resetPlan({
-            title: `برنامه تمرینی ${selectedPackageForPlan.name}`,
-            description: "",
-          });
-        }
+        setWorkoutDays(data.days || []);
       }
     } catch (e) {
       console.error(e);
     }
   };
+
+  useEffect(() => {
+    const fetchInitialPlan = async () => {
+      try {
+        const res = await fetch(
+          `/api/admin/subscription/workout-plans?packageId=${selectedPackageForPlan._id}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const plan = data.plans && data.plans.length > 0 ? data.plans[0] : null;
+          if (plan) {
+            setWorkoutPlan(plan);
+            resetPlan({
+              title: plan.title,
+              description: plan.description || "",
+            });
+            fetchDays(plan._id);
+          } else {
+            setWorkoutPlan(null);
+            setWorkoutDays([]);
+            setSelectedDay(null);
+            setExercises([]);
+            resetPlan({
+              title: `برنامه تمرینی ${selectedPackageForPlan.name}`,
+              description: "",
+            });
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchInitialPlan();
+  }, [selectedPackageForPlan]);
 
   const handleCreatePlan = async (data: WorkoutPlanFormInputs) => {
     try {
@@ -178,22 +191,13 @@ export default function WorkoutPlanModal({
     }
   };
 
-  const fetchDays = async (planId: string) => {
-    try {
-      const res = await fetch(
-        `/api/admin/subscription/workout-days?planId=${planId}`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setWorkoutDays(data.days || []);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   const handleDaySubmit = async (data: WorkoutDayFormInputs) => {
     if (!workoutPlan) return;
+    if (!data.dayName?.trim() || !data.muscleGroup?.trim()) {
+      showAlert("خطا", "پر کردن نام روز و گروه عضلانی الزامی است.", "error");
+      return;
+    }
     try {
       if (editingDay) {
         const res = await fetch("/api/admin/subscription/workout-days", {

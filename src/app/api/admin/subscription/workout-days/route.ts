@@ -6,6 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
     const body = await req.json();
+    console.log("POST workout-days body:", body);
     const items = Array.isArray(body) ? body : [body];
 
     const days = await WorkoutDay.insertMany(items);
