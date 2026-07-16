@@ -11,7 +11,6 @@ interface WorkoutHeaderProps {
 export default function WorkoutHeader({
   workoutPlan,
   workoutDays,
-  overallProgressPercent,
 }: WorkoutHeaderProps) {
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8 shadow-2xl">
@@ -41,7 +40,11 @@ export default function WorkoutHeader({
             <div className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5">
               <span className="text-gray-400">تعداد روزهای تمرین:</span>
               <span className="font-semibold text-purple-400">
-                {workoutDays.filter((d) => d.exercises && d.exercises.length > 0).length}{" "}
+                {/* {
+                  workoutDays.filter(
+                    (d) => d.exercises && d.exercises.length > 0,
+                  ).length
+                }{" "} */}
                 روز در هفته
               </span>
             </div>
@@ -49,21 +52,6 @@ export default function WorkoutHeader({
         </div>
 
         <div className="w-full md:w-auto flex flex-col sm:flex-row md:flex-col gap-4 self-stretch md:self-auto justify-between md:justify-center">
-          <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col justify-center gap-2 flex-1 md:w-60">
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>پیشرفت کل برنامه</span>
-              <span className="font-bold text-purple-400">
-                {overallProgressPercent}%
-              </span>
-            </div>
-            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
-                style={{ width: `${overallProgressPercent}%` }}
-              />
-            </div>
-          </div>
-
           <button className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg shadow-purple-500/20 hover:-translate-y-0.5">
             <Download className="w-4 h-4" />
             <span>دانلود فایل PDF برنامه</span>

@@ -1,33 +1,129 @@
 "use client";
-import React, { useState } from "react";
-import { Calendar, Flame } from "lucide-react";
-import { DayItem, WorkoutPlan } from "@/types/workout";
-import NoWorkoutPlan from "./NoWorkoutPlan";
+
+import { useEffect, useState } from "react";
+import { Calendar, Flame, ChevronDown } from "lucide-react";
 import WorkoutHeader from "./WorkoutHeader";
 import ExercisesList from "./ExercisesList";
 import WeeklyAdvice from "./WeeklyAdvice";
 import WorkoutSummary from "./WorkoutSummary";
 import WorkoutAchievements from "./WorkoutAchievements";
+import type { DayItem, ExerciseItem } from "@/types/workout";
 
-interface WorkoutViewProps {
-  workoutPlan: WorkoutPlan | null;
-  workoutDays: DayItem[];
+interface SimpleWeek {
+  _id?: string;
+  id?: string;
+  title: string;
+  days: DayItem[];
 }
 
-export default function WorkoutView({
-  workoutPlan,
-  workoutDays,
-}: WorkoutViewProps) {
-  const [activeDayIndex, setActiveDayIndex] = useState(0);
+interface WorkoutViewProps {
+  subscription?: {
+    packageId?: {
+      _id: string;
+      name?: string;
+      tagline?: string;
+    };
+  };
+}
+
+export default function WorkoutView({ subscription }: WorkoutViewProps) {
+  const [activeWeekIndex, setActiveWeekIndex] = useState("");
+  const [activeDayIndex, setActiveDayIndex] = useState("");
   const [completedExercises, setCompletedExercises] = useState<
     Record<string, boolean>
   >({});
+  const [workoutWeek, setWorkoutWeek] = useState<SimpleWeek[]>([]);
+  const [workoutDays, setWorkoutDays] = useState<DayItem[]>([]);
+  const [workoutExercises, setWorkoutExercises] = useState<ExerciseItem[]>([]);
 
-  if (!workoutPlan || !workoutDays || workoutDays.length === 0) {
-    return <NoWorkoutPlan />;
+  useEffect(() => {
+    const fetchWeeks = async () => {
+      if (!subscription?.packageId?._id) return;
+      try {
+        const res = await fetch(
+          `/api/admin/subscription/workout-week?packageId=${subscription.packageId._id}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const weeks = data.weeks || [];
+          setWorkoutWeek(weeks);
+          if (weeks.length > 0) {
+            setActiveWeekIndex(weeks[0]._id);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchWeeks();
+  }, [subscription]);
+
+  useEffect(() => {
+    const fetchDays = async () => {
+      if (!activeWeekIndex) return;
+      try {
+        const res = await fetch(
+          `/api/admin/subscription/workout-days?planId=${activeWeekIndex}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const days = data.days || [];
+          setWorkoutDays(days);
+          if (days.length > 0) {
+            setActiveDayIndex(days[0]._id);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchDays();
+  }, [activeWeekIndex]);
+
+  useEffect(() => {
+    const fetchExcersice = async () => {
+      if (!activeDayIndex) return;
+      try {
+        const res = await fetch(
+          `/api/admin/subscription/workout-exercises?dayId=${activeDayIndex}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setWorkoutExercises(data.exercises || []);
+          console.log(data.exercises);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchExcersice();
+  }, [activeDayIndex]);
+
+  if (workoutWeek.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center font-danaMed">
+        <div className="text-center space-y-4">
+          <Flame className="w-12 h-12 text-purple-500 animate-pulse mx-auto" />
+          <p className="text-sm text-gray-400">
+            در حال بارگذاری برنامه تمرینی...
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  const activeDay = workoutDays[activeDayIndex] || workoutDays[0];
+  const activeWeek =
+    workoutWeek.find((w) => w._id === activeWeekIndex) || workoutWeek[0];
+  const activeDay =
+    workoutDays.find((d) => d._id === activeDayIndex) || workoutDays[0];
+
+  const workoutPlan = {
+    _id: "plan",
+    packageId: subscription?.packageId?._id || "",
+    title: subscription?.packageId?.name || "برنامه تمرینی من",
+    description: activeWeek?.title || "",
+    isActive: true,
+  };
 
   const toggleExercise = (id: string) => {
     setCompletedExercises((prev) => ({
@@ -36,9 +132,9 @@ export default function WorkoutView({
     }));
   };
 
-  const totalExercises = activeDay?.exercises?.length || 0;
+  const totalExercises = workoutExercises.length;
   const completedCount =
-    activeDay?.exercises?.filter((ex) => completedExercises[ex._id]).length ||
+    workoutExercises.filter((ex) => completedExercises[ex._id]).length ||
     0;
   const dayProgressPercent =
     totalExercises > 0
@@ -48,7 +144,7 @@ export default function WorkoutView({
   const allExercises = workoutDays.flatMap((d) => d.exercises || []);
   const overallTotal = allExercises.length;
   const overallCompleted = allExercises.filter(
-    (ex) => completedExercises[ex._id],
+    (ex) => completedExercises[ex._id]
   ).length;
   const overallProgressPercent =
     overallTotal > 0 ? Math.round((overallCompleted / overallTotal) * 100) : 0;
@@ -66,23 +162,49 @@ export default function WorkoutView({
           overallProgressPercent={overallProgressPercent}
         />
 
-        <div className="space-y-3">
-          <h2 className="text-lg font-bold font-morabbaReg text-gray-300 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-purple-400" />
-            <span>روزهای تمرینی هفته</span>
-          </h2>
-          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-            {workoutDays.map((day, index) => {
-              const isActive = index === activeDayIndex;
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <h2 className="text-lg font-bold font-morabbaReg text-gray-300 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-purple-400" />
+              <span>روزهای تمرینی هفته</span>
+            </h2>
+            <div className="relative w-full sm:w-48">
+              <select
+                value={activeWeekIndex}
+                onChange={(e) => {
+                  setActiveWeekIndex(e.target.value);
+                  setActiveDayIndex("");
+                }}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-purple-500 transition-all appearance-none cursor-pointer text-right"
+              >
+                {workoutWeek.map((week, idx) => (
+                  <option
+                    key={idx}
+                    value={week._id}
+                    className="bg-gray-900 text-white"
+                  >
+                    هفته {week.title}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
+                <ChevronDown className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            {workoutDays.map((day) => {
+              const isActive = day._id === activeDayIndex;
               const isRest = !day.exercises || day.exercises.length === 0;
               return (
                 <button
                   key={day._id}
                   onClick={() => {
-                    setActiveDayIndex(index);
+                    setActiveDayIndex(day._id);
                   }}
                   className={`
-                    flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all duration-200 border text-center
+                    flex flex-col items-center justify-center py-3.5 px-2 rounded-xl transition-all duration-200 border text-center
                     ${
                       isActive
                         ? "bg-gradient-to-b from-purple-600/30 to-pink-600/30 border-purple-500 text-white shadow-lg"
@@ -102,39 +224,41 @@ export default function WorkoutView({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/3 border border-white/5 p-5 rounded-2xl">
-              <div>
-                <span className="text-xs text-purple-400 font-semibold">
-                  {activeDay.dayName} - تمرین امروز
-                </span>
-                <h3 className="text-xl font-bold font-morabbaReg text-white mt-1">
-                  {activeDay.muscleGroup}
-                </h3>
-              </div>
-
-              {totalExercises > 0 && (
-                <div className="flex items-center gap-4 w-full sm:w-auto">
-                  <div className="flex-1 sm:flex-none text-right">
-                    <div className="text-[10px] text-gray-400">
-                      انجام شده در این روز
-                    </div>
-                    <div className="text-sm font-bold text-white">
-                      {completedCount} از {totalExercises} حرکت
-                    </div>
-                  </div>
-                  <div className="w-16 h-1.5 rounded-full bg-white/15 overflow-hidden">
-                    <div
-                      className="h-full bg-green-500 transition-all duration-300"
-                      style={{ width: `${dayProgressPercent}%` }}
-                    />
-                  </div>
+            {activeDay && (
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/3 border border-white/5 p-5 rounded-2xl">
+                <div>
+                  <span className="text-xs text-purple-400 font-semibold">
+                    {activeDay.dayName} - تمرین امروز
+                  </span>
+                  <h3 className="text-xl font-bold font-morabbaReg text-white mt-1">
+                    {activeDay.muscleGroup}
+                  </h3>
                 </div>
-              )}
-            </div>
 
-            {totalExercises > 0 ? (
+                {totalExercises > 0 && (
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <div className="flex-1 sm:flex-none text-right">
+                      <div className="text-[10px] text-gray-400">
+                        انجام شده در این روز
+                      </div>
+                      <div className="text-sm font-bold text-white">
+                        {completedCount} از {totalExercises} حرکت
+                      </div>
+                    </div>
+                    <div className="w-16 h-1.5 rounded-full bg-white/15 overflow-hidden">
+                      <div
+                        className="h-full bg-green-500 transition-all duration-300"
+                        style={{ width: `${dayProgressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {totalExercises > 0 && activeDay ? (
               <ExercisesList
-                exercises={activeDay.exercises}
+                exercises={workoutExercises}
                 muscleGroup={activeDay.muscleGroup}
                 completedExercises={completedExercises}
                 toggleExercise={toggleExercise}
