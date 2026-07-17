@@ -24,14 +24,12 @@ interface WorkoutViewProps {
       tagline?: string;
     };
   };
+  userId?: string;
 }
 
-export default function WorkoutView({ subscription }: WorkoutViewProps) {
+export default function WorkoutView({ subscription , userId }: WorkoutViewProps) {
   const [activeWeekIndex, setActiveWeekIndex] = useState("");
   const [activeDayIndex, setActiveDayIndex] = useState("");
-  const [completedExercises, setCompletedExercises] = useState<
-    Record<string, boolean>
-  >({});
   const [workoutWeek, setWorkoutWeek] = useState<SimpleWeek[]>([]);
   const [workoutDays, setWorkoutDays] = useState<DayItem[]>([]);
   const [workoutExercises, setWorkoutExercises] = useState<ExerciseItem[]>([]);
@@ -125,29 +123,8 @@ export default function WorkoutView({ subscription }: WorkoutViewProps) {
     isActive: true,
   };
 
-  const toggleExercise = (id: string) => {
-    setCompletedExercises((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
   const totalExercises = workoutExercises.length;
-  const completedCount =
-    workoutExercises.filter((ex) => completedExercises[ex._id]).length ||
-    0;
-  const dayProgressPercent =
-    totalExercises > 0
-      ? Math.round((completedCount / totalExercises) * 100)
-      : 0;
-
-  const allExercises = workoutDays.flatMap((d) => d.exercises || []);
-  const overallTotal = allExercises.length;
-  const overallCompleted = allExercises.filter(
-    (ex) => completedExercises[ex._id]
-  ).length;
-  const overallProgressPercent =
-    overallTotal > 0 ? Math.round((overallCompleted / overallTotal) * 100) : 0;
+  const overallProgressPercent = 0;
 
   return (
     <div className="min-h-screen text-white font-danaMed pb-12 bg-gray-950">
@@ -239,17 +216,11 @@ export default function WorkoutView({ subscription }: WorkoutViewProps) {
                   <div className="flex items-center gap-4 w-full sm:w-auto">
                     <div className="flex-1 sm:flex-none text-right">
                       <div className="text-[10px] text-gray-400">
-                        انجام شده در این روز
+                        تعداد حرکات
                       </div>
                       <div className="text-sm font-bold text-white">
-                        {completedCount} از {totalExercises} حرکت
+                        {totalExercises} حرکت
                       </div>
-                    </div>
-                    <div className="w-16 h-1.5 rounded-full bg-white/15 overflow-hidden">
-                      <div
-                        className="h-full bg-green-500 transition-all duration-300"
-                        style={{ width: `${dayProgressPercent}%` }}
-                      />
                     </div>
                   </div>
                 )}
@@ -260,8 +231,7 @@ export default function WorkoutView({ subscription }: WorkoutViewProps) {
               <ExercisesList
                 exercises={workoutExercises}
                 muscleGroup={activeDay.muscleGroup}
-                completedExercises={completedExercises}
-                toggleExercise={toggleExercise}
+                userId={userId}
               />
             ) : (
               <div className="rounded-3xl border border-white/5 bg-white/3 p-8 text-center space-y-6 shadow-xl py-16">

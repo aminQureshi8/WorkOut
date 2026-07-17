@@ -31,5 +31,5 @@ export default async function page() {
 
   console.log(subscription);
 
-  return <WorkoutView subscription={subscription} />;
+  return <WorkoutView subscription={subscription} userId={session.user.id} />;
 }

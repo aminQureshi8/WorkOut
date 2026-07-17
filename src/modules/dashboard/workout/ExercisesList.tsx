@@ -8,23 +8,51 @@ import {
   ChevronDown,
   Play,
 } from "lucide-react";
-import { ExerciseItem } from "@/types/workout";
+import type { ExerciseItem } from "@/types/workout";
 
 interface ExercisesListProps {
   exercises: ExerciseItem[];
   muscleGroup: string;
-  completedExercises: Record<string, boolean>;
-  toggleExercise: (id: string) => void;
+  userId?: string;
 }
 
 export default function ExercisesList({
   exercises,
   muscleGroup,
-  completedExercises,
-  toggleExercise,
+  userId,
 }: ExercisesListProps) {
+  const [completedExercises, setCompletedExercises] = useState<
+    Record<string, boolean>
+  >({});
   const [expandedTips, setExpandedTips] = useState<Record<string, boolean>>({});
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+
+  const toggleExercise = async (exerciseId: string) => {
+    const isSelect = !completedExercises[exerciseId];
+
+    setCompletedExercises((prev) => ({
+      ...prev,
+      [exerciseId]: isSelect,
+    }));
+
+    try {
+      const res = await fetch(`/api/user/workout-progress`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, completed: isSelect, exerciseId }),
+      });
+      const data = await res.json();
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+      setCompletedExercises((prev) => ({
+        ...prev,
+        [exerciseId]: !isSelect,
+      }));
+    }
+  };
 
   const toggleTips = (id: string) => {
     setExpandedTips((prev) => ({
@@ -145,7 +173,9 @@ export default function ExercisesList({
                 <div className="px-5 pb-5 border-t border-white/5 pt-4">
                   <div className="relative aspect-video rounded-xl overflow-hidden bg-black flex items-center justify-center border border-white/10 shadow-lg">
                     <video
-                      src={exercise.videoId?.url || exercise.videoId2?.url || ""}
+                      src={
+                        exercise.videoId?.url || exercise.videoId2?.url || ""
+                      }
                       controls
                       poster={
                         exercise.videoId?.thumbnailUrl ||
