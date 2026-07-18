@@ -217,6 +217,7 @@ export default function WorkoutView({
                 exercises={workoutExercises}
                 muscleGroup={activeDay.muscleGroup}
                 userId={userId}
+                dayId={activeDay?._id}
               />
             ) : (
               <div className="rounded-3xl border border-white/5 bg-white/3 p-8 text-center space-y-6 shadow-xl py-16">

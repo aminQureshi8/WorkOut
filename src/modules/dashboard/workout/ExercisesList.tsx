@@ -7,18 +7,24 @@ import {
   Info,
   ChevronDown,
   Play,
+  HelpCircle,
 } from "lucide-react";
 import type { ExercisesListProps } from "@/types/workout";
+import ExerciseFeedbackForm from "./ExerciseFeedbackForm";
 
 export default function ExercisesList({
   exercises,
   muscleGroup,
   userId,
+  dayId,
 }: ExercisesListProps) {
   const [completedExercises, setCompletedExercises] = useState<
     Record<string, boolean>
   >({});
-  const [expandedTips, setExpandedTips] = useState<Record<string, boolean>>({});
+  const [activeTipsId, setActiveTipsId] = useState<string | null>(null);
+  const [activeQuestionsId, setActiveQuestionsId] = useState<string | null>(
+    null,
+  );
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,18 +74,11 @@ export default function ExercisesList({
     }
   };
 
-  const toggleTips = (id: string) => {
-    setExpandedTips((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
   return (
     <div className="space-y-4">
       {exercises.map((exercise, idx) => {
         const isCompleted = !!completedExercises[exercise._id];
-        const isExpanded = !!expandedTips[exercise._id];
+        const isExpanded = activeTipsId === exercise._id;
         const coachTips =
           exercise.videoId?.description ||
           exercise.videoId2?.description ||
@@ -149,7 +148,11 @@ export default function ExercisesList({
 
               <div className="flex items-center gap-3 w-full md:w-auto self-stretch md:self-auto justify-end border-t border-white/5 md:border-t-0 pt-3 md:pt-0">
                 <button
-                  onClick={() => toggleTips(exercise._id)}
+                  onClick={() =>
+                    setActiveTipsId(
+                      activeTipsId === exercise._id ? null : exercise._id,
+                    )
+                  }
                   className={`
                     flex items-center gap-1 px-3 py-2 text-xs rounded-xl transition-all
                     ${
@@ -165,6 +168,22 @@ export default function ExercisesList({
                     className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                   />
                 </button>
+
+                {isCompleted && (
+                  <button
+                    onClick={() =>
+                      setActiveQuestionsId(
+                        activeQuestionsId === exercise._id
+                          ? null
+                          : exercise._id,
+                      )
+                    }
+                    className="flex items-center gap-1.5 px-3 py-2 text-xs bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 border border-purple-500/20 hover:border-purple-500/30 rounded-xl transition-all"
+                  >
+                    <HelpCircle className="w-3.5 h-3.5" />
+                    <span>سوالات</span>
+                  </button>
+                )}
 
                 {(exercise.videoId?.url || exercise.videoId2?.url) && (
                   <button
@@ -213,6 +232,17 @@ export default function ExercisesList({
                     {coachTips}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {isCompleted && activeQuestionsId === exercise._id && (
+              <div className="px-5 pb-5 border-t border-white/5 pt-4">
+                <ExerciseFeedbackForm
+                  userId={userId || ""}
+                  dayId={dayId || ""}
+                  exerciseId={exercise._id}
+                  onClose={() => setActiveQuestionsId(null)}
+                />
               </div>
             )}
           </div>

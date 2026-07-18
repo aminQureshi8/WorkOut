@@ -209,6 +209,7 @@ export interface ExercisesListProps {
   exercises: ExerciseItem[];
   muscleGroup: string;
   userId?: string;
+  dayId?: string;
 }
 
 export interface WorkoutViewProps {
