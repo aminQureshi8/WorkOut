@@ -1,4 +1,3 @@
-import React from "react";
 import { Award, Flame, TrendingUp } from "lucide-react";
 
 export default function WorkoutAchievements() {
@@ -15,9 +14,7 @@ export default function WorkoutAchievements() {
             <Flame className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-white">
-              تمرین مداوم هفتگی
-            </h4>
+            <h4 className="text-xs font-bold text-white">تمرین مداوم هفتگی</h4>
             <p className="text-[10px] text-gray-500">
               ادامه دهید! ریتم فوق‌العاده‌ای دارید
             </p>
@@ -29,9 +26,7 @@ export default function WorkoutAchievements() {
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-white">
-              تعهد و انضباط
-            </h4>
+            <h4 className="text-xs font-bold text-white">تعهد و انضباط</h4>
             <p className="text-[10px] text-gray-500">
               پیشرفت چشمگیر در ثبت تمرینات روزانه
             </p>

@@ -1,8 +1,4 @@
-import React from "react";
-
-interface WorkoutSummaryProps {
-  totalExercises: number;
-}
+import type { WorkoutSummaryProps } from "@/types/workout";
 
 export default function WorkoutSummary({ totalExercises }: WorkoutSummaryProps) {
   return (

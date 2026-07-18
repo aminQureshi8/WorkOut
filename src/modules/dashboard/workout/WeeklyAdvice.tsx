@@ -1,4 +1,3 @@
-import React from "react";
 import { Zap } from "lucide-react";
 
 export default function WeeklyAdvice() {
@@ -12,7 +11,9 @@ export default function WeeklyAdvice() {
       </h3>
 
       <p className="text-xs text-gray-400 leading-relaxed">
-        تلاش کنید تا به اصل اضافه بار تدریجی پایبند باشید. در صورتی که در ست اول حرکت توانستید به راحتی تکرارهای مشخص شده را بزنید، در ست‌های بعدی ۵ درصد به وزنه‌ها اضافه کنید.
+        تلاش کنید تا به اصل اضافه بار تدریجی پایبند باشید. در صورتی که در ست اول
+        حرکت توانستید به راحتی تکرارهای مشخص شده را بزنید، در ست‌های بعدی ۵ درصد
+        به وزنه‌ها اضافه کنید.
       </p>
 
       <div className="border-t border-white/10 pt-3 space-y-2 text-xs">

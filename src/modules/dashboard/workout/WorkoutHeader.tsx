@@ -1,16 +1,9 @@
-import React from "react";
 import { Sparkles, Download } from "lucide-react";
-import { DayItem, WorkoutPlan } from "@/types/workout";
-
-interface WorkoutHeaderProps {
-  workoutPlan: WorkoutPlan;
-  workoutDays: DayItem[];
-  overallProgressPercent: number;
-}
+import type { WorkoutHeaderProps } from "@/types/workout";
 
 export default function WorkoutHeader({
   workoutPlan,
-  workoutDays,
+  workoutDays: _workoutDays,
 }: WorkoutHeaderProps) {
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8 shadow-2xl">

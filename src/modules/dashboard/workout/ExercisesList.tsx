@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CheckCircle2,
   Dumbbell,
@@ -8,13 +8,7 @@ import {
   ChevronDown,
   Play,
 } from "lucide-react";
-import type { ExerciseItem } from "@/types/workout";
-
-interface ExercisesListProps {
-  exercises: ExerciseItem[];
-  muscleGroup: string;
-  userId?: string;
-}
+import type { ExercisesListProps } from "@/types/workout";
 
 export default function ExercisesList({
   exercises,
@@ -27,6 +21,28 @@ export default function ExercisesList({
   const [expandedTips, setExpandedTips] = useState<Record<string, boolean>>({});
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (!userId || exercises.length === 0) return;
+      try {
+        const res = await fetch(`/api/user/workout-progress?userid=${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          const progressMap: Record<string, boolean> = {};
+          data.progress.forEach(
+            (item: { exerciseId: string; completed: boolean }) => {
+              progressMap[item.exerciseId] = item.completed;
+            },
+          );
+          setCompletedExercises(progressMap);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchProgress();
+  }, [userId, exercises]);
+
   const toggleExercise = async (exerciseId: string) => {
     const isSelect = !completedExercises[exerciseId];
 
@@ -36,15 +52,13 @@ export default function ExercisesList({
     }));
 
     try {
-      const res = await fetch(`/api/user/workout-progress`, {
+      await fetch(`/api/user/workout-progress`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ userId, completed: isSelect, exerciseId }),
       });
-      const data = await res.json();
-      console.log(data);
     } catch (err) {
       console.error(err);
       setCompletedExercises((prev) => ({

@@ -204,3 +204,37 @@ export interface SubscriptionsTableProps {
   onEdit: (sub: SubscriptionItem) => void;
   onStatsUpdate: (stats: { total: number; active: number; trial: number; expired: number }) => void;
 }
+
+export interface ExercisesListProps {
+  exercises: ExerciseItem[];
+  muscleGroup: string;
+  userId?: string;
+}
+
+export interface WorkoutViewProps {
+  subscription?: {
+    packageId?: {
+      _id: string;
+      name?: string;
+      tagline?: string;
+    };
+  };
+  userId?: string;
+}
+
+export interface WorkoutHeaderProps {
+  workoutPlan: WorkoutPlan;
+  workoutDays: DayItem[];
+  overallProgressPercent: number;
+}
+
+export interface WorkoutSummaryProps {
+  totalExercises: number;
+}
+
+export interface SimpleWeek {
+  _id?: string;
+  id?: string;
+  title: string;
+  days: DayItem[];
+}

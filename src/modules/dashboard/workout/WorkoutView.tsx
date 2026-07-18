@@ -7,27 +7,12 @@ import ExercisesList from "./ExercisesList";
 import WeeklyAdvice from "./WeeklyAdvice";
 import WorkoutSummary from "./WorkoutSummary";
 import WorkoutAchievements from "./WorkoutAchievements";
-import type { DayItem, ExerciseItem } from "@/types/workout";
+import type { DayItem, ExerciseItem, WorkoutViewProps, SimpleWeek } from "@/types/workout";
 
-interface SimpleWeek {
-  _id?: string;
-  id?: string;
-  title: string;
-  days: DayItem[];
-}
-
-interface WorkoutViewProps {
-  subscription?: {
-    packageId?: {
-      _id: string;
-      name?: string;
-      tagline?: string;
-    };
-  };
-  userId?: string;
-}
-
-export default function WorkoutView({ subscription , userId }: WorkoutViewProps) {
+export default function WorkoutView({
+  subscription,
+  userId,
+}: WorkoutViewProps) {
   const [activeWeekIndex, setActiveWeekIndex] = useState("");
   const [activeDayIndex, setActiveDayIndex] = useState("");
   const [workoutWeek, setWorkoutWeek] = useState<SimpleWeek[]>([]);

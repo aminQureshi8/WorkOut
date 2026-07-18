@@ -1,4 +1,3 @@
-import React from "react";
 import { Dumbbell } from "lucide-react";
 
 export default function NoWorkoutPlan() {
@@ -11,9 +10,12 @@ export default function NoWorkoutPlan() {
           <Dumbbell className="w-8 h-8 animate-pulse" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-bold font-morabbaReg">برنامه تمرینی یافت نشد</h2>
+          <h2 className="text-xl font-bold font-morabbaReg">
+            برنامه تمرینی یافت نشد
+          </h2>
           <p className="text-xs text-gray-400 leading-relaxed">
-            هیچ برنامه تمرینی فعالی برای اشتراک شما ثبت نشده است. پس از تایید مربی و طراحی برنامه، جزئیات آن در این بخش نمایش داده خواهد شد.
+            هیچ برنامه تمرینی فعالی برای اشتراک شما ثبت نشده است. پس از تایید
+            مربی و طراحی برنامه، جزئیات آن در این بخش نمایش داده خواهد شد.
           </p>
         </div>
       </div>
