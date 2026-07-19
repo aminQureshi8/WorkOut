@@ -29,7 +29,9 @@ export default async function page() {
     .populate("packageId", "tagline isActive name")
     .lean();
 
-  console.log(subscription);
+  const plainSubscription = subscription
+    ? JSON.parse(JSON.stringify(subscription))
+    : null;
 
-  return <WorkoutView subscription={subscription} userId={session.user.id} />;
+  return <WorkoutView subscription={plainSubscription} userId={session.user.id} />;
 }
