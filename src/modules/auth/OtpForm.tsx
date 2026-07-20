@@ -1,19 +1,20 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { BiDumbbell, BiArrowBack } from "react-icons/bi";
-import { HiOutlineShieldCheck } from "react-icons/hi";
+import { signIn } from "next-auth/react";
 import { showAlert } from "@/utils/alert";
 
 function OtpFormContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const email = searchParams.get("email") || "";
-  
-  const [code, setCode] = useState("");
+  const phone = searchParams.get("phone") || searchParams.get("email") || "";
+
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(120);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -28,26 +29,124 @@ function OtpFormContent() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      // Logic for OTP verification can be implemented here.
-      // For now, we simulate success and redirect to dashboard.
-      setTimeout(() => {
-        setIsSubmitting(false);
-        showAlert("موفقیت", "ایمیل با موفقیت تایید شد", "success");
-        router.push("/dashboard");
-      }, 1500);
-    } catch (err) {
-      setIsSubmitting(false);
-      console.error(err);
+  const handleOtpChange = (index: number, value: string) => {
+    const val = value.slice(-1);
+    const newOtp = [...otp];
+    newOtp[index] = val;
+    setOtp(newOtp);
+
+    if (val && index < 4) {
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
-  const handleResendCode = () => {
-    setTimeLeft(120);
-    showAlert("موفقیت", "کد تایید جدید ارسال شد", "success");
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 5);
+
+    if (!pastedData) return;
+
+    const newOtp = ["", "", "", "", ""];
+    for (let i = 0; i < pastedData.length; i++) {
+      newOtp[i] = pastedData[i];
+    }
+    setOtp(newOtp);
+
+    const targetIndex = Math.min(pastedData.length, 4);
+    inputRefs.current[targetIndex]?.focus();
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = otp.join("");
+
+    if (code.length < 5) {
+      showAlert("خطا", "لطفاً کد ۵ رقمی را کامل وارد کنید", "error");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const pendingDataStr =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("pendingRegister")
+          : null;
+      const pendingData = pendingDataStr ? JSON.parse(pendingDataStr) : null;
+
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone,
+          code,
+          username: pendingData?.username,
+          password: pendingData?.password,
+        }),
+      });
+
+      const resData = await res.json();
+      setIsSubmitting(false);
+
+      if (!res.ok) {
+        showAlert(
+          "خطا",
+          resData.message || "کد تایید اشتباه یا منقضی شده است",
+          "error",
+        );
+        return;
+      }
+
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("pendingRegister");
+      }
+
+      if (pendingData?.password) {
+        await signIn("credentials", {
+          phone,
+          password: pendingData.password,
+          redirect: false,
+        });
+      }
+
+      showAlert("موفقیت", "ثبت نام با موفقیت تایید و انجام شد", "success");
+      router.push("/dashboard");
+    } catch {
+      setIsSubmitting(false);
+      showAlert("خطا", "خطایی در تایید کد رخ داد", "error");
+    }
+  };
+
+  const handleResendCode = async () => {
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const resData = await res.json();
+      if (res.ok) {
+        setTimeLeft(120);
+        setOtp(["", "", "", "", ""]);
+        inputRefs.current[0]?.focus();
+        showAlert("موفقیت", "کد تایید جدید ارسال شد", "success");
+      } else {
+        showAlert("خطا", resData.message || "خطا در ارسال کد", "error");
+      }
+    } catch {
+      showAlert("خطا", "خطایی در ارتباط با سرور رخ داد", "error");
+    }
   };
 
   return (
@@ -59,7 +158,10 @@ function OtpFormContent() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             <BiDumbbell className="w-12 h-12 text-orange-500" />
-            <span className="font-bold text-3xl text-white" style={{ fontFamily: "Marbeh, sans-serif" }}>
+            <span
+              className="font-bold text-3xl text-white"
+              style={{ fontFamily: "Marbeh, sans-serif" }}
+            >
               استارفیت
             </span>
           </Link>
@@ -76,27 +178,37 @@ function OtpFormContent() {
                 <BiArrowBack className="w-5 h-5 transform scale-x-[-1]" />
               </Link>
               <div className="flex-1 text-center pr-6">
-                <h2 className="text-xl font-bold text-white mb-1">تایید ایمیل</h2>
+                <h2 className="text-xl font-bold text-white mb-1">
+                  تایید شماره تلفن
+                </h2>
                 <p className="text-white/40 text-[10px] leading-relaxed truncate max-w-[280px]">
-                  کد تایید ۵ رقمی به {email || "ایمیل شما"} ارسال گردید
+                  کد تایید ۵ رقمی به {phone || "شماره تلفن شما"} ارسال گردید
                 </p>
               </div>
             </div>
 
             <form onSubmit={handleVerifyOtp} className="space-y-6">
               <div>
-                <label className="block text-white/80 mb-2 text-xs font-semibold">کد تایید</label>
-                <div className="relative">
-                  <HiOutlineShieldCheck className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
-                  <input
-                    type="text"
-                    maxLength={5}
-                    required
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    placeholder="• • • • •"
-                    className="w-full bg-white/5 border border-white/10 rounded-lg pr-12 pl-4 py-3 text-white placeholder:text-white/20 text-center tracking-[0.5em] focus:outline-none focus:border-orange-500 font-bold text-lg"
-                  />
+                <label className="block text-white/80 mb-4 text-xs font-semibold text-center">
+                  کد تایید ۵ رقمی را وارد کنید
+                </label>
+                <div className="flex justify-center gap-3" dir="ltr">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => {
+                        inputRefs.current[index] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      onPaste={handlePaste}
+                      className="w-12 h-14 bg-white/5 border border-white/10 rounded-xl text-center text-white font-bold text-xl focus:outline-none focus:border-orange-500 focus:bg-white/10 transition-colors"
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -116,7 +228,7 @@ function OtpFormContent() {
                   href="/login"
                   className="text-orange-500 hover:text-orange-400 font-bold cursor-pointer"
                 >
-                  ویرایش ایمیل
+                  ویرایش شماره تلفن
                 </Link>
               </div>
 
@@ -143,7 +255,13 @@ function OtpFormContent() {
 
 export default function OtpForm() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">بارگذاری...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-955 flex items-center justify-center text-white">
+          بارگذاری...
+        </div>
+      }
+    >
       <OtpFormContent />
     </Suspense>
   );

@@ -1,7 +1,7 @@
 import mongoose, { Document } from "mongoose";
 
 export interface IUser extends Document {
-  email: string;
+  email?: string;
   username: string;
   password: string;
   role: "user" | "admin" | "coach";
@@ -13,11 +13,10 @@ export interface IUser extends Document {
   createdAt: Date;
 }
 
-// Client-Side Admin User Type
 export interface IAdminUser {
   _id: string;
   username: string;
-  email: string;
+  email?: string;
   phone?: string;
   role: "user" | "admin" | "coach";
   status: string;
@@ -27,8 +26,5 @@ export interface IAdminUser {
   totalPayments?: number;
   createdAt: string;
 }
-export interface IOtp extends Document {
-  email: string;
-  code: string;
-  createdAt: Date;
-}
+
+export type { IOtp } from "./otp";

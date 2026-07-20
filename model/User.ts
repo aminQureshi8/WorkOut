@@ -3,11 +3,11 @@ import { IUser } from "@/types/user";
 
 const UserSchema = new Schema<IUser>(
   {
-    email: { type: String, required: true, unique: true, lowercase: true },
+    email: { type: String, default: "", lowercase: true, sparse: true },
     username: { type: String, required: true },
     password: { type: String, default: "" },
     fullName: { type: String, default: "" },
-    phone: { type: String, default: "" },
+    phone: { type: String, default: "", sparse: true },
     role: { type: String, enum: ["user", "admin", "coach"], default: "user" },
     status: {
       type: String,

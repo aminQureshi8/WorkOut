@@ -2,23 +2,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { BiDumbbell, BiLock, BiUser } from "react-icons/bi";
-import { CgMail } from "react-icons/cg";
+import { BiDumbbell, BiUser, BiPhone } from "react-icons/bi";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
-type LoginFormData = {
-  email: string;
-  password: string;
-};
-
-type RegisterFormData = {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-};
+import type { LoginFormData, RegisterFormData } from "@/types/auth";
 
 export default function LoginForm() {
   const [isRegister, setIsRegister] = useState(false);
@@ -35,13 +23,13 @@ export default function LoginForm() {
   const onLogin = async (data: LoginFormData) => {
     setServerError("");
     const result = await signIn("credentials", {
-      email: data.email,
+      phone: data.phone,
       password: data.password,
       redirect: false,
     });
 
     if (result?.error) {
-      setServerError("ایمیل یا رمز عبور اشتباه است");
+      setServerError("شماره تلفن یا رمز عبور اشتباه است");
     } else {
       router.push("/dashboard");
     }
@@ -51,10 +39,10 @@ export default function LoginForm() {
     setServerError("");
 
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ phone: data.phone }),
       });
 
       const resData = await res.json();
@@ -64,14 +52,18 @@ export default function LoginForm() {
         return;
       }
 
-      router.push(`/otp?email=${encodeURIComponent(data.email)}`);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("pendingRegister", JSON.stringify(data));
+      }
+
+      router.push(`/otp?phone=${encodeURIComponent(data.phone)}`);
     } catch {
       setServerError("خطا در ارتباط با سرور");
     }
   };
 
   const inputClass = (hasError?: boolean) =>
-    `w-full bg-white/5 border ${hasError ? "border-red-500" : "border-white/10"} rounded-lg pr-12 pl-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500`;
+    `w-full bg-white/5 border ${hasError ? "border-red-500" : "border-white/10"} rounded-lg pl-12 pr-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-orange-500`;
 
   return (
     <div
@@ -130,26 +122,26 @@ export default function LoginForm() {
             >
               <div>
                 <label className="block text-white/80 mb-2 text-sm">
-                  ایمیل
+                  شماره تلفن
                 </label>
                 <div className="relative">
-                  <CgMail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                  <BiPhone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
-                    type="email"
-                    placeholder="example@email.com"
-                    className={inputClass(!!loginForm.formState.errors.email)}
-                    {...loginForm.register("email", {
-                      required: "ایمیل الزامی است",
+                    type="text"
+                    placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                    className={inputClass(!!loginForm.formState.errors.phone)}
+                    {...loginForm.register("phone", {
+                      required: "شماره تلفن الزامی است",
                       pattern: {
-                        value: /^\S+@\S+$/i,
-                        message: "ایمیل معتبر نیست",
+                        value: /^09\d{9}$/,
+                        message: "شماره تلفن معتبر نیست (مثال: 09123456789)",
                       },
                     })}
                   />
                 </div>
-                {loginForm.formState.errors.email && (
+                {loginForm.formState.errors.phone && (
                   <p className="text-red-400 text-xs mt-1">
-                    {loginForm.formState.errors.email.message}
+                    {loginForm.formState.errors.phone.message}
                   </p>
                 )}
               </div>
@@ -159,7 +151,6 @@ export default function LoginForm() {
                   رمز عبور
                 </label>
                 <div className="relative">
-                  <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
                     type={showLoginPassword ? "text" : "password"}
                     placeholder="رمز عبور خود را وارد کنید"
@@ -228,7 +219,7 @@ export default function LoginForm() {
                   نام کاربری
                 </label>
                 <div className="relative">
-                  <BiUser className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                  <BiUser className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
                     type="text"
                     placeholder="نام خانوادگی خود را وارد کنید"
@@ -253,28 +244,28 @@ export default function LoginForm() {
 
               <div>
                 <label className="block text-white/80 mb-2 text-sm">
-                  ایمیل
+                  شماره تلفن
                 </label>
                 <div className="relative">
-                  <CgMail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                  <BiPhone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
-                    type="email"
-                    placeholder="example@email.com"
+                    type="text"
+                    placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                     className={inputClass(
-                      !!registerForm.formState.errors.email,
+                      !!registerForm.formState.errors.phone,
                     )}
-                    {...registerForm.register("email", {
-                      required: "ایمیل الزامی است",
+                    {...registerForm.register("phone", {
+                      required: "شماره تلفن الزامی است",
                       pattern: {
-                        value: /^\S+@\S+$/i,
-                        message: "ایمیل معتبر نیست",
+                        value: /^09\d{9}$/,
+                        message: "شماره تلفن معتبر نیست (مثال: 09123456789)",
                       },
                     })}
                   />
                 </div>
-                {registerForm.formState.errors.email && (
+                {registerForm.formState.errors.phone && (
                   <p className="text-red-400 text-xs mt-1">
-                    {registerForm.formState.errors.email.message}
+                    {registerForm.formState.errors.phone.message}
                   </p>
                 )}
               </div>
@@ -284,7 +275,6 @@ export default function LoginForm() {
                   رمز عبور
                 </label>
                 <div className="relative">
-                  <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
                     type={showRegisterPassword ? "text" : "password"}
                     placeholder="رمز عبور خود را وارد کنید"
@@ -325,7 +315,6 @@ export default function LoginForm() {
                   تکرار رمز عبور
                 </label>
                 <div className="relative">
-                  <BiLock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                   <input
                     type={showRegisterConfirmPassword ? "text" : "password"}
                     placeholder="رمز عبور را دوباره وارد کنید"

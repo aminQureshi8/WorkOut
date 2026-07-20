@@ -1,15 +1,22 @@
 import mongoose, { Schema } from "mongoose";
-import { IOtp } from "@/types/user";
+import type { IOtp } from "@/types/otp";
 
 const OtpSchema = new Schema<IOtp>({
-  email: {
+  phone: {
     type: String,
     required: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    default: "",
     lowercase: true,
+    trim: true,
   },
   code: {
     type: String,
     required: true,
+    trim: true,
   },
   createdAt: {
     type: Date,

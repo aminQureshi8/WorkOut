@@ -239,3 +239,8 @@ export interface SimpleWeek {
   title: string;
   days: DayItem[];
 }
+
+export interface DownloadButtonProps {
+  workoutPlan: WorkoutPlan;
+  workoutDays: DayItem[];
+}

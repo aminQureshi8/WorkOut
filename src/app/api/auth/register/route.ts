@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import bcrypt from "bcrypt";
 import dbConnect from "../../../../../lib/dbConnect";
 import User from "../../../../../model/User";
@@ -8,9 +7,10 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const { username, email, password, confirmPassword } = await req.json();
+    const body = await req.json();
+    const { username, phone, password, confirmPassword } = body;
 
-    if (!username || !email || !password || !confirmPassword) {
+    if (!username || !phone || !password || !confirmPassword) {
       return NextResponse.json(
         { message: "همه فیلدها الزامی هستند" },
         { status: 400 },
@@ -31,21 +31,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!emailRegex.test(email)) {
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(phone)) {
       return NextResponse.json(
-        { message: "فرمت ایمیل معتبر نیست" },
+        { message: "فرمت شماره تلفن معتبر نیست (مثال: 09123456789)" },
         { status: 400 },
       );
     }
 
-    const existingUser = await User.findOne({
-      email: email.toLowerCase(),
-    });
+    const existingUser = await User.findOne({ phone: phone.trim() });
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "این ایمیل قبلاً ثبت شده است" },
+        { message: "این شماره تلفن قبلاً ثبت شده است" },
         { status: 409 },
       );
     }
@@ -54,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     await User.create({
       username: username.trim(),
-      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
       password: hashedPassword,
     });
 
@@ -67,13 +65,13 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     if (error.code === 11000) {
       return NextResponse.json(
-        { message: "این ایمیل قبلاً ثبت شده است" },
+        { message: "این شماره تلفن قبلاً ثبت شده است" },
         { status: 409 },
       );
     }
 
     return NextResponse.json(
-      { message: "خطای سرور، لطفاً دوباره تلاش کنید" },
+      { message: error.message },
       { status: 500 },
     );
   }

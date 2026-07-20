@@ -1,9 +1,10 @@
-import { Sparkles, Download } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import type { WorkoutHeaderProps } from "@/types/workout";
+import WorkoutDownloadButton from "./WorkoutDownloadButton";
 
 export default function WorkoutHeader({
   workoutPlan,
-  workoutDays: _workoutDays,
+  workoutDays,
 }: WorkoutHeaderProps) {
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8 shadow-2xl">
@@ -45,10 +46,10 @@ export default function WorkoutHeader({
         </div>
 
         <div className="w-full md:w-auto flex flex-col sm:flex-row md:flex-col gap-4 self-stretch md:self-auto justify-between md:justify-center">
-          <button className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg shadow-purple-500/20 hover:-translate-y-0.5">
-            <Download className="w-4 h-4" />
-            <span>دانلود فایل PDF برنامه</span>
-          </button>
+          <WorkoutDownloadButton
+            workoutPlan={workoutPlan}
+            workoutDays={workoutDays}
+          />
         </div>
       </div>
     </div>

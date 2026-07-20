@@ -15,15 +15,22 @@ export const authOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { type: "email" },
+        email: { type: "text" },
+        phone: { type: "text" },
         password: { type: "password" },
         username: { type: "text" },
       },
       async authorize(credentials) {
         await dbConnect();
 
+        const identifier = credentials?.phone || credentials?.email;
+        if (!identifier) return null;
+
         const user = await User.findOne({
-          email: credentials?.email?.toLowerCase(),
+          $or: [
+            { phone: identifier },
+            { email: identifier.toLowerCase() },
+          ],
         });
 
         if (!user) return null;
@@ -37,6 +44,7 @@ export const authOptions = {
         return {
           id: user._id.toString(),
           email: user.email,
+          phone: user.phone,
           username: user.username,
           role: user.role,
         };
@@ -61,7 +69,7 @@ export const authOptions = {
       return true;
     },
 
-    async jwt({ token, user, account }: any) {
+    async jwt({ token, user }: any) {
       await dbConnect();
       const userId = user?.id || token?.id;
       if (userId) {
@@ -72,15 +80,22 @@ export const authOptions = {
           token.role = dbUser.role;
           token.avatar = dbUser.avatar;
           token.email = dbUser.email;
+          token.phone = dbUser.phone;
         }
       } else if (user) {
-        const dbUser = await User.findOne({ email: user.email || token.email });
+        const dbUser = await User.findOne({
+          $or: [
+            { phone: user.phone },
+            { email: user.email || token.email },
+          ],
+        });
         if (dbUser) {
           token.id = dbUser._id.toString();
           token.username = dbUser.username;
           token.role = dbUser.role;
           token.avatar = dbUser.avatar;
           token.email = dbUser.email;
+          token.phone = dbUser.phone;
         }
       }
       return token;
@@ -93,6 +108,7 @@ export const authOptions = {
         session.user.role = token.role;
         session.user.avatar = token.avatar;
         session.user.email = token.email;
+        session.user.phone = token.phone;
       }
       return session;
     },

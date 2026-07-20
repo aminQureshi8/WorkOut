@@ -88,7 +88,7 @@ export default function ExercisesList({
           <div
             key={exercise._id}
             className={`
-              relative overflow-hidden rounded-2xl border transition-all duration-300 bg-white/4
+              relative overflow-hidden rounded-2xl ss02 border transition-all duration-300 bg-white/4
               ${
                 isCompleted
                   ? "border-green-500/30 bg-green-500/5 shadow-inner"
