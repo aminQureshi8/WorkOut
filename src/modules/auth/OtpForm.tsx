@@ -112,16 +112,19 @@ function OtpFormContent() {
         sessionStorage.removeItem("pendingRegister");
       }
 
-      if (pendingData?.password) {
-        await signIn("credentials", {
-          phone,
-          password: pendingData.password,
-          redirect: false,
-        });
+      const signInRes = await signIn("credentials", {
+        phone,
+        isOtpLogin: "true",
+        redirect: false,
+      });
+
+      if (signInRes?.error) {
+        showAlert("خطا", "ایجاد نشست کاربر با مشکل مواجه شد", "error");
+        return;
       }
 
-      showAlert("موفقیت", "ثبت نام با موفقیت تایید و انجام شد", "success");
-      router.push("/dashboard");
+      showAlert("موفقیت", "تایید با موفقیت انجام شد", "success");
+      window.location.href = "/dashboard";
     } catch {
       setIsSubmitting(false);
       showAlert("خطا", "خطایی در تایید کد رخ داد", "error");

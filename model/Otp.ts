@@ -7,12 +7,6 @@ const OtpSchema = new Schema<IOtp>({
     required: true,
     trim: true,
   },
-  email: {
-    type: String,
-    default: "",
-    lowercase: true,
-    trim: true,
-  },
   code: {
     type: String,
     required: true,
@@ -25,5 +19,4 @@ const OtpSchema = new Schema<IOtp>({
   },
 });
 
-export default mongoose.models.Otp ||
-  mongoose.model<IOtp>("Otp", OtpSchema);
+export default mongoose.models.Otp || mongoose.model<IOtp>("Otp", OtpSchema);

@@ -8,7 +8,10 @@ export default async function dbConnect() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI).then((m) => m);
+    cached.promise = mongoose.connect(MONGODB_URI).then((m) => {
+      m.connection.collection("users").dropIndex("email_1").catch(() => {});
+      return m;
+    });
   }
 
   cached.conn = await cached.promise;

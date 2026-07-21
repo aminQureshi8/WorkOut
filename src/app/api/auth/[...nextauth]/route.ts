@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcrypt";
 import User from "../../../../../model/User";
 import dbConnect from "../../../../../lib/dbConnect";
+import { toEnglishDigits } from "@/utils/numbers";
 
 export const authOptions = {
   providers: [
@@ -19,35 +20,47 @@ export const authOptions = {
         phone: { type: "text" },
         password: { type: "password" },
         username: { type: "text" },
+        isOtpLogin: { type: "text" },
       },
       async authorize(credentials) {
-        await dbConnect();
+        try {
+          await dbConnect();
 
-        const identifier = credentials?.phone || credentials?.email;
-        if (!identifier) return null;
+          const rawIdentifier = credentials?.phone || credentials?.email;
+          if (!rawIdentifier) return null;
 
-        const user = await User.findOne({
-          $or: [
-            { phone: identifier },
-            { email: identifier.toLowerCase() },
-          ],
-        });
+          const cleanIdentifier = toEnglishDigits(String(rawIdentifier));
 
-        if (!user) return null;
+          const user = await User.findOne({
+            $or: [
+              { phone: cleanIdentifier },
+              { phone: cleanIdentifier.replace(/^0/, "") },
+              { phone: `0${cleanIdentifier}` },
+              { email: cleanIdentifier.toLowerCase() },
+            ],
+          });
 
-        const isValid = await bcrypt.compare(
-          credentials!.password,
-          user.password,
-        );
-        if (!isValid) return null;
+          if (!user) return null;
 
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          phone: user.phone,
-          username: user.username,
-          role: user.role,
-        };
+          const isOtp = String(credentials?.isOtpLogin) === "true";
+          const pwd = credentials?.password;
+          const hasPassword = pwd && pwd !== "undefined" && pwd.trim() !== "";
+
+          if (!isOtp && hasPassword) {
+            const isValid = await bcrypt.compare(pwd, user.password);
+            if (!isValid) return null;
+          }
+
+          return {
+            id: user._id.toString(),
+            email: user.email || "",
+            phone: user.phone || "",
+            username: user.username || "",
+            role: user.role || "user",
+          };
+        } catch {
+          return null;
+        }
       },
     }),
   ],
@@ -71,7 +84,7 @@ export const authOptions = {
 
     async jwt({ token, user }: any) {
       await dbConnect();
-      const userId = user?.id || token?.id;
+      const userId = user?.id || token?.id || token?.sub;
       if (userId) {
         const dbUser = await User.findById(userId);
         if (dbUser) {
@@ -79,23 +92,20 @@ export const authOptions = {
           token.username = dbUser.username;
           token.role = dbUser.role;
           token.avatar = dbUser.avatar;
-          token.email = dbUser.email;
-          token.phone = dbUser.phone;
+          token.email = dbUser.email || "";
+          token.phone = dbUser.phone || "";
         }
       } else if (user) {
         const dbUser = await User.findOne({
-          $or: [
-            { phone: user.phone },
-            { email: user.email || token.email },
-          ],
+          $or: [{ phone: user.phone }, { email: user.email || token.email }],
         });
         if (dbUser) {
           token.id = dbUser._id.toString();
           token.username = dbUser.username;
           token.role = dbUser.role;
           token.avatar = dbUser.avatar;
-          token.email = dbUser.email;
-          token.phone = dbUser.phone;
+          token.email = dbUser.email || "";
+          token.phone = dbUser.phone || "";
         }
       }
       return token;
@@ -107,8 +117,8 @@ export const authOptions = {
         session.user.username = token.username;
         session.user.role = token.role;
         session.user.avatar = token.avatar;
-        session.user.email = token.email;
-        session.user.phone = token.phone;
+        session.user.email = token.email || "";
+        session.user.phone = token.phone || "";
       }
       return session;
     },

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import dbConnect from "../../../../../lib/dbConnect";
-import User from "../../../../../model/User";
+import dbConnect from "@/lib/dbConnect";
+import User from "@/model/User";
+import { toEnglishDigits } from "@/utils/numbers";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,15 +32,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const cleanPhone = toEnglishDigits(String(phone));
+
     const phoneRegex = /^09\d{9}$/;
-    if (!phoneRegex.test(phone)) {
+    if (!phoneRegex.test(cleanPhone)) {
       return NextResponse.json(
         { message: "فرمت شماره تلفن معتبر نیست (مثال: 09123456789)" },
         { status: 400 },
       );
     }
 
-    const existingUser = await User.findOne({ phone: phone.trim() });
+    const existingUser = await User.findOne({
+      $or: [
+        { phone: cleanPhone },
+        { phone: cleanPhone.replace(/^0/, "") },
+        { phone: `0${cleanPhone}` },
+      ],
+    });
 
     if (existingUser) {
       return NextResponse.json(
@@ -52,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     await User.create({
       username: username.trim(),
-      phone: phone.trim(),
+      phone: cleanPhone,
       password: hashedPassword,
     });
 
@@ -63,7 +72,7 @@ export async function POST(req: NextRequest) {
       { status: 201 },
     );
   } catch (error: any) {
-    if (error.code === 11000) {
+    if (error?.code === 11000) {
       return NextResponse.json(
         { message: "این شماره تلفن قبلاً ثبت شده است" },
         { status: 409 },
@@ -71,7 +80,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: error.message },
+      { message: "خطای سرور، لطفاً دوباره تلاش کنید" },
       { status: 500 },
     );
   }

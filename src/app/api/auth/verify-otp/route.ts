@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/model/User";
 import Otp from "@/model/Otp";
+import { toEnglishDigits } from "@/utils/numbers";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,9 +19,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const cleanPhone = toEnglishDigits(String(phone));
+    const cleanCode = toEnglishDigits(String(code));
+
     const validOtp = await Otp.findOne({
-      phone: phone.trim(),
-      code: code.trim(),
+      $or: [{ phone: cleanPhone }, { phone: cleanPhone.replace(/^0/, "") }],
+      code: cleanCode,
     });
 
     if (!validOtp) {
@@ -31,7 +35,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (username && password) {
-      const existingUser = await User.findOne({ phone: phone.trim() });
+      const existingUser = await User.findOne({
+        $or: [
+          { phone: cleanPhone },
+          { phone: cleanPhone.replace(/^0/, "") },
+          { phone: `0${cleanPhone}` },
+        ],
+      });
+
       if (existingUser) {
         return NextResponse.json(
           { message: "این شماره تلفن قبلاً ثبت شده است" },
@@ -43,12 +54,14 @@ export async function POST(req: NextRequest) {
 
       await User.create({
         username: username.trim(),
-        phone: phone.trim(),
+        phone: cleanPhone,
         password: hashedPassword,
       });
     }
 
-    await Otp.deleteMany({ phone: phone.trim() });
+    await Otp.deleteMany({
+      $or: [{ phone: cleanPhone }, { phone: cleanPhone.replace(/^0/, "") }],
+    });
 
     return NextResponse.json(
       { message: "تایید با موفقیت انجام شد" },

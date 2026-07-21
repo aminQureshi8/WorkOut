@@ -11,7 +11,6 @@ import type { LoginFormData, RegisterFormData } from "@/types/auth";
 export default function LoginForm() {
   const [isRegister, setIsRegister] = useState(false);
   const [serverError, setServerError] = useState("");
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] =
     useState(false);
@@ -22,16 +21,44 @@ export default function LoginForm() {
 
   const onLogin = async (data: LoginFormData) => {
     setServerError("");
-    const result = await signIn("credentials", {
-      phone: data.phone,
-      password: data.password,
-      redirect: false,
-    });
 
-    if (result?.error) {
-      setServerError("شماره تلفن یا رمز عبور اشتباه است");
-    } else {
-      router.push("/dashboard");
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: data.phone, type: "login" }),
+      });
+
+      const resData = await res.json();
+
+      if (res.ok) {
+        const smsRes = await fetch(
+          `https://api.sms.ir/v1/send?username=${process.env.NEXT_PUBLIC_SMS_IR_USERNAME}&password=${process.env.NEXT_PUBLIC_SMS_IR_PASSWORD}&mobile=${data.phone}&line=${process.env.NEXT_PUBLIC_SMS_IR_LINE}&text=کد ورود شما : ${resData.code}
+          
+          `,
+          {
+            method: "POST",
+            headers: {
+              Accept: "text/plain",
+            },
+          },
+        );
+
+        if (smsRes.ok) {
+          router.push(`/otp?phone=${encodeURIComponent(data.phone)}`);
+        }
+      }
+
+      if (!res.ok) {
+        setServerError(resData.message || "خطایی رخ داده است");
+        return;
+      }
+
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("pendingRegister");
+      }
+    } catch {
+      setServerError("خطا در ارتباط با سرور");
     }
   };
 
@@ -39,10 +66,10 @@ export default function LoginForm() {
     setServerError("");
 
     try {
-      const res = await fetch("/api/auth/send-otp", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: data.phone }),
+        body: JSON.stringify(data),
       });
 
       const resData = await res.json();
@@ -52,11 +79,19 @@ export default function LoginForm() {
         return;
       }
 
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("pendingRegister", JSON.stringify(data));
+      const signInRes = await signIn("credentials", {
+        phone: data.phone,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (signInRes?.error) {
+        setServerError("ثبت‌نام با موفقیت انجام شد، لطفاً وارد شوید");
+        setIsRegister(false);
+        return;
       }
 
-      router.push(`/otp?phone=${encodeURIComponent(data.phone)}`);
+      window.location.href = "/dashboard";
     } catch {
       setServerError("خطا در ارتباط با سرور");
     }
@@ -146,64 +181,13 @@ export default function LoginForm() {
                 )}
               </div>
 
-              <div>
-                <label className="block text-white/80 mb-2 text-sm">
-                  رمز عبور
-                </label>
-                <div className="relative">
-                  <input
-                    type={showLoginPassword ? "text" : "password"}
-                    placeholder="رمز عبور خود را وارد کنید"
-                    className={inputClass(
-                      !!loginForm.formState.errors.password,
-                    )}
-                    {...loginForm.register("password", {
-                      required: "رمز عبور الزامی است",
-                      minLength: {
-                        value: 6,
-                        message: "رمز عبور حداقل ۶ کاراکتر باشد",
-                      },
-                    })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowLoginPassword(!showLoginPassword)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
-                  >
-                    {showLoginPassword ? (
-                      <AiOutlineEyeInvisible className="w-5 h-5" />
-                    ) : (
-                      <AiOutlineEye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-                {loginForm.formState.errors.password && (
-                  <p className="text-red-400 text-xs mt-1">
-                    {loginForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 text-white/70 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-white/20"
-                  />
-                  <span>مرا به خاطر بسپار</span>
-                </label>
-                <a href="#" className="text-orange-500 hover:text-orange-400">
-                  فراموشی رمز عبور؟
-                </a>
-              </div>
-
               <button
                 type="submit"
                 disabled={loginForm.formState.isSubmitting}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-3 rounded-lg transition-colors font-medium"
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-3 rounded-lg transition-colors font-medium cursor-pointer"
               >
                 {loginForm.formState.isSubmitting
-                  ? "در حال ورود..."
+                  ? "در حال ارسال کد..."
                   : "ورود به حساب"}
               </button>
             </form>
@@ -294,7 +278,7 @@ export default function LoginForm() {
                     onClick={() =>
                       setShowRegisterPassword(!showRegisterPassword)
                     }
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors cursor-pointer"
                   >
                     {showRegisterPassword ? (
                       <AiOutlineEyeInvisible className="w-5 h-5" />
@@ -335,7 +319,7 @@ export default function LoginForm() {
                         !showRegisterConfirmPassword,
                       )
                     }
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors cursor-pointer"
                   >
                     {showRegisterConfirmPassword ? (
                       <AiOutlineEyeInvisible className="w-5 h-5" />
@@ -354,7 +338,7 @@ export default function LoginForm() {
               <button
                 type="submit"
                 disabled={registerForm.formState.isSubmitting}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-3 rounded-lg transition-colors font-medium"
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-3 rounded-lg transition-colors font-medium cursor-pointer"
               >
                 {registerForm.formState.isSubmitting
                   ? "در حال ثبت نام..."
@@ -377,7 +361,7 @@ export default function LoginForm() {
             <div className="mt-6">
               <button
                 onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-                className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 rounded-lg transition-colors cursor-pointer"
               >
                 <svg
                   className="w-5 h-5"

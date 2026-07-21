@@ -3,11 +3,11 @@ import { IUser } from "@/types/user";
 
 const UserSchema = new Schema<IUser>(
   {
-    email: { type: String, default: "", lowercase: true, sparse: true },
+    email: { type: String, unique: true, sparse: true, lowercase: true },
     username: { type: String, required: true },
     password: { type: String, default: "" },
     fullName: { type: String, default: "" },
-    phone: { type: String, default: "", sparse: true },
+    phone: { type: String, unique: true, sparse: true },
     role: { type: String, enum: ["user", "admin", "coach"], default: "user" },
     status: {
       type: String,
@@ -26,5 +26,11 @@ UserSchema.virtual("nutrition", {
   foreignField: "userId",
 });
 
-export default mongoose.models.User ||
-  mongoose.model<IUser>("User", UserSchema);
+const UserModel =
+  mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+
+if (mongoose.connection?.readyState === 1) {
+  UserModel.collection.dropIndex("email_1").catch(() => {});
+}
+
+export default UserModel;

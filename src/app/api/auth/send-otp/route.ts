@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/model/User";
 import Otp from "@/model/Otp";
+import { toEnglishDigits } from "@/utils/numbers";
 
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
     const body = await req.json();
-    const { phone } = body;
+    const { phone, type } = body;
 
     if (!phone) {
       return NextResponse.json(
@@ -17,31 +18,67 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const cleanPhone = toEnglishDigits(String(phone));
+
     const phoneRegex = /^09\d{9}$/;
-    if (!phoneRegex.test(phone)) {
+    if (!phoneRegex.test(cleanPhone)) {
       return NextResponse.json(
         { message: "فرمت شماره تلفن معتبر نیست (مثال: 09123456789)" },
         { status: 400 },
       );
     }
 
-    const existingUser = await User.findOne({ phone: phone.trim() });
+    const existingUser = await User.findOne({
+      $or: [
+        { phone: cleanPhone },
+        { phone: cleanPhone.replace(/^0/, "") },
+        { phone: `0${cleanPhone}` },
+      ],
+    });
 
-    if (existingUser) {
-      return NextResponse.json(
-        { message: "این شماره تلفن قبلاً ثبت شده است" },
-        { status: 409 },
-      );
+    if (type === "login") {
+      if (!existingUser) {
+        return NextResponse.json(
+          { message: "حساب کاربری با این شماره یافت نشد" },
+          { status: 404 },
+        );
+      }
+    } else if (type === "register") {
+      if (existingUser) {
+        return NextResponse.json(
+          { message: "این شماره تلفن قبلاً ثبت شده است" },
+          { status: 409 },
+        );
+      }
     }
 
     const otpCode = Math.floor(10000 + Math.random() * 90000).toString();
 
-    await Otp.deleteMany({ phone: phone.trim() });
+    await Otp.deleteMany({
+      $or: [{ phone: cleanPhone }, { phone: cleanPhone.replace(/^0/, "") }],
+    });
 
     await Otp.create({
-      phone: phone.trim(),
+      phone: cleanPhone,
       code: otpCode,
     });
+
+    const smsUsername = process.env.SMS_IR_USERNAME;
+    const smsPassword = process.env.SMS_IR_PASSWORD;
+    const smsLine = process.env.SMS_IR_LINE;
+
+    if (smsUsername && smsPassword && smsLine) {
+      const smsText = encodeURIComponent(`کد ورود شما : ${otpCode}`);
+      await fetch(
+        `https://api.sms.ir/v1/send?username=${smsUsername}&password=${smsPassword}&mobile=${cleanPhone}&line=${smsLine}&text=${smsText}`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "text/plain",
+          },
+        },
+      ).catch(() => {});
+    }
 
     return NextResponse.json(
       {
