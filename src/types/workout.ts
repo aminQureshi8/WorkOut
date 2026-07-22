@@ -244,3 +244,13 @@ export interface DownloadButtonProps {
   workoutPlan: WorkoutPlan;
   workoutDays: DayItem[];
 }
+
+export interface VideosManagementRef {
+  fetchVideos: () => Promise<void>;
+}
+
+export interface VideosManagementProps {
+  setShowUploadVideoModal: (show: boolean) => void;
+  setWatchingVideo: (video: VideoInfo | null) => void;
+  onVideosUpdate?: (videos: VideoInfo[]) => void;
+}

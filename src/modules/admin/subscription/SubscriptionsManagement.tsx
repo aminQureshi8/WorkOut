@@ -3,19 +3,19 @@
 import { useState, useEffect, useRef } from "react";
 import { Plus, Users, Check, X, Clock, Film } from "lucide-react";
 
-import { PackageInfo, SubscriptionItem, VideoInfo } from "@/types/workout";
+import { PackageInfo, SubscriptionItem, VideoInfo, SubscriptionsTableRef, VideosManagementRef } from "@/types/workout";
 
 import UploadVideoModal from "./UploadVideoModal";
 import VideosManagement from "./VideosManagement";
 import CreateSubscriptionModal from "./CreateSubscriptionModal";
 import SubscriptionsTable from "./SubscriptionsTable";
-import { SubscriptionsTableRef } from "@/types/workout";
 import WorkoutPlanModal from "./WorkoutPlanModal";
 import EditSubscriptionModal from "./EditSubscriptionModal";
 import VideoPlayerModal from "@/components/VideoPlayerModal";
 
 export default function SubscriptionsManagement() {
   const tableRef = useRef<SubscriptionsTableRef>(null);
+  const videosRef = useRef<VideosManagementRef>(null);
 
   const [activeTab, setActiveTab] = useState<"subscriptions" | "videos">(
     "subscriptions",
@@ -38,10 +38,8 @@ export default function SubscriptionsManagement() {
     useState<PackageInfo | null>(null);
 
   const [packages, setPackages] = useState<PackageInfo[]>([]);
-
   const [videos, setVideos] = useState<VideoInfo[]>([]);
 
-  const [loadingVideos, setLoadingVideos] = useState(false);
   const [showUploadVideoModal, setShowUploadVideoModal] = useState(false);
   const [watchingVideo, setWatchingVideo] = useState<VideoInfo | null>(null);
 
@@ -57,24 +55,8 @@ export default function SubscriptionsManagement() {
     }
   };
 
-  const fetchVideos = async () => {
-    setLoadingVideos(true);
-    try {
-      const res = await fetch("/api/admin/video");
-      if (res.ok) {
-        const data = await res.json();
-        setVideos(data.videos || []);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingVideos(false);
-    }
-  };
-
   useEffect(() => {
     fetchPackages();
-    fetchVideos();
   }, []);
 
   const handleOpenPlanModal = (pkg: PackageInfo) => {
@@ -94,13 +76,10 @@ export default function SubscriptionsManagement() {
       <div className="container mx-auto pt-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1
-              className="text-3xl text-white mb-2"
-              style={{ fontFamily: "Marbeh, sans-serif" }}
-            >
+            <h1 className="text-3xl text-white mb-2 font-morabeReg">
               مدیریت اشتراک و ویدیوها
             </h1>
-            <p className="text-white/60">
+            <p className="text-white/60 text-xs sm:text-sm md:text-base">
               تخصیص برنامه‌های ورزشی به کاربران و مدیریت بانک فیلم‌های آموزشی
               بدنسازی
             </p>
@@ -126,10 +105,10 @@ export default function SubscriptionsManagement() {
           </div>
         </div>
 
-        <div className="border-b border-white/10 mb-6 flex gap-4">
+        <div className="border-b border-white/10 mb-6 flex gap-4 overflow-x-auto">
           <button
             onClick={() => setActiveTab("subscriptions")}
-            className={`pb-3 font-semibold text-sm transition-all border-b-2 px-2 flex items-center gap-2 ${
+            className={`pb-3 font-semibold text-sm transition-all border-b-2 px-2 flex items-center gap-2 whitespace-nowrap shrink-0 ${
               activeTab === "subscriptions"
                 ? "border-orange-500 text-white"
                 : "border-transparent text-white/55 hover:text-white"
@@ -140,7 +119,7 @@ export default function SubscriptionsManagement() {
           </button>
           <button
             onClick={() => setActiveTab("videos")}
-            className={`pb-3 font-semibold text-sm transition-all border-b-2 px-2 flex items-center gap-2 ${
+            className={`pb-3 font-semibold text-sm transition-all border-b-2 px-2 flex items-center gap-2 whitespace-nowrap shrink-0 ${
               activeTab === "videos"
                 ? "border-orange-500 text-white"
                 : "border-transparent text-white/55 hover:text-white"
@@ -159,10 +138,7 @@ export default function SubscriptionsManagement() {
                   <span className="text-white/60 text-sm">کل اشتراک‌ها</span>
                   <Users className="w-5 h-5 text-purple-400" />
                 </div>
-                <div
-                  className="text-3xl text-white font-bold"
-                  style={{ fontFamily: "Marbeh, sans-serif" }}
-                >
+                <div className="text-3xl text-white font-bold font-morabeReg">
                   {formatNumber(stats.total)}
                 </div>
               </div>
@@ -171,10 +147,7 @@ export default function SubscriptionsManagement() {
                   <span className="text-white/60 text-sm">فعال</span>
                   <Check className="w-5 h-5 text-green-400" />
                 </div>
-                <div
-                  className="text-3xl text-white font-bold"
-                  style={{ fontFamily: "Marbeh, sans-serif" }}
-                >
+                <div className="text-3xl text-white font-bold font-morabeReg">
                   {formatNumber(stats.active)}
                 </div>
               </div>
@@ -183,10 +156,7 @@ export default function SubscriptionsManagement() {
                   <span className="text-white/60 text-sm">آزمایشی (Trial)</span>
                   <Clock className="w-5 h-5 text-blue-400" />
                 </div>
-                <div
-                  className="text-3xl text-white font-bold"
-                  style={{ fontFamily: "Marbeh, sans-serif" }}
-                >
+                <div className="text-3xl text-white font-bold font-morabeReg">
                   {formatNumber(stats.trial)}
                 </div>
               </div>
@@ -195,10 +165,7 @@ export default function SubscriptionsManagement() {
                   <span className="text-white/60 text-sm">منقضی شده</span>
                   <X className="w-5 h-5 text-red-400" />
                 </div>
-                <div
-                  className="text-3xl text-white font-bold"
-                  style={{ fontFamily: "Marbeh, sans-serif" }}
-                >
+                <div className="text-3xl text-white font-bold font-morabeReg">
                   {formatNumber(stats.expired)}
                 </div>
               </div>
@@ -218,9 +185,8 @@ export default function SubscriptionsManagement() {
 
         {activeTab === "videos" && (
           <VideosManagement
-            videos={videos}
-            loadingVideos={loadingVideos}
-            fetchVideos={fetchVideos}
+            ref={videosRef}
+            onVideosUpdate={setVideos}
             setShowUploadVideoModal={setShowUploadVideoModal}
             setWatchingVideo={setWatchingVideo}
           />
@@ -229,7 +195,7 @@ export default function SubscriptionsManagement() {
         {showUploadVideoModal && (
           <UploadVideoModal
             onClose={() => setShowUploadVideoModal(false)}
-            onUploadSuccess={fetchVideos}
+            onUploadSuccess={() => videosRef.current?.fetchVideos()}
           />
         )}
 

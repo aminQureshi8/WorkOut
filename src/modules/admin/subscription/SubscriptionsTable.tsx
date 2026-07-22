@@ -14,6 +14,7 @@ import {
   Search,
   Utensils,
   Trophy,
+  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -33,6 +34,7 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
     const fetchSubscriptions = useCallback(async () => {
       setLoading(true);
@@ -189,12 +191,11 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
           </div>
         </div>
 
-        {/* Table wrapper */}
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-right border-collapse">
+            <table className="w-full min-w-[650px] text-right border-collapse">
               <thead>
-                <tr className="border-b border-white/10 bg-white/5 text-white/60 text-sm">
+                <tr className="border-b border-white/10 bg-white/5 text-white/60 text-sm whitespace-nowrap">
                   <th className="p-4 font-semibold">کاربر</th>
                   <th className="p-4 font-semibold">پکیج</th>
                   <th className="p-4 font-semibold">شروع</th>
@@ -225,9 +226,9 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
                       key={sub._id}
                       className="border-b border-white/5 hover:bg-white/5 transition-colors text-white text-sm"
                     >
-                      <td className="p-4">
+                      <td className="p-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center font-bold text-white shadow-md">
+                          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center font-bold text-white shadow-md shrink-0">
                             {sub.userId?.fullName?.charAt(0) ||
                               sub.userId?.username?.charAt(0) ||
                               "U"}
@@ -243,61 +244,106 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
                           </div>
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 whitespace-nowrap">
                         <span className="font-semibold text-orange-400">
                           {sub.packageId?.name || "پکیج حذف شده"}
                         </span>
                       </td>
-                      <td className="p-4 text-white/80">
+                      <td className="p-4 text-white/80 whitespace-nowrap">
                         {formatDate(sub.startsAt)}
                       </td>
-                      <td className="p-4 text-white/80">
+                      <td className="p-4 text-white/80 whitespace-nowrap">
                         {formatDate(sub.endsAt)}
                       </td>
-                      <td className="p-4">{getStatusBadge(sub.status)}</td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-center gap-2">
+                      <td className="p-4 whitespace-nowrap">{getStatusBadge(sub.status)}</td>
+                      <td className="p-4 text-center whitespace-nowrap">
+                        <div className="relative inline-block text-right">
                           <button
-                            onClick={() => {
-                              if (sub.packageId) {
-                                onOpenPlanModal(sub.packageId);
-                              } else {
-                                showAlert("خطا", "پکیج یافت نشد!", "error");
-                              }
-                            }}
-                            className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-lg flex items-center gap-1 text-xs transition-colors cursor-pointer"
+                            onClick={() =>
+                              setOpenDropdownId(
+                                openDropdownId === sub._id ? null : sub._id,
+                              )
+                            }
+                            className="bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 text-xs transition-colors cursor-pointer"
                           >
-                            <Dumbbell className="w-3.5 h-3.5" />
-                            برنامه تمرینی
+                            <span>عملیات</span>
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                                openDropdownId === sub._id ? "rotate-180" : ""
+                              }`}
+                            />
                           </button>
-                          <Link
-                            href={`/admin/meal-plans?search=${encodeURIComponent(sub.packageId?.name || "")}`}
-                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg flex items-center gap-1 text-xs transition-colors cursor-pointer"
-                          >
-                            <Utensils className="w-3.5 h-3.5" />
-                            برنامه غذایی
-                          </Link>
-                          <Link
-                            href={`/admin/pr?userId=${encodeURIComponent(sub.userId?._id || "")}`}
-                            className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/30 px-3 py-1.5 rounded-lg flex items-center gap-1 text-xs transition-colors cursor-pointer"
-                          >
-                            <Trophy className="w-3.5 h-3.5" />
-                            رکوردهای شخصی (PR)
-                          </Link>
-                          <button
-                            onClick={() => onEdit(sub)}
-                            className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-lg flex items-center gap-1 text-xs transition-colors cursor-pointer"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                            ویرایش
-                          </button>
-                          <button
-                            onClick={() => handleDeleteSubscription(sub._id)}
-                            className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 p-1.5 rounded-lg transition-colors cursor-pointer"
-                            title="حذف اشتراک"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+
+                          {openDropdownId === sub._id && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => setOpenDropdownId(null)}
+                              />
+                              <div className="absolute left-0 mt-2 w-48 bg-gray-900 border border-white/15 rounded-xl shadow-2xl z-20 overflow-hidden py-1 backdrop-blur-xl">
+                                <button
+                                  onClick={() => {
+                                    setOpenDropdownId(null);
+                                    if (sub.packageId) {
+                                      onOpenPlanModal(sub.packageId);
+                                    } else {
+                                      showAlert("خطا", "پکیج یافت نشد!", "error");
+                                    }
+                                  }}
+                                  className="w-full text-right px-3 py-2 text-xs text-purple-300 hover:bg-purple-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Dumbbell className="w-4 h-4 text-purple-400" />
+                                  <span>برنامه تمرینی</span>
+                                </button>
+
+                                <Link
+                                  href={`/admin/meal-plans?search=${encodeURIComponent(
+                                    sub.packageId?.name || "",
+                                  )}`}
+                                  onClick={() => setOpenDropdownId(null)}
+                                  className="w-full text-right px-3 py-2 text-xs text-emerald-300 hover:bg-emerald-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Utensils className="w-4 h-4 text-emerald-400" />
+                                  <span>برنامه غذایی</span>
+                                </Link>
+
+                                <Link
+                                  href={`/admin/pr?userId=${encodeURIComponent(
+                                    sub.userId?._id || "",
+                                  )}`}
+                                  onClick={() => setOpenDropdownId(null)}
+                                  className="w-full text-right px-3 py-2 text-xs text-yellow-300 hover:bg-yellow-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Trophy className="w-4 h-4 text-yellow-400" />
+                                  <span>رکوردهای شخصی (PR)</span>
+                                </Link>
+
+                                <div className="my-1 border-t border-white/10" />
+
+                                <button
+                                  onClick={() => {
+                                    setOpenDropdownId(null);
+                                    onEdit(sub);
+                                  }}
+                                  className="w-full text-right px-3 py-2 text-xs text-blue-300 hover:bg-blue-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Edit className="w-4 h-4 text-blue-400" />
+                                  <span>ویرایش</span>
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    setOpenDropdownId(null);
+                                    handleDeleteSubscription(sub._id);
+                                  }}
+                                  className="w-full text-right px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-4 h-4 text-red-400" />
+                                  <span>حذف اشتراک</span>
+                                </button>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

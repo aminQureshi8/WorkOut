@@ -5,6 +5,7 @@
   --font-danaDemiBold: var(--font-danaDemiBold);
   --font-danaLight: var(--font-danaLight);
   --font-morabbaReg: var(--font-morabbaReg);
+  --font-morabeReg: var(--font-morabbaReg);
 }
 
 @utility ss02 {
