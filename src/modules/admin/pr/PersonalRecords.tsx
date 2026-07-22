@@ -44,7 +44,7 @@ export default function PersonalRecords({ userId }: PersonalRecordsProps) {
           </div>
         </div>
 
-        <PRChart />
+        <PRChart userId={userId} />
 
         <CreatePRModal
           isOpen={isModalOpen}

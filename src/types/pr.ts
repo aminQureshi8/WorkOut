@@ -55,3 +55,20 @@ export interface TestMetricItem {
   description?: string;
   createdAt?: string;
 }
+
+export interface PRChartProps {
+  userId?: string;
+}
+
+export interface PRRecordItem {
+  _id: string;
+  userId: string;
+  coachId?: string;
+  category: string;
+  testName: string;
+  value: number;
+  unit: string;
+  date: string;
+  notes?: string;
+  createdAt?: string;
+}

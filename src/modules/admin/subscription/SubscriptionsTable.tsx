@@ -44,6 +44,8 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
         if (!res.ok) throw new Error("Failed to fetch subscriptions");
         const data = await res.json();
         setSubscriptions(data.subscriptions || []);
+        console.log(data);
+        
         setTotalPages(data.totalPages || 1);
 
         const statsRes = await fetch("/api/admin/subscription?limit=10000");
@@ -129,7 +131,7 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
       if (
         !(await showConfirm(
           "حذف اشتراک",
-          "آیا از حذف این اشتراک اطمینان دارید@",
+          "آیا از حذف این اشتراک اطمینان دارید؟",
         ))
       )
         return;
@@ -191,8 +193,8 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
           </div>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
+          <div className="overflow-x-auto min-h-[360px] pb-28">
             <table className="w-full min-w-[650px] text-right border-collapse">
               <thead>
                 <tr className="border-b border-white/10 bg-white/5 text-white/60 text-sm whitespace-nowrap">
@@ -277,10 +279,10 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
                           {openDropdownId === sub._id && (
                             <>
                               <div
-                                className="fixed inset-0 z-10"
+                                className="fixed inset-0 z-20"
                                 onClick={() => setOpenDropdownId(null)}
                               />
-                              <div className="absolute left-0 mt-2 w-48 bg-gray-900 border border-white/15 rounded-xl shadow-2xl z-20 overflow-hidden py-1 backdrop-blur-xl">
+                              <div className="absolute left-0 top-full mt-1.5 w-48 bg-gray-900/95 border border-white/15 rounded-xl shadow-2xl z-30 overflow-hidden py-1.5 backdrop-blur-xl">
                                 <button
                                   onClick={() => {
                                     setOpenDropdownId(null);
@@ -290,7 +292,7 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
                                       showAlert("خطا", "پکیج یافت نشد!", "error");
                                     }
                                   }}
-                                  className="w-full text-right px-3 py-2 text-xs text-purple-300 hover:bg-purple-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                  className="w-full text-right px-3.5 py-2 text-xs text-purple-300 hover:bg-purple-500/15 flex items-center gap-2.5 transition-colors cursor-pointer"
                                 >
                                   <Dumbbell className="w-4 h-4 text-purple-400" />
                                   <span>برنامه تمرینی</span>
@@ -301,7 +303,7 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
                                     sub.packageId?.name || "",
                                   )}`}
                                   onClick={() => setOpenDropdownId(null)}
-                                  className="w-full text-right px-3 py-2 text-xs text-emerald-300 hover:bg-emerald-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                  className="w-full text-right px-3.5 py-2 text-xs text-emerald-300 hover:bg-emerald-500/15 flex items-center gap-2.5 transition-colors cursor-pointer"
                                 >
                                   <Utensils className="w-4 h-4 text-emerald-400" />
                                   <span>برنامه غذایی</span>
@@ -309,12 +311,14 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
 
                                 <Link
                                   href={`/admin/pr?userId=${encodeURIComponent(
-                                    sub.userId?._id || "",
+                                    (typeof sub.userId === "object"
+                                      ? sub.userId?._id
+                                      : sub.userId) || "",
                                   )}`}
                                   onClick={() => setOpenDropdownId(null)}
-                                  className="w-full text-right px-3 py-2 text-xs text-yellow-300 hover:bg-yellow-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                  className="w-full text-right px-3.5 py-2 text-xs text-amber-300 hover:bg-amber-500/15 flex items-center gap-2.5 transition-colors cursor-pointer"
                                 >
-                                  <Trophy className="w-4 h-4 text-yellow-400" />
+                                  <Trophy className="w-4 h-4 text-amber-400" />
                                   <span>رکوردهای شخصی (PR)</span>
                                 </Link>
 
@@ -325,7 +329,7 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
                                     setOpenDropdownId(null);
                                     onEdit(sub);
                                   }}
-                                  className="w-full text-right px-3 py-2 text-xs text-blue-300 hover:bg-blue-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                  className="w-full text-right px-3.5 py-2 text-xs text-blue-300 hover:bg-blue-500/15 flex items-center gap-2.5 transition-colors cursor-pointer"
                                 >
                                   <Edit className="w-4 h-4 text-blue-400" />
                                   <span>ویرایش</span>
@@ -336,9 +340,9 @@ export default forwardRef<SubscriptionsTableRef, SubscriptionsTableProps>(
                                     setOpenDropdownId(null);
                                     handleDeleteSubscription(sub._id);
                                   }}
-                                  className="w-full text-right px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                  className="w-full text-right px-3.5 py-2 text-xs text-rose-400 hover:bg-rose-500/15 flex items-center gap-2.5 transition-colors cursor-pointer"
                                 >
-                                  <Trash2 className="w-4 h-4 text-red-400" />
+                                  <Trash2 className="w-4 h-4 text-rose-400" />
                                   <span>حذف اشتراک</span>
                                 </button>
                               </div>
