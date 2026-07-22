@@ -41,7 +41,7 @@ export default function FAQ() {
                   <h3 className="text-lg font-medium text-white">
                     {faq.question}
                   </h3>
-                  <div className="text-orange-500 group-open:rotate-180 transition-transform">
+                  <div className="text-amber-500 group-open:rotate-180 transition-transform">
                     <svg
                       className="w-6 h-6"
                       fill="none"

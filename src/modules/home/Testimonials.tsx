@@ -44,7 +44,7 @@ export default function Testimonials() {
                 {[...Array(testimonial.rating)].map((_, i) => (
                   <BiStar
                     key={i}
-                    className="w-5 h-5 fill-orange-500 text-orange-500"
+                    className="w-5 h-5 fill-amber-500 text-amber-500"
                   />
                 ))}
               </div>

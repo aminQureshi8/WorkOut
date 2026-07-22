@@ -10,7 +10,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-8 sm:gap-8 mb-12">
           <div className="col-span-2 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <BiDumbbell className="w-8 h-8 text-orange-500" />
+              <BiDumbbell className="w-8 h-8 text-amber-500" />
               <span className="font-bold text-xl text-white font-morabbaReg">
                 استار فیت
               </span>
@@ -128,7 +128,7 @@ export default function Footer() {
                 href="https://www.linkedin.com/in/amin-ghoreishi-399a26395?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-orange-500 hover:text-orange-400 transition-colors"
+                className="text-amber-500 hover:text-amber-400 transition-colors"
               >
                 Amin Ghoreishi
               </a>

@@ -32,7 +32,7 @@ export default function LatestArticles({ articles }: LatestArticlesProps) {
           </div>
           <Link
             href="/articles"
-            className="text-orange-500 hover:text-orange-400 flex items-center gap-2"
+            className="text-amber-500 hover:text-amber-400 flex items-center gap-2"
           >
             <span>مشاهده همه</span>
             <BsArrowLeft className="w-4 h-4" />

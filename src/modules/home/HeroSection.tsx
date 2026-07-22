@@ -19,7 +19,7 @@ export default function HeroSection() {
               <div className="flex flex-col sm:flex-row gap-4 font-danaMed">
                 <Link
                   href="/packages"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg transition-colors text-center flex items-center justify-center gap-2"
+                  className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-lg transition-colors text-center flex items-center justify-center gap-2"
                 >
                   <span>مشاهده پکیج‌ها</span>
                   <BsArrowLeft className="w-5 h-5" />
@@ -31,7 +31,7 @@ export default function HeroSection() {
             </div>
             <div className="relative">
               <div className="aspect-square -z-10 rounded-3xl bg-gradient-to-br from-orange-500/20 to-purple-500/20 backdrop-blur-xl border border-white/10 flex items-center justify-center">
-                <BiDumbbell className="w-32 h-32 text-orange-500/50" />
+                <BiDumbbell className="w-32 h-32 text-amber-500/50" />
               </div>
             </div>
           </div>

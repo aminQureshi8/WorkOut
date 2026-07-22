@@ -10,7 +10,7 @@ export default function Header({ session }: { session: any }) {
   const getLinkClass = (href: string) => {
     const isActive = pathname === href;
     return isActive
-      ? "text-orange-500 transition-colors"
+      ? "text-amber-500 transition-colors"
       : "text-white/80 hover:text-orange-500 transition-colors";
   };
 
@@ -20,7 +20,7 @@ export default function Header({ session }: { session: any }) {
         <div className="mx-auhref font-danaMed">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center gap-2">
-              <BiDumbbell className="w-8 h-8 text-orange-500" />
+              <BiDumbbell className="w-8 h-8 text-amber-500 " />
               <span className="font-bold text-xl text-white font-morabbaReg">
                 استارفیت
               </span>

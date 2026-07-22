@@ -65,11 +65,11 @@ export default function WorkoutPlans() {
               <p className="text-white/70 mb-6">{plan.description}</p>
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-2 text-white/80 text-sm">
-                  <BsClock className="w-4 h-4 text-orange-500" />
+                  <BsClock className="w-4 h-4 text-amber-500" />
                   <span>مدت: {plan.duration}</span>
                 </div>
                 <div className="flex items-center gap-2 text-white/80 text-sm">
-                  <BiTrendingUp className="w-4 h-4 text-orange-500" />
+                  <BiTrendingUp className="w-4 h-4 text-amber-500" />
                   <span>سطح: {plan.level}</span>
                 </div>
               </div>
@@ -79,7 +79,7 @@ export default function WorkoutPlans() {
                     key={idx}
                     className="flex items-start gap-2 text-white/70 text-sm"
                   >
-                    <BiCheckCircle className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                    <BiCheckCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
                     <span>{feature}</span>
                   </li>
                 ))}
