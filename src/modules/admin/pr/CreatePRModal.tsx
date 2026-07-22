@@ -1,27 +1,73 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import useSWR from "swr";
 import { X, Loader2 } from "lucide-react";
 import { showAlert } from "@/utils/alert";
-import type { CreatePRModalProps, PRFormInput } from "@/types/pr";
+import type { CreatePRModalProps, PRFormInput, TestMetricItem } from "@/types/pr";
 
-export default function CreatePRModal({ isOpen, onClose, onSuccess, userId }: CreatePRModalProps) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<PRFormInput>({
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+export default function CreatePRModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  userId,
+}: CreatePRModalProps) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<PRFormInput>({
     defaultValues: {
       category: "strength",
-      testName: "1RM Squat",
+      testName: "",
       unit: "kg",
       date: new Date().toLocaleDateString("fa-IR"),
       notes: "",
-    }
+    },
   });
 
   const [submitting, setSubmitting] = useState(false);
 
+  const { data: metricsData } = useSWR(
+    isOpen ? "/api/admin/metric" : null,
+    fetcher,
+  );
+  const metrics: TestMetricItem[] = metricsData?.metrics || [];
+
+  useEffect(() => {
+    if (metrics.length > 0 && isOpen) {
+      const first = metrics[0];
+      setValue("metricId", first._id);
+      setValue("testName", first.name);
+      if (first.category) setValue("category", first.category);
+      if (first.unit) setValue("unit", first.unit);
+    }
+  }, [metrics, isOpen, setValue]);
+
+  const handleMetricSelect = (metricId: string) => {
+    if (!metricId) return;
+    const selected = metrics.find((m) => m._id === metricId);
+    if (selected) {
+      setValue("metricId", selected._id);
+      setValue("testName", selected.name);
+      if (selected.category) setValue("category", selected.category);
+      if (selected.unit) setValue("unit", selected.unit);
+    }
+  };
+
   const onSubmit = async (data: PRFormInput) => {
     if (!userId) {
       showAlert("خطا", "شناسه کاربر یافت نشد. امکان ثبت رکورد وجود ندارد.", "error");
+      return;
+    }
+
+    if (!data.testName && !data.metricId) {
+      showAlert("خطا", "لطفاً یک متس ارزیابی انتخاب کنید.", "error");
       return;
     }
 
@@ -59,76 +105,68 @@ export default function CreatePRModal({ isOpen, onClose, onSuccess, userId }: Cr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
       <div className="relative w-full max-w-lg bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <h2 className="text-xl text-white font-bold font-morabbaReg">ثبت رکورد شخصی جدید (PR)</h2>
-          <button onClick={onClose} className="text-white/60 hover:text-white transition-colors cursor-pointer">
+          <h2 className="text-xl text-white font-bold font-morabbaReg">
+            ثبت رکورد شخصی جدید (PR)
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-white/60 hover:text-white transition-colors cursor-pointer"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4 overflow-y-auto flex-1">
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-white/80 text-sm mb-2">دسته‌بندی</label>
-              <select
-                {...register("category", { required: true })}
-                className="w-full bg-gray-950 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500/50 text-sm"
-              >
-                <option value="strength">قدرت</option>
-                <option value="speed">سرعت</option>
-                <option value="power">توان</option>
-                <option value="endurance">استقامت</option>
-              </select>
-            </div>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="p-6 space-y-4 overflow-y-auto flex-1"
+        >
+          <input type="hidden" {...register("testName")} />
+          <input type="hidden" {...register("category")} />
+          <input type="hidden" {...register("unit")} />
 
-            <div>
-              <label className="block text-white/80 text-sm mb-2">واحد اندازه‌گیری</label>
-              <select
-                {...register("unit", { required: true })}
-                className="w-full bg-gray-950 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500/50 text-sm"
-              >
-                <option value="kg">کیلوگرم (kg)</option>
-                <option value="sec">ثانیه (sec)</option>
-                <option value="cm">سانتی‌متر (cm)</option>
-                <option value="meter">متر (meter)</option>
-                <option value="level">سطح (level)</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-white/80 text-sm mb-2">
+              انتخاب متس ارزیابی (Metric)
+            </label>
+            <select
+              onChange={(e) => handleMetricSelect(e.target.value)}
+              className="w-full bg-gray-950 border border-purple-500/30 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 text-sm"
+            >
+              {metrics.length === 0 ? (
+                <option value="">در حال بارگذاری یا هیچ متسی ثبت نشده است...</option>
+              ) : (
+                metrics.map((m) => (
+                  <option key={m._id} value={m._id}>
+                    {m.name} ({m.unit})
+                  </option>
+                ))
+              )}
+            </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-white/80 text-sm mb-2">نام حرکت / تست</label>
-              <select
-                {...register("testName", { required: true })}
-                className="w-full bg-gray-950 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500/50 text-sm"
-              >
-                <option value="1RM Squat">1RM اسکات پا</option>
-                <option value="1RM Bench Press">1RM پرس سینه</option>
-                <option value="20m Run">دوی ۲۰ متر</option>
-                <option value="40m Run">دوی ۴۰ متر</option>
-                <option value="Vertical Jump">پرش عمودی</option>
-                <option value="Yo-Yo Test">تست Yo-Yo</option>
-                <option value="Cooper Test">تست Cooper</option>
-                <option value="Weight Endurance">استقامت با وزنه</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-white/80 text-sm mb-2">مقدار رکورد</label>
-              <input
-                type="number"
-                step="any"
-                {...register("value", { required: true, valueAsNumber: true })}
-                placeholder="مثال: ۱۰۰ یا ۲.۹۵"
-                className="w-full bg-gray-950 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 text-left font-sans text-sm"
-              />
-              {errors.value && <p className="text-red-400 text-xs mt-1">وارد کردن مقدار رکورد الزامی است.</p>}
-            </div>
+          <div>
+            <label className="block text-white/80 text-sm mb-2">
+              مقدار رکورد
+            </label>
+            <input
+              type="number"
+              step="any"
+              {...register("value", { required: true, valueAsNumber: true })}
+              placeholder="مثال: ۱۰۰ یا ۲.۹۵"
+              className="w-full bg-gray-950 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 text-left font-sans text-sm"
+            />
+            {errors.value && (
+              <p className="text-red-400 text-xs mt-1">
+                وارد کردن مقدار رکورد الزامی است.
+              </p>
+            )}
           </div>
 
           <div>
@@ -141,7 +179,9 @@ export default function CreatePRModal({ isOpen, onClose, onSuccess, userId }: Cr
           </div>
 
           <div>
-            <label className="block text-white/80 text-sm mb-2">توضیحات / یادداشت</label>
+            <label className="block text-white/80 text-sm mb-2">
+              توضیحات / یادداشت
+            </label>
             <textarea
               {...register("notes")}
               rows={3}

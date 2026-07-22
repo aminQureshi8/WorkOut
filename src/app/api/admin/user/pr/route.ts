@@ -8,7 +8,17 @@ export async function GET(req: NextRequest) {
   try {
     await dbConnect();
 
-    const search = req.nextUrl.searchParams.get("search");
+    const { searchParams } = req.nextUrl;
+    const userId = searchParams.get("userId");
+    const search = searchParams.get("search");
+
+    if (userId) {
+      const records = await Pr.find({ userId })
+        .sort({ date: 1, createdAt: 1 })
+        .lean();
+      return NextResponse.json({ success: true, records });
+    }
+
     if (!search || !search.trim()) {
       return NextResponse.json([]);
     }
@@ -33,12 +43,16 @@ export async function GET(req: NextRequest) {
       },
       "userId",
     )
-
       .populate("userId", "username fullName email")
       .lean();
 
     return NextResponse.json(subscriptions);
-  } catch (error) {}
+  } catch (error: any) {
+    return NextResponse.json(
+      { message: error.message || "Failed to fetch records" },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {

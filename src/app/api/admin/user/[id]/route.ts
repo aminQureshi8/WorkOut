@@ -1,6 +1,43 @@
 import dbConnect from "@/lib/dbConnect";
 import User from "@/model/User";
+import Subscription from "@/model/Subscription";
 import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await dbConnect();
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
+
+    const user = await User.findById(id).select("-password").lean();
+    if (!user) {
+      return NextResponse.json({ message: "کاربر پیدا نشد" }, { status: 404 });
+    }
+
+    const activeSubscription = await Subscription.findOne({
+      userId: id,
+      status: { $in: ["active", "trial"] },
+    })
+      .populate("packageId", "name slug colorClass")
+      .lean();
+
+    return NextResponse.json({
+      success: true,
+      user: {
+        ...user,
+        activeSubscription: activeSubscription || null,
+      },
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { message: error.message || "خطا در دریافت اطلاعات کاربر" },
+      { status: 500 },
+    );
+  }
+}
 
 export async function PATCH(
   req: NextRequest,
@@ -18,7 +55,6 @@ export async function PATCH(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Update allowable fields
     if (data.username !== undefined) user.username = data.username;
     if (data.email !== undefined) user.email = data.email.toLowerCase();
     if (data.phone !== undefined) user.phone = data.phone;
@@ -51,7 +87,6 @@ export async function PATCH(
       },
     });
   } catch (error: any) {
-    console.error("PATCH error:", error);
     return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
   }
 }
