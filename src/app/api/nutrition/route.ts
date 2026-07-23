@@ -1,22 +1,22 @@
 import dbConnect from "@/lib/dbConnect";
 import NutritionLog from "@/model/NutritionLog";
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
 
-    const { searchParams } = req.nextUrl;
-    const userId = searchParams.get("userId");
-
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { message: "شناسه کاربر معتبر نمی‌باشد یا ارسال نشده است." },
-        { status: 400 },
+        { message: "شما مجاز به دسترسی به این بخش نیستید." },
+        { status: 401 }
       );
     }
 
+    const userId = session.user.id;
     const body = await req.json();
     const {
       date,
@@ -31,15 +31,14 @@ export async function POST(req: NextRequest) {
     if (!date) {
       return NextResponse.json(
         { message: "ارسال تاریخ الزامی است." },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    const updateFields: any = {};
+    const updateFields: Record<string, unknown> = {};
     if (meals !== undefined) updateFields.meals = meals;
     if (waterIntake !== undefined) updateFields.waterIntake = waterIntake;
-    if (targetCalories !== undefined)
-      updateFields.targetCalories = targetCalories;
+    if (targetCalories !== undefined) updateFields.targetCalories = targetCalories;
     if (targetProtein !== undefined) updateFields.targetProtein = targetProtein;
     if (targetCarbs !== undefined) updateFields.targetCarbs = targetCarbs;
     if (targetFat !== undefined) updateFields.targetFat = targetFat;
@@ -47,15 +46,15 @@ export async function POST(req: NextRequest) {
     const log = await NutritionLog.findOneAndUpdate(
       { userId, date },
       updateFields,
-      { upsert: true, new: true, runValidators: true },
+      { upsert: true, new: true, runValidators: true }
     );
 
     return NextResponse.json(log, { status: 200 });
-  } catch (error: any) {
-    console.error("Nutrition API POST Error:", error);
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "خطای سرور در ثبت اطلاعات تغذیه.";
     return NextResponse.json(
-      { message: error.message || "خطای سرور در ثبت اطلاعات تغذیه." },
-      { status: 500 },
+      { message: errMessage },
+      { status: 500 }
     );
   }
 }
@@ -63,32 +62,33 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
 
-    const { searchParams } = req.nextUrl;
-    const userId = searchParams.get("userId");
-    const date = searchParams.get("date");
-
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { message: "شناسه کاربر معتبر نمی‌باشد یا ارسال نشده است." },
-        { status: 400 },
+        { message: "شما مجاز به دسترسی به این بخش نیستید." },
+        { status: 401 }
       );
     }
+
+    const userId = session.user.id;
+    const { searchParams } = req.nextUrl;
+    const date = searchParams.get("date");
 
     if (!date) {
       return NextResponse.json(
         { message: "ارسال تاریخ الزامی است." },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    const log = await NutritionLog.findOne({ userId, date } , "-__v -updatedAt");
+    const log = await NutritionLog.findOne({ userId, date }, "-__v -updatedAt");
     return NextResponse.json(log || null, { status: 200 });
-  } catch (error: any) {
-    console.error("Nutrition API GET Error:", error);
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "خطای سرور در دریافت اطلاعات تغذیه.";
     return NextResponse.json(
-      { message: error.message || "خطای سرور در دریافت اطلاعات تغذیه." },
-      { status: 500 },
+      { message: errMessage },
+      { status: 500 }
     );
   }
 }
@@ -96,10 +96,16 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
 
-    const { searchParams } = req.nextUrl;
-    const userId = searchParams.get("userId");
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { message: "شما مجاز به دسترسی به این بخش نیستید." },
+        { status: 401 }
+      );
+    }
 
+    const userId = session.user.id;
     const {
       tempTargetCalories,
       tempTargetProtein,
@@ -123,13 +129,13 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json(
       { message: "اطلاعات تغذیه با موفقیت بروزرسانی شد." },
-      { status: 200 },
+      { status: 200 }
     );
-  } catch (error: any) {
-    console.error("Nutrition API PUT Error:", error);
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "خطای سرور در بروزرسانی اطلاعات تغذیه.";
     return NextResponse.json(
-      { message: error.message || "خطای سرور در بروزرسانی اطلاعات تغذیه." },
-      { status: 500 },
+      { message: errMessage },
+      { status: 500 }
     );
   }
 }

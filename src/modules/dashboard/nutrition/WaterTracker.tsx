@@ -6,7 +6,6 @@ import type { WaterTrackerProps } from "@/types/nutrition";
 const WaterTracker: React.FC<WaterTrackerProps> = ({
   selectedDate,
   targetWater,
-  userId,
   waterIntake,
   onWaterChange,
   isLoading,
@@ -14,16 +13,17 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({
   const currentWater = waterIntake;
   const waterPercent = Math.min(
     100,
-    Math.round((currentWater / targetWater) * 100),
+    Math.round((currentWater / targetWater) * 100)
   );
 
   const handleAddWater = async (amount: number) => {
     if (isLoading) return;
+    const previousAmount = currentWater;
     const newAmount = Math.min(4000, currentWater + amount);
     onWaterChange(newAmount);
 
     try {
-      await fetch(`/api/nutrition?userId=${userId}`, {
+      const res = await fetch("/api/nutrition", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,17 +33,21 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({
           waterIntake: newAmount,
         }),
       });
-    } catch (error) {
-      console.error("Error saving water intake:", error);
+      if (!res.ok) {
+        onWaterChange(previousAmount);
+      }
+    } catch {
+      onWaterChange(previousAmount);
     }
   };
 
   const handleResetWater = async () => {
     if (isLoading) return;
+    const previousAmount = currentWater;
     onWaterChange(0);
 
     try {
-      await fetch(`/api/nutrition?userId=${userId}`, {
+      const res = await fetch("/api/nutrition", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -53,8 +57,11 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({
           waterIntake: 0,
         }),
       });
-    } catch (error) {
-      console.error("Error resetting water intake:", error);
+      if (!res.ok) {
+        onWaterChange(previousAmount);
+      }
+    } catch {
+      onWaterChange(previousAmount);
     }
   };
 
@@ -111,7 +118,7 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({
         >
           <Plus className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
           <span className="hidden sm:inline ss02">۲۵۰ میلی‌لیتر (۱ لیوان)</span>
-          <span className="sm:hidden ss02">۲۵۰ میلی‌لیتر</span>
+          <span className="sm:hidden ss02">۲۵0 میلی‌لیتر</span>
         </button>
         <button
           onClick={() => handleAddWater(500)}

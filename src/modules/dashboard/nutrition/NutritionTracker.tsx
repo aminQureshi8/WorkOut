@@ -19,7 +19,7 @@ import { getLocalDateString, getPersianDateLabel } from "@/utils/date";
 
 export default function NutritionTracker({ userId }: { userId: string }) {
   const [selectedDate, setSelectedDate] = useState<string>(
-    getLocalDateString(0),
+    getLocalDateString(0)
   );
 
   const [mealsData, setMealsData] = useState<Record<string, MealData>>({});
@@ -55,9 +55,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
       }
       setIsLoadingMeals(true);
       try {
-        const res = await fetch(
-          `/api/nutrition?userId=${userId}&date=${selectedDate}`,
-        );
+        const res = await fetch(`/api/nutrition?date=${selectedDate}`);
         if (res.ok) {
           const data = await res.json();
 
@@ -70,6 +68,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                 fat: data.targetFat || 70,
               });
             }
+            if (data.targetWater) setTargetWater(data.targetWater);
             setMealsData((prev) => ({
               ...prev,
               [selectedDate]: data.meals || {
@@ -113,15 +112,23 @@ export default function NutritionTracker({ userId }: { userId: string }) {
             [selectedDate]: 0,
           }));
         }
-      } catch (err) {
-        console.error("Error fetching daily log:", err);
+      } catch {
+        setMealsData((prev) => ({
+          ...prev,
+          [selectedDate]: {
+            breakfast: [],
+            lunch: [],
+            dinner: [],
+            snack: [],
+          },
+        }));
       } finally {
         setIsLoadingMeals(false);
         setTargetsLoaded(true);
       }
     };
     fetchDailyLog();
-  }, [selectedDate, userId]);
+  }, [selectedDate, mealsData]);
 
   const changeDate = (direction: "next" | "prev") => {
     const [year, month, day] = selectedDate.split("-").map(Number);
@@ -160,7 +167,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
   const caloriesRemaining = Math.max(0, targetCalories - dailyTotals.calories);
   const calPercent = Math.min(
     100,
-    Math.round((dailyTotals.calories / targetCalories) * 100),
+    Math.round((dailyTotals.calories / targetCalories) * 100)
   );
 
   const handleDeleteFood = useCallback(
@@ -171,8 +178,10 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         dinner: [],
         snack: [],
       };
+
+      const previousMeals = { ...dayMeals };
       const updatedMeal = dayMeals[mealType].filter(
-        (item) => item.id !== itemId,
+        (item) => item.id !== itemId
       );
 
       const updatedMealsForDate = {
@@ -186,7 +195,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
       }));
 
       try {
-        const response = await fetch(`/api/nutrition?userId=${userId}`, {
+        const response = await fetch("/api/nutrition", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -197,13 +206,19 @@ export default function NutritionTracker({ userId }: { userId: string }) {
           }),
         });
         if (!response.ok) {
-          throw new Error("Failed to delete food log from server");
+          setMealsData((prev) => ({
+            ...prev,
+            [selectedDate]: previousMeals,
+          }));
         }
-      } catch (error) {
-        console.error("Error deleting food log:", error);
+      } catch {
+        setMealsData((prev) => ({
+          ...prev,
+          [selectedDate]: previousMeals,
+        }));
       }
     },
-    [selectedDate, userId, mealsData],
+    [selectedDate, mealsData]
   );
 
   const handleSaveFood = useCallback(
@@ -225,7 +240,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
       });
       setIsModalOpen(false);
     },
-    [selectedDate, activeMealType],
+    [selectedDate, activeMealType]
   );
 
   const handleWaterChange = useCallback(
@@ -235,7 +250,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
         [selectedDate]: newAmount,
       }));
     },
-    [selectedDate],
+    [selectedDate]
   );
 
   const handleAddFoodClick = useCallback((mealType: keyof MealData) => {
@@ -315,7 +330,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
               >
                 <div className="flex items-center gap-1">
                   {targetsLoaded ? (
-                    <span className="text-xl sm:text-2xl font-extrabold text-white  ss02">
+                    <span className="text-xl sm:text-2xl font-extrabold text-white ss02">
                       {targetCalories}
                     </span>
                   ) : (
@@ -340,7 +355,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                     }}
                   />
                   <div className="text-center z-10">
-                    <span className="block text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400  ss02">
+                    <span className="block text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 ss02">
                       {dailyTotals.calories}
                     </span>
                     <span className="text-white/40 text-[10px] sm:text-xs mt-0.5 block">
@@ -356,7 +371,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                     باقی‌مانده:
                   </span>
                   {targetsLoaded ? (
-                    <span className="text-white font-bold  text-sm sm:text-lg ss02">
+                    <span className="text-white font-bold text-sm sm:text-lg ss02">
                       {caloriesRemaining} kcal
                     </span>
                   ) : (
@@ -368,7 +383,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                     درصد تکمیل:
                   </span>
                   {targetsLoaded ? (
-                    <span className="text-emerald-400 font-bold  text-xs sm:text-base ss02">
+                    <span className="text-emerald-400 font-bold text-xs sm:text-base ss02">
                       {calPercent}%
                     </span>
                   ) : (
@@ -409,7 +424,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                 <div>
                   <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span className="text-purple-300">پروتئین (عضله‌ساز)</span>
-                    <span className="text-white/60  flex items-center gap-1 ss02">
+                    <span className="text-white/60 flex items-center gap-1 ss02">
                       {dailyTotals.protein} /{" "}
                       {targetsLoaded ? (
                         `${targetMacros.protein}g`
@@ -431,7 +446,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                 <div>
                   <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span className="text-orange-300">کربوهیدرات (انرژی)</span>
-                    <span className="text-white/60  flex items-center gap-1 ss02">
+                    <span className="text-white/60 flex items-center gap-1 ss02">
                       {dailyTotals.carbs} /{" "}
                       {targetsLoaded ? (
                         `${targetMacros.carbs}g`
@@ -453,7 +468,7 @@ export default function NutritionTracker({ userId }: { userId: string }) {
                 <div>
                   <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span className="text-yellow-300">چربی (هورمون‌ساز)</span>
-                    <span className="text-white/60  flex items-center gap-1 ss02">
+                    <span className="text-white/60 flex items-center gap-1 ss02">
                       {dailyTotals.fat} /{" "}
                       {targetsLoaded ? (
                         `${targetMacros.fat}g`
@@ -476,9 +491,9 @@ export default function NutritionTracker({ userId }: { userId: string }) {
           </div>
 
           <WaterTracker
-            userId={userId}
             selectedDate={selectedDate}
             targetWater={targetWater}
+            userId={userId}
             waterIntake={waterData[selectedDate] || 0}
             onWaterChange={handleWaterChange}
             isLoading={isLoadingMeals}
