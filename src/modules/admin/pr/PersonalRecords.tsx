@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Trophy } from "lucide-react";
 import UserSearchBar from "./UserSearchBar";
-import PRChart from "./PRChart";
+import PRChart from "./chart/PRChart";
 import CreatePRModal from "./CreatePRModal";
 import CreateMetricModal from "./CreateMetricModal";
 import type { PersonalRecordsProps } from "@/types/pr";

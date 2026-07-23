@@ -72,3 +72,7 @@ export interface PRRecordItem {
   notes?: string;
   createdAt?: string;
 }
+
+export interface PRHistoryTableProps {
+  sortedRecords: PRRecordItem[];
+}
