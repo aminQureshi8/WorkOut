@@ -1,18 +1,20 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { BankOption, BillingCycle, OrderFormData, OrderPageProps } from "@/types/order";
 import {
   ArrowRight,
   CheckCircle,
   CreditCard,
+  Gift,
   ShieldCheck,
   Zap,
-  Gift,
 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
-const banks = [
+const banks: BankOption[] = [
   { id: "mellat", name: "بانک ملت", logo: "🏦" },
   { id: "melli", name: "بانک ملی", logo: "🏦" },
   { id: "saderat", name: "بانک صادرات", logo: "🏦" },
@@ -21,25 +23,22 @@ const banks = [
   { id: "tejarat", name: "بانک تجارت", logo: "🏦" },
 ];
 
-interface OrderPageProps {
-  package?: any;
-  userId?: string;
-  email?: string;
-}
-
-export default function OrderPage({ package: initialPackage, userId, email }: OrderPageProps) {
+export default function OrderPage({ packageData, email }: OrderPageProps) {
   const router = useRouter();
-  const { register, handleSubmit, watch, setValue } = useForm({
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const { register, handleSubmit, watch, setValue } = useForm<OrderFormData>({
     mode: "onBlur",
     defaultValues: {
-      selectedPackage: initialPackage?._id,
+      selectedPackage: packageData._id,
       billingCycle: "monthly",
       paymentMethod: "gateway",
       selectedBank: "mellat",
       discountCode: "",
       agreedToTerms: false,
       fullName: "",
-      email,
+      email: email || "",
       phone: "",
     },
   });
@@ -51,44 +50,46 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
   const discountCode = watch("discountCode");
   const agreedToTerms = watch("agreedToTerms");
 
-  const currentPackage = initialPackage;
-
-  const getPrice = () => {
+  const getPrice = (): number => {
     switch (billingCycle) {
       case "monthly":
-        return currentPackage?.price?.monthly || 0;
+        return packageData.price?.monthly || 0;
       case "quarterly":
-        return currentPackage?.price?.quarterly || 0;
+        return packageData.price?.quarterly || 0;
       case "biannual":
-        return currentPackage?.price?.biannual || 0;
+        return packageData.price?.biannual || 0;
       default:
-        return currentPackage?.price?.monthly || 0;
+        return packageData.price?.monthly || 0;
     }
   };
 
-  const discountApplied = discountCode?.toUpperCase() === "FIT2024";
+  const discountApplied = discountCode?.trim().toUpperCase() === "FIT2024";
 
-  const getDiscount = () => {
+  const getDiscount = (): number => {
     if (!discountApplied) return 0;
     return Math.floor(getPrice() * 0.15);
   };
 
-  const getFinalPrice = () => getPrice() - getDiscount();
+  const getFinalPrice = (): number => getPrice() - getDiscount();
 
-  const formatNumber = (num: any) => {
+  const formatNumber = (num: number): string => {
     return new Intl.NumberFormat("fa-IR").format(num || 0);
   };
 
-  const onSubmit = async (data: any) => {
-    if (!data.fullName || !data.email || !data.phone) {
-      alert("لطفاً تمام اطلاعات را وارد کنید");
+  const onSubmit = async (data: OrderFormData) => {
+    setErrorMessage(null);
+
+    if (!data.fullName.trim() || !data.email.trim() || !data.phone.trim()) {
+      setErrorMessage("لطفاً تمام اطلاعات کاربر را به درستی وارد کنید");
       return;
     }
 
     if (!data.agreedToTerms) {
-      alert("لطفاً قوانین و مقررات را تایید کنید");
+      setErrorMessage("لطفاً قوانین و مقررات را تایید کنید");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const payload = {
@@ -96,10 +97,10 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
         phone: data.phone,
         packageId: data.selectedPackage,
         billingCycle: data.billingCycle,
-        discountCode: data.discountCode || null,
+        discountCode: data.discountCode ? data.discountCode.trim() : null,
       };
 
-      const res = await fetch(`/api/order?userId=${userId}`, {
+      const res = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -108,7 +109,8 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
       const result = await res.json();
 
       if (!res.ok) {
-        alert(result.message);
+        setErrorMessage(result.message || "خطا در ثبت سفارش");
+        setIsSubmitting(false);
         return;
       }
 
@@ -123,16 +125,26 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
       const verifyResult = await verifyRes.json();
 
       if (!verifyRes.ok) {
-        alert(verifyResult.message);
+        setErrorMessage(verifyResult.message || "خطا در تایید پرداخت");
+        setIsSubmitting(false);
         return;
       }
 
       router.push(`/payment/success?orderId=${orderId}`);
     } catch (error) {
       console.error(error);
-      alert("خطا در ثبت سفارش");
+      setErrorMessage("خطای غیرمنتظره در ثبت سفارش. لطفاً دوباره تلاش کنید");
+      setIsSubmitting(false);
     }
   };
+
+  const availableCycles: BillingCycle[] = ["monthly", "quarterly", "biannual"];
+  const cyclesToDisplay = availableCycles.filter((cycle) => {
+    if (packageData.slug === "footballers") {
+      return cycle === "monthly";
+    }
+    return true;
+  });
 
   return (
     <div
@@ -162,6 +174,12 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
           </p>
         </div>
 
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-sm text-center">
+            {errorMessage}
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="grid grid-cols-1 lg:grid-cols-3 gap-6"
@@ -180,20 +198,20 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
                 <button
                   type="button"
                   onClick={() =>
-                    setValue("selectedPackage", initialPackage?._id)
+                    setValue("selectedPackage", packageData._id)
                   }
                   className={`p-4 rounded-xl border-2 transition-all text-right ${
-                    selectedPackage === initialPackage?._id
+                    selectedPackage === packageData._id
                       ? "border-orange-500 bg-orange-500/10"
                       : "border-white/10 bg-white/5 hover:border-white/20"
                   }`}
                 >
                   <div className="text-white font-medium mb-1">
-                    {currentPackage?.name}
+                    {packageData.name}
                   </div>
 
                   <div className="text-white/60 text-sm">
-                    از {formatNumber(currentPackage?.price?.monthly)} تومان
+                    از {formatNumber(packageData.price?.monthly || 0)} تومان
                   </div>
                 </button>
               </div>
@@ -209,40 +227,33 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
               </h2>
 
               <div className="space-y-3">
-                {["monthly", "quarterly", "biannual"]
-                  .filter((cycle) => {
-                    if (currentPackage?.slug === "footballers") {
-                      return cycle === "monthly";
-                    }
-                    return true;
-                  })
-                  .map((cycle) => (
-                    <button
-                      key={cycle}
-                      type="button"
-                      onClick={() => setValue("billingCycle", cycle)}
-                      className={`w-full p-4 rounded-xl border-2 transition-all flex justify-between items-center ${
-                        billingCycle === cycle
-                          ? "border-orange-500 bg-orange-500/10"
-                          : "border-white/10 bg-white/5 hover:border-white/20"
-                      }`}
-                    >
-                      <div className="text-right">
-                        <div className="text-white font-medium">
-                          {cycle === "monthly" && "یک ماهه"}
-                          {cycle === "quarterly" && "سه ماهه"}
-                          {cycle === "biannual" && "شش ماهه"}
-                        </div>
+                {cyclesToDisplay.map((cycle) => (
+                  <button
+                    key={cycle}
+                    type="button"
+                    onClick={() => setValue("billingCycle", cycle)}
+                    className={`w-full p-4 rounded-xl border-2 transition-all flex justify-between items-center ${
+                      billingCycle === cycle
+                        ? "border-orange-500 bg-orange-500/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <div className="text-right">
+                      <div className="text-white font-medium">
+                        {cycle === "monthly" && "یک ماهه"}
+                        {cycle === "quarterly" && "سه ماهه"}
+                        {cycle === "biannual" && "شش ماهه"}
                       </div>
+                    </div>
 
-                      <div
-                        className="text-white font-bold"
-                        style={{ fontFamily: "Marbeh, sans-serif" }}
-                      >
-                        {formatNumber(currentPackage?.price?.[cycle])} تومان
-                      </div>
-                    </button>
-                  ))}
+                    <div
+                      className="text-white font-bold"
+                      style={{ fontFamily: "Marbeh, sans-serif" }}
+                    >
+                      {formatNumber(packageData.price?.[cycle] || 0)} تومان
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -357,7 +368,7 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
               <input
                 {...register("discountCode")}
                 placeholder="کد تخفیف"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-white/40"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-white/40 mb-4"
               />
 
               <label className="flex items-start gap-3 mb-4 cursor-pointer">
@@ -373,10 +384,10 @@ export default function OrderPage({ package: initialPackage, userId, email }: Or
 
               <button
                 type="submit"
-                disabled={!agreedToTerms}
-                className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-4 rounded-xl disabled:opacity-50"
+                disabled={!agreedToTerms || isSubmitting}
+                className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-4 rounded-xl disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                انتقال به درگاه پرداخت
+                {isSubmitting ? "در حال انتقال..." : "انتقال به درگاه پرداخت"}
               </button>
 
               <div className="grid grid-cols-3 gap-2 mt-4">

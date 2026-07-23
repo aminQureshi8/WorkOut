@@ -1,64 +1,84 @@
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import dbConnect from "@/lib/dbConnect";
 import Order from "@/model/Order";
-import User from "@/model/User";
 import Package from "@/model/Package";
+import User from "@/model/User";
+import { CreateOrderPayload } from "@/types/order";
 import mongoose from "mongoose";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const userId = req.nextUrl.searchParams.get("userId");
+    const session = await getServerSession(authOptions);
 
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return NextResponse.json({ message: "Invalid userId" }, { status: 400 });
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { message: "لطفاً ابتدا وارد حساب کاربری خود شوید" },
+        { status: 401 }
+      );
     }
 
-    const { fullName, phone, packageId, billingCycle, discountCode } =
-      await req.json();
+    const userId = session.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return NextResponse.json({ message: "شناسه کاربر نامعتبر است" }, { status: 400 });
+    }
+
+    const body: CreateOrderPayload = await req.json();
+    const { fullName, phone, packageId, billingCycle, discountCode } = body;
 
     if (!fullName || !phone || !packageId || !billingCycle) {
       return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 },
+        { message: "لطفاً تمام فیلدهای الزامی را تکمیل کنید" },
+        { status: 400 }
       );
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(packageId)) {
+      return NextResponse.json({ message: "شناسه پکیج نامعتبر است" }, { status: 400 });
     }
 
     const user = await User.findByIdAndUpdate(
       userId,
-      {
-        fullName,
-        phone,
-      },
-      { new: true },
+      { fullName, phone },
+      { new: true }
     );
 
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return NextResponse.json({ message: "کاربر یافت نشد" }, { status: 404 });
     }
 
     const pkg = await Package.findById(packageId);
 
-    if (!pkg) {
+    if (!pkg || !pkg.isActive) {
       return NextResponse.json(
-        { message: "Package not found" },
-        { status: 404 },
+        { message: "پکیج انتخاب شده معتبر یا فعال نیست" },
+        { status: 404 }
       );
     }
 
     if (pkg.slug === "footballers" && billingCycle !== "monthly") {
       return NextResponse.json(
-        { message: "Only monthly billing cycle is allowed for this package" },
-        { status: 400 },
+        { message: "برای این پکیج فقط دوره پرداخت یک ماهه امکان‌پذیر است" },
+        { status: 400 }
       );
     }
 
     const originalAmount = pkg.price[billingCycle];
 
+    if (typeof originalAmount !== "number" || originalAmount <= 0) {
+      return NextResponse.json(
+        { message: "قیمت پکیج نامعتبر است" },
+        { status: 400 }
+      );
+    }
+
     let discountPercent = 0;
 
-    if (discountCode === "FIT2024") {
+    if (discountCode && discountCode.trim().toUpperCase() === "FIT2024") {
       discountPercent = 15;
     }
 
@@ -77,18 +97,18 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Order created",
-        orderId: order._id,
+        message: "سفارش با موفقیت ایجاد شد",
+        orderId: String(order._id),
         amount: amountPaid,
       },
-      { status: 201 },
+      { status: 201 }
     );
-  } catch (error: any) {
-    console.error("Order API Error:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "خطای سرور";
 
     return NextResponse.json(
-      { message: error.message || "Server error" },
-      { status: 500 },
+      { message: errorMessage },
+      { status: 500 }
     );
   }
 }
