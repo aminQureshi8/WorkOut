@@ -14,12 +14,14 @@ export async function GET() {
     const subscriptionsCount = await Subscription.countDocuments({});
     const articlesCount = await Blog.countDocuments({});
     const pendingCommentsCount = await Comment.countDocuments({ isApproved: false });
+    const commentsCount = await Comment.countDocuments({});
 
     return NextResponse.json({
       usersCount,
       subscriptionsCount,
       articlesCount,
       pendingCommentsCount,
+      commentsCount,
     });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });

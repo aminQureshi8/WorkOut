@@ -72,7 +72,7 @@ export function getAdminMenuItems(
           id: "comments",
           label: "کامنت‌ها",
           icon: MessageSquare,
-          badge: counts.comments > 0 ? formatNumber(counts.comments) : null,
+          badge: counts.comments > 0 ? formatNumber(counts.comments) : "۰",
           href: "/admin/comments",
         },
         {

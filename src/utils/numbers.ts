@@ -5,3 +5,7 @@ export function toEnglishDigits(str: string): string {
     .replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d).toString())
     .trim();
 }
+
+export function formatNumber(num: number): string {
+  return new Intl.NumberFormat("fa-IR").format(num);
+}

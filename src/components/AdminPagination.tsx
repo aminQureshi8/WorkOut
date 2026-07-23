@@ -1,17 +1,12 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-type Props = {
-  currentPage: number;
-  totalPages: number;
-  setCurrentPage: (page: number) => void;
-};
+import type { PaginationProps } from "@/types/components";
 
 export default function Pagination({
   currentPage,
   totalPages,
   setCurrentPage,
-}: Props) {
+}: PaginationProps) {
   const goToPrevious = () => setCurrentPage(currentPage - 1);
   const goToNext = () => setCurrentPage(currentPage + 1);
 

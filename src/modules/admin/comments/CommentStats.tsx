@@ -1,12 +1,7 @@
 "use client";
 import React, { memo } from "react";
 import { MessageSquare, CheckCircle, Clock } from "lucide-react";
-import { AdminCommentStats } from "@/types/comment";
-
-interface CommentStatsProps {
-  stats: AdminCommentStats;
-  formatNumber: (num: number) => string;
-}
+import type { CommentStatsProps } from "@/types/comment";
 
 const CommentStats = memo(function CommentStats({ stats, formatNumber }: CommentStatsProps) {
   return (

@@ -13,16 +13,16 @@ export async function GET(req: NextRequest) {
     await dbConnect();
 
     const session = await getServerSession(authOptions);
-    // if (!session || (session.user.role !== "admin" && session.user.role !== "coach")) {
-    //   return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
-    // }
-    if (!session) {
+    if (
+      !session ||
+      (session.user.role !== "admin" && session.user.role !== "coach")
+    ) {
       return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
     }
 
     const { searchParams } = new URL(req.url);
     const page = searchParams.get("page") || "1";
-    const limit = searchParams.get("limit") || "10";
+    const limit = 10;
     const isApprovedStr = searchParams.get("isApproved");
     const search = searchParams.get("search");
 
@@ -78,14 +78,10 @@ export async function PUT(req: NextRequest) {
     await dbConnect();
 
     const session = await getServerSession(authOptions);
-    // if (
-    //   !session ||
-    //   (session.user.role !== "admin" && session.user.role !== "coach")
-    // ) {
-    //   return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
-    // }
-
-    if (!session) {
+    if (
+      !session ||
+      (session.user.role !== "admin" && session.user.role !== "coach")
+    ) {
       return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
     }
 
@@ -128,14 +124,10 @@ export async function DELETE(req: NextRequest) {
     await dbConnect();
 
     const session = await getServerSession(authOptions);
-    // if (
-    //   !session ||
-    //   (session.user.role !== "admin" && session.user.role !== "coach")
-    // ) {
-    //   return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
-    // }
-
-    if (!session) {
+    if (
+      !session ||
+      (session.user.role !== "admin" && session.user.role !== "coach")
+    ) {
       return NextResponse.json({ message: "دسترسی غیرمجاز" }, { status: 403 });
     }
 

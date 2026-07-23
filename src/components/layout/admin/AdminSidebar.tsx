@@ -35,7 +35,7 @@ export default function AdminSidebar({ isAdmin = false }) {
             users: data.usersCount || 0,
             subscriptions: data.subscriptionsCount || 0,
             articles: data.articlesCount || 0,
-            comments: data.pendingCommentsCount || 0
+            comments: data.commentsCount ?? data.pendingCommentsCount ?? 0
           }));
         }
       } catch (err) {
@@ -101,7 +101,7 @@ export default function AdminSidebar({ isAdmin = false }) {
             <>
               <Link href="/" className="flex items-center gap-2">
                 <Dumbbell className="w-8 h-8 text-orange-500" />
-                <span className="font-bold text-lg text-white">فیت‌کوچ</span>
+                <span className="font-bold text-lg text-white font-morabbaReg">استار فیت</span>
               </Link>
               <button
                 onClick={onToggle}

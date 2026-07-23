@@ -12,6 +12,8 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
+import type { AdminDashboardAdminProps } from "@/types/admin";
+import RecentComments from "./RecentComments";
 
 const gradients = [
   "from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/30",
@@ -50,31 +52,13 @@ const roleMap: Record<string, { text: string; bg: string }> = {
   },
 };
 
-const recentTickets = [
-  {
-    id: 101,
-    user: "محمد رضایی",
-    subject: "سوال درباره برنامه تمرینی",
-    status: "در حال بررسی",
-    time: "۲ ساعت پیش",
-  },
-  {
-    id: 102,
-    user: "سارا احمدی",
-    subject: "مشکل در دانلود ویدیو",
-    status: "پاسخ داده شده",
-    time: "۵ ساعت پیش",
-  },
-  {
-    id: 103,
-    user: "علی کریمی",
-    subject: "درخواست تمدید اشتراک",
-    status: "جدید",
-    time: "۱ روز پیش",
-  },
-];
 
-export default async function AdminDashboardAdmin() {
+
+export default async function AdminDashboardAdmin({
+  usersCount = 0,
+  publishedBlogsCount = 0,
+  openTicketsCount = 0,
+}: AdminDashboardAdminProps) {
   await dbConnect();
 
   const users = await User.find({}, "username email fullName role status createdAt")
@@ -95,7 +79,7 @@ export default async function AdminDashboardAdmin() {
             className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2"
             style={{ fontFamily: "Marbeh, sans-serif" }}
           >
-            ۲,۵۴۳
+            {usersCount.toLocaleString("fa-IR")}
           </div>
           <div className="text-white/60 text-xs sm:text-sm">کاربران فعال</div>
           <div className="text-green-400 text-xs mt-1 sm:mt-2 hidden sm:block">
@@ -135,7 +119,7 @@ export default async function AdminDashboardAdmin() {
             className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2"
             style={{ fontFamily: "Marbeh, sans-serif" }}
           >
-            ۱۵۶
+            {publishedBlogsCount.toLocaleString("fa-IR")}
           </div>
           <div className="text-white/60 text-xs sm:text-sm">
             مقالات منتشر شده
@@ -159,7 +143,7 @@ export default async function AdminDashboardAdmin() {
             className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2"
             style={{ fontFamily: "Marbeh, sans-serif" }}
           >
-            ۴۸
+            {openTicketsCount.toLocaleString("fa-IR")}
           </div>
           <div className="text-white/60 text-xs sm:text-sm">تیکت‌های باز</div>
           <div className="text-white/40 text-xs mt-1 sm:mt-2 hidden sm:block">
@@ -265,53 +249,7 @@ export default async function AdminDashboardAdmin() {
           </div>
         </div>
 
-        <div className="min-w-0 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
-          <div className="p-4 sm:p-6 border-b border-white/10">
-            <div className="flex justify-between items-center">
-              <h2
-                className="text-lg sm:text-xl font-bold text-white"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
-                تیکت‌های اخیر
-              </h2>
-              <Link
-                href="/tickets"
-                className="text-orange-500 hover:text-orange-400 text-sm"
-              >
-                مشاهده همه
-              </Link>
-            </div>
-          </div>
-          <div className="p-3 sm:p-6">
-            <div className="space-y-3 sm:space-y-4">
-              {recentTickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  className="p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="text-white/60 text-xs">#{ticket.id}</div>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${ticket.status === "جدید" ? "bg-blue-500/20 text-blue-400" : ticket.status === "در حال بررسی" ? "bg-orange-500/20 text-orange-400" : "bg-green-500/20 text-green-400"}`}
-                    >
-                      {ticket.status}
-                    </span>
-                  </div>
-                  <div className="text-white font-medium mb-1 text-sm sm:text-base line-clamp-1">
-                    {ticket.subject}
-                  </div>
-                  <div className="text-white/60 text-xs sm:text-sm mb-2">
-                    {ticket.user}
-                  </div>
-                  <div className="flex items-center text-white/40 text-xs">
-                    <Clock className="w-3 h-3 ml-1" />
-                    {ticket.time}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <RecentComments />
       </div>
 
       <div className="mt-4 sm:mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">

@@ -1,6 +1,5 @@
 import mongoose, { Document } from "mongoose";
 
-// Client-Side Types
 export interface Comment {
   _id: string;
   blogId: string;
@@ -14,7 +13,6 @@ export interface Comment {
   updatedAt?: string;
 }
 
-// Mongoose / DB Schema Types
 export interface IComment extends Omit<Comment, "_id" | "blogId" | "userId" | "createdAt" | "updatedAt">, Document {
   blogId: mongoose.Types.ObjectId;
   userId?: mongoose.Types.ObjectId | null;
@@ -22,7 +20,6 @@ export interface IComment extends Omit<Comment, "_id" | "blogId" | "userId" | "c
   updatedAt: Date;
 }
 
-// Admin Dashboard Populated Types
 export interface AdminComment {
   _id: string;
   name: string;
@@ -50,21 +47,20 @@ export interface AdminCommentStats {
   pendingCount: number;
 }
 
-// CommentList Component Props Type
-export interface CommentListProps {
+export interface AdminCommentsResponse {
   comments: AdminComment[];
-  isLoading: boolean;
-  error: string | null;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  filterApproved: string;
-  setFilterApproved: (filter: string) => void;
-  currentPage: number;
-  setCurrentPage: (page: number) => void;
+  total: number;
   totalPages: number;
-  totalComments: number;
-  onToggleApproval: (id: string, currentStatus: boolean) => void;
-  onEdit: (comment: AdminComment) => void;
-  onDelete: (id: string) => void;
+  stats: AdminCommentStats;
+}
+
+export interface CommentStatsProps {
+  stats: AdminCommentStats;
   formatNumber: (num: number) => string;
+}
+
+export interface ViewCommentModalProps {
+  isOpen: boolean;
+  comment: AdminComment | null;
+  onClose: () => void;
 }
