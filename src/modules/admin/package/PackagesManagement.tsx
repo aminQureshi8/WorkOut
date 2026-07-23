@@ -247,7 +247,7 @@ export default function PackagesManagement() {
       <div className="container mx-auto pt-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl mb-2 text-white">مدیریت پکیج‌ها</h1>
+            <h1 className="text-3xl mb-2 text-white font-morabbaReg font-bold">مدیریت پکیج‌ها</h1>
             <p className="text-white/60">مشاهده و ویرایش پکیج‌های اشتراک</p>
           </div>
           <button

@@ -165,7 +165,7 @@ export default function CreateArticle() {
               <ArrowRight className="w-6 h-6" />
             </Link>
             <div>
-              <h1 className="text-3xl text-white mb-1">ایجاد مقاله جدید</h1>
+              <h1 className="text-3xl text-white mb-1 font-morabbaReg">ایجاد مقاله جدید</h1>
               <p className="text-white/60">مقاله خود را بنویسید و منتشر کنید</p>
             </div>
           </div>
@@ -204,8 +204,7 @@ export default function CreateArticle() {
               <input
                 {...register("title", { required: "عنوان مقاله الزامی است" })}
                 placeholder="عنوان جذاب مقاله خود را وارد کنید..."
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-xl placeholder:text-white/40 focus:outline-none focus:border-orange-500/50"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-xl placeholder:text-white/40 focus:outline-none focus:border-orange-500/50 font-morabbaReg"
               />
               {errors.title && (
                 <p className="text-red-400 text-sm mt-2">
@@ -299,10 +298,7 @@ export default function CreateArticle() {
             </div>
 
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
-              <h3
-                className="text-white text-lg mb-4"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h3 className="text-white text-lg mb-4 font-morabbaReg">
                 تنظیمات سئو
               </h3>
               <div className="space-y-4">
@@ -337,10 +333,7 @@ export default function CreateArticle() {
 
           <div className="space-y-6">
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
-              <h3
-                className="text-white mb-4"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h3 className="text-white mb-4 font-morabbaReg">
                 تنظیمات انتشار
               </h3>
               <div className="space-y-4">
@@ -384,10 +377,7 @@ export default function CreateArticle() {
             </div>
 
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
-              <h3
-                className="text-white mb-4"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h3 className="text-white mb-4 font-morabbaReg">
                 دسته‌بندی
               </h3>
               <Controller
@@ -409,10 +399,7 @@ export default function CreateArticle() {
             </div>
 
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
-              <h3
-                className="text-white mb-4"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h3 className="text-white mb-4 font-morabbaReg">
                 برچسب‌ها
               </h3>
               <div className="flex gap-2 mb-3">
@@ -455,10 +442,7 @@ export default function CreateArticle() {
             </div>
 
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
-              <h3
-                className="text-white mb-4"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h3 className="text-white mb-4 font-morabbaReg">
                 اطلاعات نویسنده
               </h3>
               <div className="flex items-center gap-3">

@@ -23,10 +23,7 @@ export default function AdminHeader({ username = "مدیر", role = "admin", ava
               <Menu className="w-6 h-6 text-white" />
             </button>
             <div>
-              <h1
-                className="text-xl font-bold text-white"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h1 className="text-xl font-bold text-white font-morabbaReg">
                 داشبورد
               </h1>
               <p className="text-white/50 text-xs">خوش آمدید، {username}</p>

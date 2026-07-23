@@ -147,10 +147,7 @@ export default function PackageList({
                   </div>
                 </div>
 
-                <h3
-                  className="text-2xl text-white mb-2"
-                  style={{ fontFamily: "Marbeh, sans-serif" }}
-                >
+                <h3 className="text-2xl text-white mb-2 font-morabbaReg">
                   {pkg.name}
                 </h3>
                 <p className="text-white/60 text-sm mb-4 min-h-[40px] line-clamp-2">

@@ -371,10 +371,7 @@ export default function WorkoutPlanModal({
             <span className="text-xs text-orange-400 font-bold bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/20">
               پکیج: {selectedPackageForPlan.name}
             </span>
-            <h2
-              className="text-2xl text-white font-bold mt-2"
-              style={{ fontFamily: "Marbeh, sans-serif" }}
-            >
+            <h2 className="text-2xl text-white font-bold mt-2 font-morabbaReg">
               مدیریت برنامه تمرینی
             </h2>
           </div>

@@ -375,10 +375,7 @@ export default function WorkoutsManagement() {
     <div className="overflow-hidden font-danaMed" dir="rtl">
       <div className="container mx-auto pt-8">
         <div className="mb-8">
-          <h1
-            className="text-3xl font-bold text-white mb-2"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <h1 className="text-3xl font-bold text-white mb-2 font-morabbaReg">
             مدیریت برنامه‌های تمرینی
           </h1>
           <p className="text-white/60 text-sm">

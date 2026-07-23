@@ -21,10 +21,7 @@ export default function PackageModal({
         
         {/* Header */}
         <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-gray-900/80 backdrop-blur-lg z-10">
-          <h2
-            className="text-2xl text-white font-bold"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <h2 className="text-2xl text-white font-bold font-morabbaReg">
             {editingPackage ? "ویرایش پکیج" : "ایجاد پکیج جدید"}
           </h2>
           <button

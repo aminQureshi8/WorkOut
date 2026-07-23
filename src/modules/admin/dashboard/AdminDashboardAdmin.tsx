@@ -75,10 +75,7 @@ export default async function AdminDashboardAdmin({
             </div>
             <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
           </div>
-          <div
-            className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2 font-morabbaReg">
             {usersCount.toLocaleString("fa-IR")}
           </div>
           <div className="text-white/60 text-xs sm:text-sm">کاربران فعال</div>
@@ -95,10 +92,7 @@ export default async function AdminDashboardAdmin({
             </div>
             <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
           </div>
-          <div
-            className="text-xl sm:text-3xl font-bold text-white mb-1 sm:mb-2"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <div className="text-xl sm:text-3xl font-bold text-white mb-1 sm:mb-2 font-morabbaReg">
             ۱۲۵ <span className="text-base sm:text-xl">م</span>
           </div>
           <div className="text-white/60 text-xs sm:text-sm">درآمد ماهانه</div>
@@ -115,10 +109,7 @@ export default async function AdminDashboardAdmin({
             </div>
             <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
           </div>
-          <div
-            className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2 font-morabbaReg">
             {publishedBlogsCount.toLocaleString("fa-IR")}
           </div>
           <div className="text-white/60 text-xs sm:text-sm">
@@ -139,10 +130,7 @@ export default async function AdminDashboardAdmin({
               ۳ جدید
             </span>
           </div>
-          <div
-            className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2 font-morabbaReg">
             {openTicketsCount.toLocaleString("fa-IR")}
           </div>
           <div className="text-white/60 text-xs sm:text-sm">تیکت‌های باز</div>
@@ -156,10 +144,7 @@ export default async function AdminDashboardAdmin({
         <div className="lg:col-span-2 min-w-0 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
           <div className="p-4 sm:p-6 border-b border-white/10">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-              <h2
-                className="text-lg sm:text-xl font-bold text-white"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <h2 className="text-lg sm:text-xl font-bold text-white font-morabbaReg">
                 کاربران اخیر
               </h2>
               <div className="flex items-center gap-2 sm:gap-3">

@@ -64,3 +64,7 @@ export interface ViewCommentModalProps {
   comment: AdminComment | null;
   onClose: () => void;
 }
+
+export interface RecentCommentsProps {
+  limit?: number;
+}

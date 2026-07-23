@@ -15,10 +15,7 @@ const ArticleStats = memo(function ArticleStats({
           <div className="text-white/60 text-sm">کل مقالات</div>
           <Tag className="w-5 h-5 text-blue-400" />
         </div>
-        <div
-          className="text-3xl text-white font-bold"
-          style={{ fontFamily: "Marbeh, sans-serif" }}
-        >
+        <div className="text-3xl text-white font-bold font-morabbaReg">
           {formatNumber(totalCount)}
         </div>
       </div>
@@ -28,10 +25,7 @@ const ArticleStats = memo(function ArticleStats({
           <div className="text-white/60 text-sm">منتشر شده</div>
           <Eye className="w-5 h-5 text-green-400" />
         </div>
-        <div
-          className="text-3xl text-white font-bold"
-          style={{ fontFamily: "Marbeh, sans-serif" }}
-        >
+        <div className="text-3xl text-white font-bold font-morabbaReg">
           {formatNumber(stats.publishedCount)}
         </div>
       </div>
@@ -41,10 +35,7 @@ const ArticleStats = memo(function ArticleStats({
           <div className="text-white/60 text-sm">پیش‌نویس</div>
           <Edit className="w-5 h-5 text-gray-400" />
         </div>
-        <div
-          className="text-3xl text-white font-bold"
-          style={{ fontFamily: "Marbeh, sans-serif" }}
-        >
+        <div className="text-3xl text-white font-bold font-morabbaReg">
           {formatNumber(stats.draftCount)}
         </div>
       </div>
@@ -54,10 +45,7 @@ const ArticleStats = memo(function ArticleStats({
           <div className="text-white/60 text-sm">کل بازدیدها</div>
           <TrendingUp className="w-5 h-5 text-orange-400" />
         </div>
-        <div
-          className="text-3xl text-white font-bold"
-          style={{ fontFamily: "Marbeh, sans-serif" }}
-        >
+        <div className="text-3xl text-white font-bold font-morabbaReg">
           {formatNumber(stats.totalViews)}
         </div>
       </div>

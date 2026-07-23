@@ -14,10 +14,7 @@ export default function ViewCommentModal({
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-2xl w-full overflow-hidden">
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
-          <h2
-            className="text-2xl text-white font-bold"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <h2 className="text-2xl text-white font-bold font-morabbaReg">
             مشاهده دیدگاه
           </h2>
           <button

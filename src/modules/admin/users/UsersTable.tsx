@@ -43,6 +43,8 @@ export default function UsersTable() {
       const res = await fetch(`/api/admin/user?page=${currentPage}`);
       if (!res.ok) throw new Error("خطا در دریافت کاربران");
       const data = await res.json();
+      console.log(data);
+      
       setUsers(data.users || []);
       setTotalPages(data.totalPage || 0);
       setTotalUsers(data.totalUsers || 0);
@@ -369,10 +371,7 @@ export default function UsersTable() {
                       {user.lastLogin || "—"}
                     </td>
                     <td className="p-4">
-                      <span
-                        className="text-white font-medium"
-                        style={{ fontFamily: "Marbeh, sans-serif" }}
-                      >
+                      <span className="text-white font-medium font-morabbaReg">
                         {user.totalPayments
                           ? formatNumber(user.totalPayments)
                           : "۰"}

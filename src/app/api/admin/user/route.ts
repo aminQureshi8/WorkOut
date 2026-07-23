@@ -9,11 +9,15 @@ export async function GET(req: NextRequest) {
   try {
     await dbConnect();
 
-    const page = req.nextUrl.searchParams.get("page") || 1;
-    const limit = 6;
-    const skip = (Number(page) - 1) * limit;
+    const page = Number(req.nextUrl.searchParams.get("page") || "1");
+    const limit = Number(req.nextUrl.searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
 
-    const users = await User.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
+    const users = await User.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     const totalUsers = await User.countDocuments({});
     const activeUsers = await User.countDocuments({ status: "active" });
@@ -29,7 +33,9 @@ export async function GET(req: NextRequest) {
     const subscriptions = await Subscription.find({
       userId: { $in: userIds },
       status: { $in: ["active", "trial"] },
-    }).populate("packageId", "name").lean();
+    })
+      .populate("packageId", "name")
+      .lean();
 
     const orders = await Order.find({
       userId: { $in: userIds },
@@ -38,12 +44,15 @@ export async function GET(req: NextRequest) {
 
     const usersWithDetails = users.map((u) => {
       const activeSub = subscriptions.find(
-        (sub) => sub.userId.toString() === u._id.toString()
+        (sub) => sub.userId.toString() === u._id.toString(),
       );
       const userOrders = orders.filter(
-        (ord) => ord.userId.toString() === u._id.toString()
+        (ord) => ord.userId.toString() === u._id.toString(),
       );
-      const totalPayments = userOrders.reduce((sum, ord) => sum + (ord.amountPaid || 0), 0);
+      const totalPayments = userOrders.reduce(
+        (sum, ord) => sum + (ord.amountPaid || 0),
+        0,
+      );
 
       let persianStatus = "فعال";
       if (u.status === "blocked") persianStatus = "مسدود";
@@ -54,7 +63,9 @@ export async function GET(req: NextRequest) {
         package: activeSub?.packageId?.name || "—",
         status: persianStatus,
         totalPayments: totalPayments,
-        lastLogin: u.lastLogin ? new Date(u.lastLogin).toLocaleDateString("fa-IR") : "—",
+        lastLogin: u.lastLogin
+          ? new Date(u.lastLogin).toLocaleDateString("fa-IR")
+          : "—",
       };
     });
 
@@ -67,6 +78,9 @@ export async function GET(req: NextRequest) {
       blockedUsers,
     });
   } catch (error: any) {
-    return NextResponse.json({ message: error.message || "Failed to fetch users" }, { status: 500 });
+    return NextResponse.json(
+      { message: error.message || "Failed to fetch users" },
+      { status: 500 },
+    );
   }
 }

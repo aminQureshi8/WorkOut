@@ -77,10 +77,7 @@ export default function UserEditModal({
       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         
         <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-gray-900/80 backdrop-blur-lg">
-          <h2
-            className="text-2xl text-white font-bold"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <h2 className="text-2xl text-white font-bold font-morabbaReg">
             ویرایش اطلاعات کاربر
           </h2>
           <button
@@ -228,10 +225,7 @@ export default function UserEditModal({
               <div className="text-white/60 text-xs mb-1">
                 کل پرداخت‌ها
               </div>
-              <div
-                className="text-white font-medium text-sm"
-                style={{ fontFamily: "Marbeh, sans-serif" }}
-              >
+              <div className="text-white font-medium text-sm font-morabbaReg">
                 {user.totalPayments ? formatNumber(user.totalPayments) : "۰"} تومان
               </div>
             </div>

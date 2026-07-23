@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Clock, CheckCircle2, Clock3 } from "lucide-react";
-import type { AdminComment } from "@/types/comment";
+import type { AdminComment, RecentCommentsProps } from "@/types/comment";
 
-export default function RecentComments() {
+export default function RecentComments({ limit = 3 }: RecentCommentsProps) {
   const [comments, setComments] = useState<AdminComment[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,12 +15,13 @@ export default function RecentComments() {
       try {
         setIsLoading(true);
         setError(null);
-        const res = await fetch("/api/admin/comment?limit=3");
+        const res = await fetch(`/api/admin/comment?limit=${limit}`);
         if (!res.ok) {
           throw new Error("خطا در دریافت دیدگاه‌ها");
         }
         const data = await res.json();
-        setComments(data.comments || []);
+        const list = data.comments || [];
+        setComments(list.slice(0, limit));
       } catch (err: any) {
         setError(err.message || "خطایی رخ داد");
       } finally {
@@ -29,16 +30,13 @@ export default function RecentComments() {
     }
 
     getRecentComments();
-  }, []);
+  }, [limit]);
 
   return (
     <div className="min-w-0 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
       <div className="p-4 sm:p-6 border-b border-white/10">
         <div className="flex justify-between items-center">
-          <h2
-            className="text-lg sm:text-xl font-bold text-white"
-            style={{ fontFamily: "Marbeh, sans-serif" }}
-          >
+          <h2 className="text-lg sm:text-xl font-bold text-white font-morabbaReg">
             کامنت‌های جدید
           </h2>
           <Link
@@ -67,7 +65,7 @@ export default function RecentComments() {
           </div>
         ) : (
           <div className="space-y-3 sm:space-y-4">
-            {comments.map((comment) => {
+            {comments.slice(0, limit).map((comment) => {
               const authorName =
                 comment.userId?.fullName ||
                 comment.name ||
