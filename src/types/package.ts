@@ -1,6 +1,5 @@
 import mongoose, { Document } from "mongoose";
 
-// Client-Side Types
 export interface Package {
   _id: string;
   name: string;
@@ -31,13 +30,11 @@ export interface Package {
   updatedAt?: string;
 }
 
-// Mongoose / DB Schema Types
 export interface IPackage extends Omit<Package, "_id" | "createdAt" | "updatedAt">, Document {
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Component Types
 export type PackageFormData = {
   name: string;
   slug: string;
@@ -70,31 +67,28 @@ export interface PackageStats {
   mostPopularCount: number;
 }
 
-// Component Props Types
 export interface PackageStatsProps {
-  stats: PackageStats;
+  packages: Package[];
   formatNumber: (num: number) => string;
 }
 
 export interface PackageListProps {
   packages: Package[];
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  selectedPackages: string[];
-  handleSelectPackage: (id: string) => void;
-  handleBulkDelete: () => void;
-  handleEditClick: (pkg: Package) => void;
-  handleDeletePackage: (id: string) => void;
+  fetchPackages: () => Promise<void> | void;
+  setEditingPackage: (pkg: Package | null) => void;
+  setShowCreateModal: (show: boolean) => void;
+  reset: (values: any) => void;
   formatNumber: (num: number) => string;
-  isLoading: boolean;
-  error: string | null;
 }
 
 export interface PackageModalProps {
   isOpen: boolean;
+  setShowCreateModal: (show: boolean) => void;
   editingPackage: Package | null;
-  onClose: () => void;
-  onSubmit: (e: React.FormEvent) => void;
+  setEditingPackage: (pkg: Package | null) => void;
+  reset: (values: any) => void;
+  handleSubmit: any;
+  fetchPackages: () => void;
   register: any;
   errors: any;
   isSubmitting: boolean;

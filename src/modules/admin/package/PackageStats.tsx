@@ -1,18 +1,42 @@
 "use client";
-import React, { memo } from "react";
-import { Package, Users, DollarSign, TrendingUp, Award } from "lucide-react";
-import { PackageStatsProps } from "@/types/package";
+import React, { memo, useMemo } from "react";
+import { Package as PackageIcon, Users, DollarSign, TrendingUp, Award } from "lucide-react";
+import { PackageStatsProps, PackageStats as IPackageStats } from "@/types/package";
 
 const PackageStats = memo(function PackageStats({
-  stats,
+  packages,
   formatNumber,
 }: PackageStatsProps) {
+  const stats = useMemo<IPackageStats>(() => {
+    const totalUsers = packages.reduce(
+      (sum, pkg) => sum + (pkg.studentCount || 0),
+      0,
+    );
+    const totalRevenue = packages.reduce(
+      (sum, pkg) => sum + (pkg.price?.monthly || 0) * (pkg.studentCount || 0),
+      0,
+    );
+    const activeCount = packages.filter((p) => p.isActive).length;
+    const mostPopularPackage = packages.find((p) => p.isPopular) || packages[0];
+
+    return {
+      totalCount: packages.length,
+      activeCount,
+      totalUsers,
+      totalRevenue,
+      mostPopularName: mostPopularPackage ? mostPopularPackage.name : "—",
+      mostPopularCount: mostPopularPackage
+        ? mostPopularPackage.studentCount || 0
+        : 0,
+    };
+  }, [packages]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
         <div className="flex items-center justify-between mb-2">
           <div className="text-white/60 text-sm">کل پکیج‌ها</div>
-          <Package className="w-5 h-5 text-blue-400" />
+          <PackageIcon className="w-5 h-5 text-blue-400" />
         </div>
         <div className="text-3xl text-white mb-1 font-morabbaReg">
           {formatNumber(stats.totalCount)}

@@ -1,13 +1,18 @@
 "use client";
 import React from "react";
-import { formatToPersianWithCommas } from "@/utils/price";
-import { PackageModalProps } from "@/types/package";
+import { SubmitHandler } from "react-hook-form";
+import { showAlert } from "@/utils/alert";
+import { formatToPersianWithCommas, parsePersianPrice } from "@/utils/price";
+import { PackageFormData, PackageModalProps } from "@/types/package";
 
 export default function PackageModal({
   isOpen,
+  setShowCreateModal,
   editingPackage,
-  onClose,
-  onSubmit,
+  setEditingPackage,
+  reset,
+  handleSubmit,
+  fetchPackages,
   register,
   errors,
   isSubmitting,
@@ -15,27 +20,92 @@ export default function PackageModal({
 }: PackageModalProps) {
   if (!isOpen) return null;
 
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setEditingPackage(null);
+    reset({
+      name: "",
+      slug: "",
+      tagline: "",
+      description: "",
+      icon: "",
+      colorClass: "",
+      tier: "basic",
+      isPopular: false,
+      isActive: true,
+      price: { monthly: "", quarterly: "", biannual: "" },
+      originalPrice: { monthly: "", quarterly: "", biannual: "" },
+      featuresText: "",
+    });
+  };
+
+  const onSubmit: SubmitHandler<PackageFormData> = async (formData) => {
+    try {
+      const features = formData.featuresText
+        ? formData.featuresText.split("\n").filter((f) => f.trim() !== "")
+        : [];
+
+      const payload = {
+        ...formData,
+        features,
+        price: {
+          monthly: parsePersianPrice(formData.price.monthly),
+          quarterly: parsePersianPrice(formData.price.quarterly),
+          biannual: parsePersianPrice(formData.price.biannual),
+        },
+        originalPrice: {
+          monthly: parsePersianPrice(formData.originalPrice.monthly),
+          quarterly: parsePersianPrice(formData.originalPrice.quarterly),
+          biannual: parsePersianPrice(formData.originalPrice.biannual),
+        },
+      };
+
+      if (editingPackage) {
+        const res = await fetch(`/api/admin/package/${editingPackage._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "خطا در ویرایش پکیج");
+        }
+        showAlert("موفقیت", "پکیج با موفقیت ویرایش شد", "success");
+      } else {
+        const res = await fetch("/api/admin/package", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "خطا در ایجاد پکیج");
+        }
+        showAlert("موفقیت", "پکیج با موفقیت ایجاد شد", "success");
+      }
+      handleCloseModal();
+      fetchPackages();
+    } catch (err: any) {
+      showAlert("خطا", err.message || "عملیات ناموفق بود", "error");
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        
-        {/* Header */}
         <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-gray-900/80 backdrop-blur-lg z-10">
           <h2 className="text-2xl text-white font-bold font-morabbaReg">
             {editingPackage ? "ویرایش پکیج" : "ایجاد پکیج جدید"}
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleCloseModal}
             className="text-white/60 hover:text-white transition-colors cursor-pointer"
           >
             ✕
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={onSubmit} className="p-6 space-y-4">
-          
-          {/* Package Name */}
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
           <div>
             <label className="block text-white mb-2 text-xs">نام پکیج</label>
             <input
@@ -54,7 +124,6 @@ export default function PackageModal({
             )}
           </div>
 
-          {/* Slug */}
           <div>
             <label className="block text-white mb-2 text-xs">اسلاگ (URL)</label>
             <input
@@ -76,7 +145,6 @@ export default function PackageModal({
             )}
           </div>
 
-          {/* Tagline */}
           <div>
             <label className="block text-white mb-2 text-xs">تاگلاین (معرفی کوتاه)</label>
             <input
@@ -95,7 +163,6 @@ export default function PackageModal({
             )}
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-white mb-2 text-xs">توضیحات</label>
             <textarea
@@ -114,7 +181,6 @@ export default function PackageModal({
             )}
           </div>
 
-          {/* Icon, ColorClass, Tier */}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-white mb-2 text-xs">آیکون پکیج</label>
@@ -147,7 +213,6 @@ export default function PackageModal({
             </div>
           </div>
 
-          {/* Prices */}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-white mb-2 text-xs">قیمت یک ماهه</label>
@@ -211,7 +276,6 @@ export default function PackageModal({
             </div>
           </div>
 
-          {/* Original Prices */}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-white mb-2 text-xs">قیمت اصلی یک ماهه</label>
@@ -275,7 +339,6 @@ export default function PackageModal({
             </div>
           </div>
 
-          {/* Features text area */}
           <div>
             <label className="block text-white mb-2 text-xs">امکانات پکیج (هر کدام در یک خط)</label>
             <textarea
@@ -286,7 +349,6 @@ export default function PackageModal({
             />
           </div>
 
-          {/* Switches (Popular / Active) */}
           <div className="flex gap-6 py-2">
             <label className="flex items-center gap-2 text-white text-xs cursor-pointer">
               <input
@@ -306,7 +368,6 @@ export default function PackageModal({
             </label>
           </div>
 
-          {/* Actions */}
           <div className="p-6 border-t border-white/10 flex gap-3 bg-gray-950/20 -mx-6 -mb-6 sticky bottom-0 backdrop-blur-lg">
             <button
               type="submit"
@@ -317,13 +378,12 @@ export default function PackageModal({
             </button>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCloseModal}
               className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg transition-colors text-sm cursor-pointer"
             >
               انصراف
             </button>
           </div>
-
         </form>
       </div>
     </div>
