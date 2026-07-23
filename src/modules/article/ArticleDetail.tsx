@@ -17,28 +17,12 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { showAlert } from "@/utils/alert";
-
-interface ArticleDetailProps {
-  article: any;
-  relatedArticles?: any[];
-  userId?: string | null;
-  currentUser?: {
-    id: string;
-    username: string;
-    fullName?: string;
-    email: string;
-    avatar?: string;
-    role: string;
-  } | null;
-  isWished?: boolean;
-  isLiked?: boolean;
-}
+import type { ArticleDetailProps } from "@/types/blog";
 
 export default function ArticleDetail({
   article,
   relatedArticles = [],
   userId = null,
-  currentUser = null,
   isWished = false,
   isLiked = false,
 }: ArticleDetailProps) {
@@ -46,7 +30,14 @@ export default function ArticleDetail({
   const [bookmarked, setBookmarked] = useState(isWished);
   const [likeCount, setLikeCount] = useState(article?.likedUsers?.length || 0);
   const [newComment, setNewComment] = useState("");
-  const [commentList, setCommentList] = useState<any[]>([]);
+  const [commentList, setCommentList] = useState<Array<{
+    name: string;
+    text: string;
+    avatar?: string;
+    time?: string;
+    createdAt?: string;
+    likes?: number;
+  }>>([]);
   const [commentPage, setCommentPage] = useState(1);
   const [totalComments, setTotalComments] = useState(0);
   const [hasMoreComments, setHasMoreComments] = useState(false);
@@ -89,6 +80,7 @@ export default function ArticleDetail({
   }, [article?._id, commentPage]);
 
   useEffect(() => {
+    if (!article?._id) return;
     const recordView = async () => {
       try {
         const res = await fetch("/api/blog/view", {
@@ -107,7 +99,7 @@ export default function ArticleDetail({
       }
     };
     recordView();
-  }, [article._id]);
+  }, [article?._id]);
 
   const handleBookmark = async () => {
     if (!userId) {
@@ -175,19 +167,23 @@ export default function ArticleDetail({
 
   const handleSendComment = async () => {
     if (!newComment.trim()) return;
-    try {
-      const commenterName = currentUser
-        ? (currentUser.fullName || currentUser.username || "کاربر فیت‌کوچ")
-        : "کاربر فیت‌کوچ";
+    if (!userId) {
+      showAlert({
+        title: "ورود به حساب کاربری",
+        text: "برای ثبت نظر، ابتدا وارد حساب کاربری خود شوید.",
+        icon: "warning",
+        confirmButtonColor: "#7c3aed",
+      });
+      return;
+    }
 
+    try {
       const res = await fetch("/api/blog/comment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           blogId: article._id,
-          name: commenterName,
           text: newComment.trim(),
-          userId: userId,
         }),
       });
 
@@ -497,7 +493,7 @@ export default function ArticleDetail({
                             {c.text}
                           </p>
                           <button className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-400 mt-3 transition-colors cursor-pointer">
-                            <ThumbsUp size={12} /> {c.likes} پسند
+                            <ThumbsUp size={12} /> {c.likes || 0} پسند
                           </button>
                         </div>
                       </div>

@@ -1,31 +1,45 @@
 import dbConnect from "@/lib/dbConnect";
 import Comment from "@/model/Comment";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
-    const body = await req.json();
-    const { blogId, name, text, userId } = body;
+    const session = await getServerSession(authOptions);
 
-    if (!blogId || !name || !text) {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { message: "پر کردن تمامی فیلدهای الزامی است." },
-        { status: 400 },
+        { message: "جهت ثبت نظر ابتدا وارد حساب کاربری خود شوید." },
+        { status: 401 }
       );
     }
 
+    const body = await req.json();
+    const { blogId, text } = body;
+
+    if (!blogId || !text || !text.trim()) {
+      return NextResponse.json(
+        { message: "پر کردن تمامی فیلدهای الزامی است." },
+        { status: 400 }
+      );
+    }
+
+    const commenterName = session.user.fullName || session.user.username || "کاربر فیت‌کوچ";
+
     const comment = await Comment.create({
       blogId,
-      name,
-      text,
+      name: commenterName,
+      text: text.trim(),
       likes: 0,
-      userId: userId || null,
+      userId: session.user.id,
     });
 
     return NextResponse.json({ success: true, comment }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "خطای سرور";
+    return NextResponse.json({ message: errMessage }, { status: 500 });
   }
 }
 
@@ -42,7 +56,7 @@ export async function GET(req: NextRequest) {
     if (!blogId) {
       return NextResponse.json(
         { message: "شناسه مقاله الزامی است." },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -55,7 +69,8 @@ export async function GET(req: NextRequest) {
       .lean();
 
     return NextResponse.json({ success: true, comments, totalCount }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "خطای سرور";
+    return NextResponse.json({ message: errMessage }, { status: 500 });
   }
 }

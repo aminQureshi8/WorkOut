@@ -5,24 +5,59 @@ import ArticleDetail from "@/modules/article/ArticleDetail";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
+import type { Metadata } from "next";
+import type { ArticlePageProps } from "@/types/blog";
 import "@/model/Comment";
 
-interface PageProps {
-  params: Promise<{ slug: string }>;
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  let decodedSlug = slug;
+  try {
+    decodedSlug = decodeURIComponent(slug);
+  } catch {
+    return { title: "مقاله یافت نشد | فیت‌کوچ" };
+  }
+
+  await dbConnect();
+  const blog = await Blog.findOne({ slug: decodedSlug, status: "published" })
+    .select("title excerpt image seoTitle seoDescription")
+    .lean();
+
+  if (!blog) {
+    return { title: "مقاله یافت نشد | فیت‌کوچ" };
+  }
+
+  const title = blog.seoTitle || blog.title;
+  const description = blog.seoDescription || blog.excerpt || "مطالعه مقاله ورزشی و سلامتی در فیت‌کوچ";
+
+  return {
+    title: `${title} | فیت‌کوچ`,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: blog.image ? [{ url: blog.image }] : [],
+    },
+  };
 }
 
-export default async function page({ params }: PageProps) {
+export default async function page({ params }: ArticlePageProps) {
   const { slug } = await params;
+
+  let decodedSlug = slug;
+  try {
+    decodedSlug = decodeURIComponent(slug);
+  } catch {
+    notFound();
+  }
 
   await dbConnect();
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id || null;
 
-  const decodedSlug = decodeURIComponent(slug);
-
   const blog = await Blog.findOne({ slug: decodedSlug, status: "published" })
-    .populate("authorId", "username fullName email role");
+    .populate("authorId", "username fullName role")
+    .lean();
 
   if (!blog) {
     notFound();
@@ -33,6 +68,7 @@ export default async function page({ params }: PageProps) {
     status: "published",
     _id: { $ne: blog._id },
   })
+    .select("title slug image category content createdAt")
     .sort({ createdAt: -1 })
     .limit(3)
     .lean();
@@ -44,9 +80,9 @@ export default async function page({ params }: PageProps) {
     if (existingWish) {
       isWished = true;
     }
-    if (blog.likedUsers) {
+    if (Array.isArray(blog.likedUsers)) {
       isLiked = blog.likedUsers.some(
-        (id: any) => id.toString() === userId.toString()
+        (id: unknown) => String(id) === String(userId)
       );
     }
   }

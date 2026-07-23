@@ -1,6 +1,5 @@
 import mongoose, { Document } from "mongoose";
 
-// Client-Side Types
 export interface Blog {
   _id: string;
   title: string;
@@ -23,7 +22,6 @@ export interface Blog {
   updatedAt?: string;
 }
 
-// Mongoose / DB Schema Types
 export interface IBlog extends Omit<Blog, "_id" | "authorId" | "viewedUsers" | "likedUsers" | "publishDate" | "createdAt" | "updatedAt">, Document {
   authorId: mongoose.Types.ObjectId;
   viewedUsers?: mongoose.Types.ObjectId[];
@@ -33,7 +31,6 @@ export interface IBlog extends Omit<Blog, "_id" | "authorId" | "viewedUsers" | "
   updatedAt: Date;
 }
 
-// Admin Dashboard Populated Types
 export interface AdminBlog {
   _id: string;
   title: string;
@@ -58,7 +55,6 @@ export interface AdminBlogStats {
   draftCount: number;
 }
 
-// Component Props Types
 export interface ArticleStatsProps {
   stats: AdminBlogStats;
   totalCount: number;
@@ -84,4 +80,37 @@ export interface ArticleListProps {
   currentPage: number;
   setCurrentPage: (page: number) => void;
   totalPages: number;
+}
+
+export interface ArticleDetailAuthor {
+  _id: string;
+  username: string;
+  fullName?: string;
+  role?: string;
+}
+
+export interface ArticleDetailData extends Omit<Blog, "authorId"> {
+  authorId?: ArticleDetailAuthor | null;
+}
+
+export interface ArticleCurrentUser {
+  id: string;
+  username: string;
+  fullName?: string;
+  email: string;
+  avatar?: string;
+  role: string;
+}
+
+export interface ArticleDetailProps {
+  article: ArticleDetailData;
+  relatedArticles?: ArticleDetailData[];
+  userId?: string | null;
+  currentUser?: ArticleCurrentUser | null;
+  isWished?: boolean;
+  isLiked?: boolean;
+}
+
+export interface ArticlePageProps {
+  params: Promise<{ slug: string }>;
 }
