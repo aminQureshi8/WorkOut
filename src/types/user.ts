@@ -27,4 +27,17 @@ export interface IAdminUser {
   createdAt: string;
 }
 
+export interface UsersStatsProps {
+  totalUsers: number;
+  activeUsers: number;
+  expiredUsers: number;
+  blockedUsers: number;
+}
+
+export interface UserEditModalProps {
+  user: IAdminUser;
+  onClose: () => void;
+  onSaveSuccess: () => void;
+}
+
 export type { IOtp } from "./otp";

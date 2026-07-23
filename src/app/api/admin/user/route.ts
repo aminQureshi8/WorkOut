@@ -3,55 +3,63 @@ import User from "@/model/User";
 import Subscription from "@/model/Subscription";
 import Order from "@/model/Order";
 import Package from "@/model/Package";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
 
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id || session.user.role !== "admin") {
+      return NextResponse.json(
+        { message: "شما مجاز به دسترسی به این بخش نیستید." },
+        { status: 403 }
+      );
+    }
+
     const page = Number(req.nextUrl.searchParams.get("page") || "1");
     const limit = Number(req.nextUrl.searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
 
-    const users = await User.find({})
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
-    const totalUsers = await User.countDocuments({});
-    const activeUsers = await User.countDocuments({ status: "active" });
-    const expiredUsers = await User.countDocuments({ status: "expired" });
-    const blockedUsers = await User.countDocuments({ status: "blocked" });
+    const [users, totalUsers, activeUsers, expiredUsers, blockedUsers] =
+      await Promise.all([
+        User.find({}).select("-password").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+        User.countDocuments({}),
+        User.countDocuments({ status: "active" }),
+        User.countDocuments({ status: "expired" }),
+        User.countDocuments({ status: "blocked" }),
+      ]);
 
     const totalPage = Math.ceil(totalUsers / limit);
-
     const userIds = users.map((u) => u._id);
 
     await Package.findOne({});
 
-    const subscriptions = await Subscription.find({
-      userId: { $in: userIds },
-      status: { $in: ["active", "trial"] },
-    })
-      .populate("packageId", "name")
-      .lean();
-
-    const orders = await Order.find({
-      userId: { $in: userIds },
-      status: "paid",
-    }).lean();
+    const [subscriptions, orders] = await Promise.all([
+      Subscription.find({
+        userId: { $in: userIds },
+        status: { $in: ["active", "trial"] },
+      })
+        .populate("packageId", "name")
+        .lean(),
+      Order.find({
+        userId: { $in: userIds },
+        status: "paid",
+      }).lean(),
+    ]);
 
     const usersWithDetails = users.map((u) => {
       const activeSub = subscriptions.find(
-        (sub) => sub.userId.toString() === u._id.toString(),
+        (sub) => sub.userId.toString() === u._id.toString()
       );
       const userOrders = orders.filter(
-        (ord) => ord.userId.toString() === u._id.toString(),
+        (ord) => ord.userId.toString() === u._id.toString()
       );
       const totalPayments = userOrders.reduce(
         (sum, ord) => sum + (ord.amountPaid || 0),
-        0,
+        0
       );
 
       let persianStatus = "فعال";
@@ -62,7 +70,7 @@ export async function GET(req: NextRequest) {
         ...u,
         package: activeSub?.packageId?.name || "—",
         status: persianStatus,
-        totalPayments: totalPayments,
+        totalPayments,
         lastLogin: u.lastLogin
           ? new Date(u.lastLogin).toLocaleDateString("fa-IR")
           : "—",
@@ -77,10 +85,11 @@ export async function GET(req: NextRequest) {
       expiredUsers,
       blockedUsers,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "Failed to fetch users";
     return NextResponse.json(
-      { message: error.message || "Failed to fetch users" },
-      { status: 500 },
+      { message: errMessage },
+      { status: 500 }
     );
   }
 }

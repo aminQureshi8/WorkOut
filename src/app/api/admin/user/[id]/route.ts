@@ -1,6 +1,8 @@
 import dbConnect from "@/lib/dbConnect";
 import User from "@/model/User";
 import Subscription from "@/model/Subscription";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -9,6 +11,15 @@ export async function GET(
 ) {
   try {
     await dbConnect();
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id || session.user.role !== "admin") {
+      return NextResponse.json(
+        { message: "شما مجاز به دسترسی به این بخش نیستید." },
+        { status: 403 }
+      );
+    }
+
     const resolvedParams = await params;
     const id = resolvedParams.id;
 
@@ -31,10 +42,11 @@ export async function GET(
         activeSubscription: activeSubscription || null,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "خطا در دریافت اطلاعات کاربر";
     return NextResponse.json(
-      { message: error.message || "خطا در دریافت اطلاعات کاربر" },
-      { status: 500 },
+      { message: errMessage },
+      { status: 500 }
     );
   }
 }
@@ -45,6 +57,14 @@ export async function PATCH(
 ) {
   try {
     await dbConnect();
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id || session.user.role !== "admin") {
+      return NextResponse.json(
+        { error: "شما مجاز به دسترسی به این بخش نیستید." },
+        { status: 403 }
+      );
+    }
 
     const data = await req.json();
     const resolvedParams = await params;
@@ -86,7 +106,8 @@ export async function PATCH(
         status: user.status,
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json({ error: errMessage }, { status: 500 });
   }
 }

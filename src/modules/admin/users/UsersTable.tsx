@@ -13,7 +13,7 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import { IAdminUser } from "@/types/user";
+import type { IAdminUser } from "@/types/user";
 import { showAlert, showConfirm } from "@/utils/alert";
 import { getStatusBadge, getRoleBadge, getRoleLabel } from "@/utils/user";
 import UserEditModal from "./UserEditModal";
@@ -43,16 +43,16 @@ export default function UsersTable() {
       const res = await fetch(`/api/admin/user?page=${currentPage}`);
       if (!res.ok) throw new Error("خطا در دریافت کاربران");
       const data = await res.json();
-      console.log(data);
-      
+
       setUsers(data.users || []);
       setTotalPages(data.totalPage || 0);
       setTotalUsers(data.totalUsers || 0);
       setActiveUsers(data.activeUsers || 0);
       setExpiredUsers(data.expiredUsers || 0);
       setBlockedUsers(data.blockedUsers || 0);
-    } catch (err: any) {
-      setError(err.message || "دریافت کاربران با خطا مواجه شد");
+    } catch (err: unknown) {
+      const errMessage = err instanceof Error ? err.message : "دریافت کاربران با خطا مواجه شد";
+      setError(errMessage);
     } finally {
       setIsLoading(false);
     }
@@ -69,12 +69,12 @@ export default function UsersTable() {
     const timer = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/admin/search?query=${searchQuery}`, {
+        const res = await fetch(`/api/admin/search?query=${encodeURIComponent(searchQuery)}`, {
           signal: controller.signal,
         });
         const data = await res.json();
 
-        const mappedUsers = (data.userFind || []).map((u: any) => {
+        const mappedUsers = (data.userFind || []).map((u: IAdminUser) => {
           let persianStatus = "فعال";
           if (u.status === "blocked") persianStatus = "مسدود";
           else if (u.status === "expired") persianStatus = "منقضی";
@@ -85,8 +85,10 @@ export default function UsersTable() {
         });
 
         setUsers(mappedUsers);
-      } catch (err: any) {
-        if (err.name !== "AbortError") setError("خطا در جستجو");
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== "AbortError") {
+          setError("خطا در جستجو");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -151,10 +153,11 @@ export default function UsersTable() {
         });
 
         getUsers();
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errMessage = err instanceof Error ? err.message : "انجام عملیات با خطا مواجه شد";
         showAlert({
           title: "خطا",
-          text: err.message || "انجام عملیات با خطا مواجه شد",
+          text: errMessage,
           icon: "error",
         });
       }

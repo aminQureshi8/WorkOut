@@ -1,13 +1,7 @@
 "use client";
 import React from "react";
 import { Users, UserCheck, Calendar, Ban } from "lucide-react";
-
-interface UsersStatsProps {
-  totalUsers: number;
-  activeUsers: number;
-  expiredUsers: number;
-  blockedUsers: number;
-}
+import type { UsersStatsProps } from "@/types/user";
 
 export default function UsersStats({
   totalUsers,

@@ -1,13 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { showAlert } from "@/utils/alert";
-import { IAdminUser } from "@/types/user";
-
-interface UserEditModalProps {
-  user: IAdminUser;
-  onClose: () => void;
-  onSaveSuccess: () => void;
-}
+import type { UserEditModalProps } from "@/types/user";
 
 export default function UserEditModal({
   user,
@@ -15,7 +9,7 @@ export default function UserEditModal({
   onSaveSuccess,
 }: UserEditModalProps) {
   const [editUsername, setEditUsername] = useState(user.username);
-  const [editEmail, setEditEmail] = useState(user.email);
+  const [editEmail, setEditEmail] = useState(user.email || "");
   const [editPhone, setEditPhone] = useState(user.phone || "");
   const [editStatus, setEditStatus] = useState(() => {
     let dbStatus = "active";
@@ -52,7 +46,7 @@ export default function UserEditModal({
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "خطا در بروزرسانی مشخصات کاربر");
+        throw new Error(err.error || err.message || "خطا در بروزرسانی مشخصات کاربر");
       }
 
       showAlert({
@@ -63,10 +57,11 @@ export default function UserEditModal({
 
       onSaveSuccess();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errMessage = err instanceof Error ? err.message : "خطا در ذخیره تغییرات";
       showAlert({
         title: "خطا",
-        text: err.message || "خطا در ذخیره تغییرات",
+        text: errMessage,
         icon: "error",
       });
     }
@@ -75,7 +70,6 @@ export default function UserEditModal({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        
         <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-gray-900/80 backdrop-blur-lg">
           <h2 className="text-2xl text-white font-bold font-morabbaReg">
             ویرایش اطلاعات کاربر
@@ -88,9 +82,7 @@ export default function UserEditModal({
           </button>
         </div>
 
-        
         <div className="p-6 space-y-6">
-          
           <div className="flex items-center gap-4 pb-4 border-b border-white/10">
             <div className="w-20 h-20 bg-orange-500/20 rounded-full flex items-center justify-center text-4xl font-bold text-orange-400">
               {user.avatar || user.username[0]?.toUpperCase() || "👤"}
@@ -105,7 +97,6 @@ export default function UserEditModal({
             </div>
           </div>
 
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-white mb-2 text-xs">
@@ -177,7 +168,7 @@ export default function UserEditModal({
                 value={editRole}
                 onChange={(e) =>
                   setEditRole(
-                    e.target.value as "user" | "admin" | "coach",
+                    e.target.value as "user" | "admin" | "coach"
                   )
                 }
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 text-sm cursor-pointer"
@@ -204,16 +195,13 @@ export default function UserEditModal({
               </label>
               <input
                 type="text"
-                value={new Date(
-                  user.createdAt,
-                ).toLocaleDateString("fa-IR")}
+                value={new Date(user.createdAt).toLocaleDateString("fa-IR")}
                 disabled
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white/55 cursor-not-allowed text-sm ss02"
               />
             </div>
           </div>
 
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
             <div className="bg-white/5 rounded-lg p-4">
               <div className="text-white/60 text-xs mb-1">آخرین ورود</div>
@@ -232,7 +220,6 @@ export default function UserEditModal({
           </div>
         </div>
 
-        
         <div className="p-6 border-t border-white/10 flex gap-3">
           <button
             onClick={handleSaveEdit}
