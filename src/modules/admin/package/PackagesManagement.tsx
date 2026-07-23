@@ -10,7 +10,7 @@ import PackageModal from "./PackageModal";
 const formatNumber = (num: number) =>
   new Intl.NumberFormat("fa-IR").format(num);
 
-export default function PackagesManagement() {
+export default function PackagesManagLoement() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);

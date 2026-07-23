@@ -6,14 +6,14 @@ import { BiDumbbell, BiUser, BiPhone } from "react-icons/bi";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import type { LoginFormData, RegisterFormData } from "@/types/auth";
+import type { LoginFormData, RegisterFormData, AuthApiResponse } from "@/types/auth";
+import { toEnglishDigits } from "@/utils/numbers";
 
 export default function LoginForm() {
   const [isRegister, setIsRegister] = useState(false);
   const [serverError, setServerError] = useState("");
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] =
-    useState(false);
+  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false);
   const router = useRouter();
 
   const loginForm = useForm<LoginFormData>();
@@ -21,42 +21,25 @@ export default function LoginForm() {
 
   const onLogin = async (data: LoginFormData) => {
     setServerError("");
+    const cleanPhone = toEnglishDigits(data.phone);
 
     try {
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: data.phone, type: "login" }),
+        body: JSON.stringify({ phone: cleanPhone, type: "login" }),
       });
 
-      const resData = await res.json();
-
-      if (res.ok) {
-        const smsRes = await fetch(
-          `https://api.sms.ir/v1/send?username=${process.env.NEXT_PUBLIC_SMS_IR_USERNAME}&password=${process.env.NEXT_PUBLIC_SMS_IR_PASSWORD}&mobile=${data.phone}&line=${process.env.NEXT_PUBLIC_SMS_IR_LINE}&text=کد ورود شما : ${resData.code}
-          
-          `,
-          {
-            method: "POST",
-            headers: {
-              Accept: "text/plain",
-            },
-          },
-        );
-
-        if (smsRes.ok) {
-          router.push(`/otp?phone=${encodeURIComponent(data.phone)}`);
-        }
-      }
+      const resData: AuthApiResponse = await res.json().catch(() => ({
+        message: "خطا در دریافت پاسخ از سرور",
+      }));
 
       if (!res.ok) {
         setServerError(resData.message || "خطایی رخ داده است");
         return;
       }
 
-      if (typeof window !== "undefined") {
-        sessionStorage.removeItem("pendingRegister");
-      }
+      router.push(`/otp?phone=${encodeURIComponent(cleanPhone)}`);
     } catch {
       setServerError("خطا در ارتباط با سرور");
     }
@@ -64,15 +47,21 @@ export default function LoginForm() {
 
   const onRegister = async (data: RegisterFormData) => {
     setServerError("");
+    const cleanPhone = toEnglishDigits(data.phone);
 
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          phone: cleanPhone,
+        }),
       });
 
-      const resData = await res.json();
+      const resData: AuthApiResponse = await res.json().catch(() => ({
+        message: "خطا در دریافت پاسخ از سرور",
+      }));
 
       if (!res.ok) {
         setServerError(resData.message || "خطایی رخ داده است");
@@ -80,7 +69,7 @@ export default function LoginForm() {
       }
 
       const signInRes = await signIn("credentials", {
-        phone: data.phone,
+        phone: cleanPhone,
         password: data.password,
         redirect: false,
       });
@@ -91,7 +80,8 @@ export default function LoginForm() {
         return;
       }
 
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
+      router.refresh();
     } catch {
       setServerError("خطا در ارتباط با سرور");
     }
@@ -167,9 +157,9 @@ export default function LoginForm() {
                     className={inputClass(!!loginForm.formState.errors.phone)}
                     {...loginForm.register("phone", {
                       required: "شماره تلفن الزامی است",
-                      pattern: {
-                        value: /^09\d{9}$/,
-                        message: "شماره تلفن معتبر نیست (مثال: 09123456789)",
+                      validate: (val) => {
+                        const clean = toEnglishDigits(val);
+                        return /^09\d{9}$/.test(clean) || "شماره تلفن معتبر نیست (مثال: 09123456789)";
                       },
                     })}
                   />
@@ -208,7 +198,7 @@ export default function LoginForm() {
                     type="text"
                     placeholder="نام خانوادگی خود را وارد کنید"
                     className={inputClass(
-                      !!registerForm.formState.errors.username,
+                      !!registerForm.formState.errors.username
                     )}
                     {...registerForm.register("username", {
                       required: "نام خانوادگی الزامی است",
@@ -236,13 +226,13 @@ export default function LoginForm() {
                     type="text"
                     placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                     className={inputClass(
-                      !!registerForm.formState.errors.phone,
+                      !!registerForm.formState.errors.phone
                     )}
                     {...registerForm.register("phone", {
                       required: "شماره تلفن الزامی است",
-                      pattern: {
-                        value: /^09\d{9}$/,
-                        message: "شماره تلفن معتبر نیست (مثال: 09123456789)",
+                      validate: (val) => {
+                        const clean = toEnglishDigits(val);
+                        return /^09\d{9}$/.test(clean) || "شماره تلفن معتبر نیست (مثال: 09123456789)";
                       },
                     })}
                   />
@@ -263,7 +253,7 @@ export default function LoginForm() {
                     type={showRegisterPassword ? "text" : "password"}
                     placeholder="رمز عبور خود را وارد کنید"
                     className={inputClass(
-                      !!registerForm.formState.errors.password,
+                      !!registerForm.formState.errors.password
                     )}
                     {...registerForm.register("password", {
                       required: "رمز عبور الزامی است",
@@ -303,7 +293,7 @@ export default function LoginForm() {
                     type={showRegisterConfirmPassword ? "text" : "password"}
                     placeholder="رمز عبور را دوباره وارد کنید"
                     className={inputClass(
-                      !!registerForm.formState.errors.confirmPassword,
+                      !!registerForm.formState.errors.confirmPassword
                     )}
                     {...registerForm.register("confirmPassword", {
                       required: "تکرار رمز عبور الزامی است",
@@ -316,7 +306,7 @@ export default function LoginForm() {
                     type="button"
                     onClick={() =>
                       setShowRegisterConfirmPassword(
-                        !showRegisterConfirmPassword,
+                        !showRegisterConfirmPassword
                       )
                     }
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors cursor-pointer"

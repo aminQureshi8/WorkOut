@@ -13,3 +13,7 @@ export interface OtpFormData {
   phone: string;
   code: string;
 }
+
+export interface AuthApiResponse {
+  message: string;
+}

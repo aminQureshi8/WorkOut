@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     if (!phone) {
       return NextResponse.json(
         { message: "شماره تلفن الزامی است" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (!phoneRegex.test(cleanPhone)) {
       return NextResponse.json(
         { message: "فرمت شماره تلفن معتبر نیست (مثال: 09123456789)" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -36,20 +36,18 @@ export async function POST(req: NextRequest) {
       ],
     });
 
-    if (type === "login") {
-      if (!existingUser) {
-        return NextResponse.json(
-          { message: "حساب کاربری با این شماره یافت نشد" },
-          { status: 404 },
-        );
-      }
-    } else if (type === "register") {
-      if (existingUser) {
-        return NextResponse.json(
-          { message: "این شماره تلفن قبلاً ثبت شده است" },
-          { status: 409 },
-        );
-      }
+    if (type === "login" && !existingUser) {
+      return NextResponse.json(
+        { message: "حساب کاربری با این شماره یافت نشد" },
+        { status: 404 }
+      );
+    }
+
+    if (type === "register" && existingUser) {
+      return NextResponse.json(
+        { message: "این شماره تلفن قبلاً ثبت شده است" },
+        { status: 409 }
+      );
     }
 
     const otpCode = Math.floor(10000 + Math.random() * 90000).toString();
@@ -76,21 +74,18 @@ export async function POST(req: NextRequest) {
           headers: {
             Accept: "text/plain",
           },
-        },
+        }
       ).catch(() => {});
     }
 
     return NextResponse.json(
-      {
-        message: "کد تایید با موفقیت ارسال شد",
-        code: otpCode,
-      },
-      { status: 200 },
+      { message: "کد تایید با موفقیت ارسال شد" },
+      { status: 200 }
     );
   } catch {
     return NextResponse.json(
       { message: "خطای سرور، لطفاً دوباره تلاش کنید" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
